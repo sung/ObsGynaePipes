@@ -1,0 +1,950 @@
+#####################
+## READ/BASE COUNT ##
+#####################
+0. Base count
+0.1 from raw reads
+for i in `ls ~/scratch/data/fastq/SLX-8080/SLX-8080.*.fq.gz`; do printf "$i "; zcat $i | awk 'BEGIN{sum=0;}{if(NR%4==2){sum+=length($0);}}END{print sum;}' ; done > ~/scratch/data/fastq/SLX-8080.fastq.base.cnt.txt
+0.2 from bam file
+for i in A001 A010 A003 A012; do printf "$i "; grep ^genome ~/scratch/results/SLX-8074.SLX-8080.v1/Coverage/$i/SLX-8074.SLX-8080.$i.bedtools.genomecov.txt | awk 'BEGIN{sum=0}{sum+=$2*$3}END{print sum/10^9}'; done
+
+1. Read count 
+for i in `ls ~/scratch/data/fastq/SLX-8551/*.fq.gz | grep -v lost`; do printf "$i "; zcat $i | echo $((`wc -l`/4)); done  > ~/scratch/data/fastq/SLX-8551.C416EANXX.fastq.read.cnt.txt
+
+3. Read and base count from fastq file
+for i in `ls ~/scratch/data/fastq/SLX-8769/SLX-8769.*.fq.gz | grep -v lost`; do printf "$i "; zcat $i | awk 'BEGIN{sum=0;cnt=0}{if(NR%4==2){cnt++;sum+=length($0);}}END{print cnt,sum;}' ; done > ~/scratch/data/fastq/SLX-8769.fq.read.base.cnt.txt
+
+#####################
+# SLX-8551.SLX-8552 #
+#####################
+# SLX-8551.C416EANXX
+for i in `ls ~/scratch/data/fastq/SLX-8551/*.s_3.r_1.fq.gz`; do ln -s $i SLX-8551.SLX-8552.`echo $i | cut -d. -f2,3,4`.r_1.fq.gz  ; done
+
+# SLX-8552.C416EANXX
+for i in `ls ~/scratch/data/fastq/SLX-8552/*.s_4.r_1.fq.gz | grep -v D709_D504`; do ln -s $i SLX-8551.SLX-8552.`echo $i | cut -d. -f2,3,4`.r_1.fq.gz  ; done
+
+# SLX-8552.C416EANXX.D709_D504
+ln -s /home/ssg29/scratch/data/fastq/SLX-8552/SLX-8552.D709_D504.C416EANXX.s_4.r_1.fq.gz SLX-8551.SLX-8552.D709_D504b.C416EANXX.s_4.r_1.fq.gz
+
+# SLX-8546
+for i in D709_D503 D709_D504 D712_D501 D712_D502 D712_D503; do for j in `ls ~/scratch/data/fastq/SLX-8546/SLX-8546.$i*.fq.gz`; do ln -s $j SLX-8551.SLX-8552.`echo $j | cut -d. -f2,3,4`.r_1.fq.gz; done ; done
+
+# SLX-8547
+for i in D701_D506 D701_D508 D702_D505 D703_D501 D703_D502 D703_D503 D703_D504 D703_D505 D703_D506 D703_D507 D703_D508 D704_D504 D701_D503 D701_D504; do for j in `ls ~/scratch/data/fastq/SLX-8547/SLX-8547.$i*.fq.gz`; do ln -s $j SLX-8551.SLX-8552.`echo $j | cut -d. -f2,3,4`.r_1.fq.gz; done ; done
+
+# SLX-8549
+for i in D706_D506 D707_D502 D707_D503 D707_D504 D707_D505 D707_D506 D710_D504 D710_D507 D712_D501 D712_D502 D712_D503; do for j in `ls ~/scratch/data/fastq/SLX-8549/SLX-8549.$i*.fq.gz`; do ln -s $j SLX-8551.SLX-8552.`echo $j | cut -d. -f2,3,4`.r_1.fq.gz; done ; done
+
+#SLX-8549.D709_D504
+for j in `ls ~/scratch/data/fastq/SLX-8549/SLX-8549.D709_D504*.fq.gz`; do ln -s $j SLX-8551.SLX-8552.D709_D504b.`echo $j | cut -d. -f3,4`.r_1.fq.gz; done 
+
+
+# For Ulla
+cnt=0; for i in `ls *1a.xls`; do let cnt++; if [ $cnt -eq 1 ];then printf "FileName\tEntry\tArea\tMean\tStdDev\tMin\tMax\tX\tY\tPerim.\tMajor\tMinor\tAngle\tCirc.\tAR\tRound\tSolidity\n"; fi; FileName=${i%1a.xls}; awk -v FileName=$FileName 'FNR==2{print FileName,$0}' $i; done
+#cnt=0; for i in `ls *2a.xls`; do let cnt++; if [ $cnt -eq 1 ];then printf "FileName\tEntry\tLabel\tArea\tMean\tStdDev\tMin\tMax\tX\tY\tPerim.\tMajor\tMinor\tAngle\tCirc.\tAR\tRound\tSolidity\tLength\n"; fi; awk '$2~/^(Mean|SD|Min|Max)$/{print substr(FILENAME,1,8),$0}' $i; done 
+cnt=0; for i in `ls *2a.xls`; do let cnt++; if [ $cnt -eq 1 ];then printf "FileName\tEntry\tLabel\tArea\tMean\tStdDev\tMin\tMax\tX\tY\tPerim.\tMajor\tMinor\tAngle\tCirc.\tAR\tRound\tSolidity\tLength\n"; fi; FileName=${i%2a.xls}; awk -v FileName=$FileName '$2~/^(Mean|SD|Min|Max)$/{print FileName,$0}' $i; done
+
+# reformat meta.csv 
+awk -F"," 'BEGIN{OFS=","}{print $1,$3,$2,$4,$5,$6,$7,$8,$9,$10,$11}' ~/scratch/results/RNA-Seq/SGA.AGA/Meta/meta.PAPPA.SGA.csv
+
+
+# Mering BAM for FG-topup
+# D712_D502 D703_D503 D710_D504 D710_D507 (78 97 142 155) 
+samtools merge ~/scratch/results/RNA-Seq/Topup/D712_D502.bam ~/scratch/results/SLX-8551.SLX-8552.v1/TopHat/D712_D502/accepted_hits.bam ~/scratch/results/SLX-9170.v1/TopHat/D712_D502/accepted_hits.bam
+samtools merge ~/scratch/results/RNA-Seq/Topup/D703_D503.bam ~/scratch/results/SLX-8551.SLX-8552.v1/TopHat/D703_D503/accepted_hits.bam ~/scratch/results/SLX-9171.v1/TopHat/D703_D503/accepted_hits.bam
+samtools merge ~/scratch/results/RNA-Seq/Topup/D710_D504.bam ~/scratch/results/SLX-8551.SLX-8552.v1/TopHat/D710_D504/accepted_hits.bam ~/scratch/results/SLX-9170.v1/TopHat/D710_D504/accepted_hits.bam
+samtools merge ~/scratch/results/RNA-Seq/Topup/D710_D507.bam ~/scratch/results/SLX-8551.SLX-8552.v1/TopHat/D710_D507/accepted_hits.bam ~/scratch/results/SLX-9170.v1/TopHat/D710_D507/accepted_hits.bam
+
+samtools view ~/scratch/results/RNA-Seq/Topup/D712_D502.bam | htseq-count --stranded=reverse --type=exon --quiet --idattr=gene_id - /scratch/genome/Homo_sapiens/Ensembl/GRCh37/Annotation/Genes/genes.gtf > ~/scratch/results/RNA-Seq/Topup/D712_D502.igenome.HTSeq.count.txt
+
+
+#############
+## BIS-SNP ##
+#############
+# 1. CG types (from INFO)
+grep ^chr ~/scratch/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.vcf | cut -f 8 | cut -d';' -f 2 | sort | uniq
+# Context=C
+# Context=CG
+# Context=CG,C
+# Context=CH
+# Context=CH,C
+# Context=CK
+# Context=CM
+# Context=CR
+# Context=CS
+# Context=CY
+# Context=M
+# Context=MG
+# Context=MH
+# Context=MR
+# Context=MS
+# Context=MY
+# Context=S
+# Context=SG
+# Context=SH
+# Context=SR
+# Context=Y
+# Context=YG
+# Context=YH
+# Context=YK
+# Context=YM
+# Context=YR
+# Context=YS
+# Context=YY
+#
+
+# 2. CG types (from FORMAT)
+grep ^chr ~/scratch/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.vcf | cut -f 10 | cut -d':' -f 5 | sort | uniq
+[ssg29@login-sand3 Pipelines]$ grep ^chr ~/scratch/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.vcf | cut -f 10 | cut -d':' -f 5 | sort | uniq
+.
+C
+CG: CpG -> Homo CG
+CH: Cp(A or C or T) -> Non-CG
+CK: Cp(G or T) -> Hetero CG
+CM: Cp(A or C) -> Non-CG
+CR: Cp(A or G) -> Hetero CG
+CS: Cp(G or C) -> Hetero CG
+CY: Cp(C or T) -> Non-CG
+M:  (A or C)
+MG: (A or C)pG -> Hetero CG
+MH: (A or C)p(A or C or T) -> Hetero CG / Non-CG
+MR: (A or C)p(A or G)
+MS: (A or C)p(G or C)
+MY: (A or C)p(C or T)
+S:  (G or C)
+SG: (G or C)pG
+SH: (G or C)p(A or C or T)
+SR: (G or C)p(A or G)
+Y:  (C or T)
+YG: (C or T)pG
+YH: (C or T)p(A or C or T)
+YK: (C or T)p(G or T)
+YM: (C or T)p(A or C)
+YR: (C or T)p(A or G)
+YS: (C or T)p(G or C)
+YY: (C or T)p(C or T)
+
+3. Heterogyous CpG context
+CR: Cp(A or G)
+CS: Cp(G or C)
+CK: Cp(G or T)
+#CB: Cp(C or G or T)
+#CD: Cp(A or G or T)
+#CV: Cp(A or C or G)
+MG: (A or C)pG
+SG: (G or C)pG
+YG: (C or T)pG
+grep ^chr ~/scratch/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.vcf| awk '{if($7=="PASS"){split($10,fm,":")}{if(fm[5]=="CR" || fm[5]=="CS" || fm[5]=="CK" || fm[5]=="MG" || fm[5]=="SG" || fm[5]=="YG"){print $0}}}'
+
+3. Non-CG context
+CY: Cp(C or T)
+CW: Cp(A or T)
+CM: Cp(A or C)
+CH: Cp(A or C or T)
+#AG: ApG
+#GG: GpG
+#TG: TpG
+RG: (A or G)pG
+WG: (A or T)pG
+KG: (G or T)pG
+DG: (A or G or T)pG
+
+grep ^chr ~/scratch/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.vcf| awk '{if($7=="PASS"){split($10,fm,":")}{if(fm[5]=="CY" || fm[5]=="CW" || fm[5]=="CM" || fm[5]=="CH" || fm[5]=="MH" || fm[5]=="MR" || fm[5]=="MS" || fm[5]=="MY" || fm[5]=="SH" || fm[5]=="SR" || fm[5]=="YH" || fm[5]=="YK" || fm[5]=="YM" || fm[5]=="YR" || fm[5]=="YS" || fm[5]=="YY"){print $0}}}'
+
+3. PASS or not PASS? 
+grep ^chr ~/scratch/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.vcf | cut -f 7 | uniq
+PASS
+
+# BIS-SNP VCF FORMAT
+##FORMAT=<ID=BQ,Number=.,Type=Float,Description="Average base quality for reads supporting alleles. For each allele, in the same order as listed">
+##FORMAT=<ID=BRC6,Number=.,Type=Integer,Description="Bisulfite read counts(not filtered by minConv): 1) number of C in cytosine strand, 2) number of T in cytosine strand, 3) number of A/G/N in cytosine strand, 4) number of G in guanine strand, 5) number of A in guanine strand, 6) number of C/T/N in guanine strand.">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth, not filtered by mapping quality and base quality score criteria yet">
+##FORMAT=<ID=DP4,Number=4,Type=Integer,Description="Reads supporting ALT, only keep good base. Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles">
+
+
+##########
+## HPCS ##
+##########
+# 1. QDEL
+for i in `squeue -u ssg29 | awk '{print $1}'`; do echo deleting $i; scancel $i;  done
+for i in `squeue -u ssg29 | grep PD | awk '{print $1}'`; do echo deleting $i; scancel $i;  done
+
+# 2. Interactive jobs
+sintr -A CHARNOCK-JONES -p sandybridge -n1 -N1 -t 2:0:0 # 1 node / 1 core (therefore 1/16 of memory)
+sintr -A CHARNOCK-JONES -p sandybridge -n8 -N1 -t 2:0:0 # 1 node / 8 core (therefore 8/16 of memory)
+sintr -A CHARNOCK-JONES -p sandybridge -n1 -N1 -t 2:0:0 --mem=20000 # 1 node / 1 core with 20G mem (63900 is the maximum value allowed per node)
+
+######################################
+## WGBS on-target                   ##
+## use 'bin/sureselect.on.target.sh ##
+######################################
+#1-a. NKX1-2. on the fluidigm amplicon-target only
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/MJ.FLD/FLD.v1/mj.amplicon.coordinates.nkx1.2.merged.bed > ${i%.bed}.nkx1.2.fld.ontarget.bed ; done
+#1-b. NKX1-2 (up 1500bp and down 500bp) only 
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/NKX1-2/NKX1-2.up.1500.down.500.bed > ${i%.bed}.NKX1-2.up.1500.down.500.bed ; done
+#1-c. NKX1-2 (top 3 500bp regions) only 
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/NKX1-2/NKX1-2.top3.meth.up.100.down.100.bed > ${i%.bed}.NKX1-2.top3.up.100.down.100.bed ; done
+#2-a. MAB21L1 (chr13) top2 500bp regions (genomeTiling500bp)
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/MAB21L1/MAB21L1.top2.grch37.bed > ${i%.bed}.MAB21L1.top2.500bp.bed ; done
+#2-b. MAB21L1 (chr13) top2 500bp regions (enstTiling500bp)
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/MAB21L1/MAB21L1.top2.grch37.enstTiling500.bed > ${i%.bed}.MAB21L1.top2.enstTiling.500bp.bed ; done
+#3. chr7 DMR top2 500bp regions
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed > ${i%.bed}.chr7.DMR.top2.500bp.bed ; done
+#4. CSMD1 (chr8) 225kb DMR regions (based on 5k tiling)
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/CSMD1/CSMD1.boy.girl.dmr.bed > ${i%.bed}.CSMD1.DMR.225kb.bed ; done
+#5. VIPR2 (chr7) 5kb DMR regions (based on 5k tiling)
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/VIPR2/VIPR2.top5k.grch37.bed > ${i%.bed}.VIPR2.DMR.5kb.bed ; done
+#6. C1orf216 (chr1) top from Boy-Girl 
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/C1orf216/C1orf216.up.1500.down.500.grch37.bed > ${i%.bed}.C1orf216.up.1500.down.500.bed ; done
+
+awk 'BEGIN{FS=",";OFS=","; print"SampleName,BedFile"}NR>1{split($1,fname,"bed"); print $3,fname[1]"NKX1-2.up.1500.down.500.bed"}' ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv > ~/Pipelines/data/NKX1-2/NKX1-2.up.1500.down.500.grch37.WGBS.bed.txt
+awk 'BEGIN{FS=",";OFS=","; print"SampleName,BedFile"}NR>1{split($1,fname,"bed"); print $3,fname[1]"MAB21L1.top2.500bp.bed"}' ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv > ~/Pipelines/data/MAB21L1/MAB21L1.top2.grch37.WGBS.bed.txt
+awk 'BEGIN{FS=",";OFS=","; print"SampleName,BedFile"}NR>1{split($1,fname,"bed"); print $3,fname[1]"MAB21L1.top2.enstTiling.500bp.bed"}' ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv > ~/Pipelines/data/MAB21L1/MAB21L1.top2.grch37.enstTiling500.WGBS.bed.txt
+awk 'BEGIN{FS=",";OFS=","; print"SampleName,BedFile"}NR>1{split($1,fname,"bed"); print $3,fname[1]"chr7.DMR.top2.500bp.bed"}' ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv > ~/Pipelines/data/Chr7.DMR/chr7.top2.grch37.WGBS.bed.txt
+awk 'BEGIN{FS=",";OFS=","; print"SampleName,BedFile"}NR>1{split($1,fname,"bed"); print $3,fname[1]"CSMD1.DMR.225kb.bed"}' ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv > ~/Pipelines/data/CSMD1/CSMD1.225kb.grch37.WGBS.bed.txt
+awk 'BEGIN{FS=",";OFS=","; print"SampleName,BedFile"}NR>1{split($1,fname,"bed"); print $3,fname[1]"VIPR2.DMR.5kb.bed"}' ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv > ~/Pipelines/data/VIPR2/VIPR2.5kb.grch37.WGBS.bed.txt
+awk 'BEGIN{FS=",";OFS=","; print"SampleName,BedFile"}NR>1{split($1,fname,"bed"); print $3,fname[1]"C1orf216.up.1500.down.500.bed"}' ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv > ~/Pipelines/data/C1orf216/C1orf216.up.1500.down.500.grch37.WGBS.bed.txt
+
+##########################
+## SureSelect on-target ##
+##########################
+#1-a. NKX1-2 (up 1500bp and down 500bp) only 
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/NKX1-2/NKX1-2.up.1500.down.500.bed > ${i%.bed}.NKX1-2.up.1500.down.500.bed ; done
+#2-a. MAB21L1 (chr13) top2 500bp regions (genomeTiling500bp)
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/MAB21L1/MAB21L1.top2.grch37.bed > ${i%.bed}.MAB21L1.top2.500bp.bed ; done 
+#3. chr7 DMR top2 500bp regions
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed > ${i%.bed}.chr7.DMR.top2.500bp.bed ; done
+#4. CSMD1 (chr8) 225kb DMR regions (based on 5k tiling)
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/CSMD1/CSMD1.boy.girl.dmr.bed > ${i%.bed}.CSMD1.DMR.225kb.bed ; done
+#4. VIPR2 (chr7) 5kb DMR regions (based on 5k tiling)
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/VIPR2/VIPR2.top5k.grch37.bed > ${i%.bed}.VIPR2.DMR.5kb.bed ; done
+
+########################
+## Fluidigm SLX-8771  ##
+########################
+#1. Fluidigm NKX1-2 (chr10) bed file only
+for i in `ls ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD*/$SLX.FLD*.cpg.filtered.CG.bed`;do head -n1 $i > ${i%.bed}.chr10.bed; grep "^chr10" $i >> ${i%.bed}.chr10.bed; done
+or
+SLX=SLX-8773; ALL_BARCODES=$(awk '$6=="q4"{print $2,$3}' $HOME/Pipelines/data/MJ.FLD.v3/8773RnBeads.sample.sheet.txt)
+for i in $ALL_BARCODES;do k=~/results/$SLX.Homo_sapiens.v1/BisSNP/$i/$SLX.$i.cpg.filtered.CG.bed; head -n1 $k > ${k%.bed}.chr10.bed; grep "^chr10" $k >> ${k%.bed}.chr10.bed; done
+
+#3. FLD per amplicon BoC
+echo "Barcode Amplicon Base Length Cov" > ~/results/SLX-8771.Homo_sapiens.v1/Coverage/FLD.BoC.per.amplicon.txt; for j in $(for i in `ls ~/data/fastq/$SLX/$SLX*.fq.gz | grep -v lost`; do echo $i | cut -d'/' -f7 | cut -d'.' -f2 ; done | uniq);do for k in $(awk '{print $4}' ~/Pipelines/data/MJ.FLD.v1/mj.amplicon.coordinates.bed);do printf "$j $k "; awk "BEGIN{sum=0}\$4==\"$k\"{len=\$9}\$4==\"$k\" && \$7>=10{sum+=\$8}END{print sum,len,sum/len}" /home/ssg29/results/SLX-8771.Homo_sapiens.v1/Coverage/$j/SLX-8771.$j.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam.CoverageHist.per.amplicon; done; done >> ~/results/SLX-8771.Homo_sapiens.v1/Coverage/FLD.BoC.per.amplicon.txt
+
+###########################
+## Per Amplicon Coverage ##
+###########################
+# 1. Breadth of Coverage Per Amplicon
+#SLX=SLX-10295; VERSION=Homo_sapiens.v2
+#echo "Barcode Amplicon Base Length Cov" > ~/results/$SLX.$VERSION/Coverage/FLD.BoC.per.amplicon.txt
+#coverageFiles=$(ls ~/results/$SLX.$VERSION/Coverage/FLD*/$SLX.FLD*.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam.CoverageHist.per.amplicon)
+#amplicons=$(awk '{print $4}' ~/Pipelines/data/MJ.FLD/$SLX/mj.amplicon.coordinates.sorted.bed)
+#for i in $coverageFiles;do barcode=`echo $i| cut -d'/' -f7`;for k in $amplicons; do printf "$barcode $k "; awk "BEGIN{sum=0}\$4==\"$k\"{len=\$9}\$4==\"$k\" && \$7>=10{sum+=\$8}END{print sum,len,sum/len}" $i; done; done >> ~/results/$SLX.$VERSION/Coverage/FLD.BoC.per.amplicon.txt
+
+# 2. Depth of Coverage Per Amplicon
+#echo "Barcode Amplicon Base Length Cov" > ~/results/$SLX.$VERSION/Coverage/FLD.DoC.per.amplicon.txt
+#for i in $coverageFiles;do barcode=`echo $i| cut -d'/' -f7`;for k in $amplicons; do printf "$barcode $k "; awk "BEGIN{sum=0}\$4==\"$k\"{len=\$9; sum+=\$7*\$8}END{print sum,len,sum/len}" $i; done; done >> ~/results/$SLX.$VERSION/Coverage/FLD.DoC.per.amplicon.txt
+
+###############
+## SNP & CpG ##
+## NKX1-2    ##
+###############
+# 1. SNP within top1, top2, top3 region of NKX1-2 
+zcat  ~/data/dbSNP/common_all_20150217.vcf.gz| awk '$1==10 && $2>=126137501 && $2<=126139000{print $0}' # top1-top3
+zcat  ~/data/dbSNP/common_all_20150217.vcf.gz| awk '$1==10 && $2>=126138001 && $2<=126138500{print $0}' # top1
+zcat  ~/data/dbSNP/common_all_20150217.vcf.gz| awk '$1==10 && $2>=126138501 && $2<=126139000{print $0}' # top2
+zcat  ~/data/dbSNP/common_all_20150217.vcf.gz| awk '$1==10 && $2>=126137501 && $2<=126138000{print $0}' # top3
+# 1. SNP within NKX1-2 +-1000
+zcat  ~/data/dbSNP/common_all_20150217.vcf.gz| awk '$1==10 && $2>=126135592-1000 && $2<=126138753+1000{print $0}'
+# from MJ WGBS 8 samples
+for i in `ls ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A*/*snp.filtered.vcf`; do echo $i|cut -d/ -f7; awk '$1=="chr10" && $2>=126135592-1000 && $2<=126138753+1000{print $0}' $i; done # NKX1-2 +- 1K
+for i in `ls ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A*/*snp.filtered.vcf`; do echo $i|cut -d/ -f7; awk '$1=="chr10" && $2>=126137501 && $2<=126139000{print $0}' $i; done # top1-3
+for i in `ls ~/results/SLX-8074.SLX-8080.v1/BisSNP/A*/*snp.filtered.vcf`; do echo $i|cut -d/ -f7; awk '$1=="chr10" && $2>=126137501 && $2<=126139000{print $0}' $i; done # top1-3
+#or 
+for i in `ls ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A*/*snp.filtered.vcf`; do bedtools intersect -a $i -b ~/Pipelines/data/NKX1-2/NKX1-2.top3.meth.up.100.down.100.bed -header > ${i%.vcf}.nkx1.2.top3.vcf; done
+for i in `ls ~/results/SLX-8074.SLX-8080.v1/BisSNP/A*/*snp.filtered.vcf`; do bedtools intersect -a $i -b ~/Pipelines/data/NKX1-2/NKX1-2.top3.meth.up.100.down.100.bed -header > ${i%.vcf}.nkx1.2.top3.vcf; done
+# SNP within up 5k & down 2k region of NKX1-2
+bedtools slop -i ~/Pipelines/data/NKX1-2/NKX1-2.bed -g ~/data/UCSC/hg19b/hg19b.fa.fai -l 5000 -r 2000 -s -header > ~/Pipelines/data/NKX1-2/NKX1-2.up.5k.down.2k.bed
+for i in `ls ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A*/*snp.filtered.vcf`; do bedtools intersect -a $i -b ~/Pipelines/data/NKX1-2/NKX1-2.up.5k.down.2k.bed -header > ${i%.vcf}.NKX1-2.up5k.down2k.vcf; done
+for i in `ls ~/results/SLX-8074.SLX-8080.v1/BisSNP/A*/*snp.filtered.vcf`; do bedtools intersect -a $i -b ~/Pipelines/data/NKX1-2/NKX1-2.up.5k.down.2k.bed -header > ${i%.vcf}.NKX1-2.up5k.down2k.vcf; done
+# then
+for i in `ls ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A*/*snp.filtered.NKX1-2.up5k.down2k.vcf`; do echo $i; grep ^chr $i; done
+for i in `ls ~/results/SLX-8074.SLX-8080.v1/BisSNP/A*/*snp.filtered.NKX1-2.up5k.down2k.vcf`; do echo $i; grep ^chr $i; done
+
+## oxBS-Seq BAM files on-target (NKX1-2) only
+for i in `ls ~/results/SLX-8074.SLX-8080.v1/Bismark/Alignment/A*/*sorted.RG.recal.bam`;do echo $i; time bedtools intersect -abam $i -b ~/Pipelines/data/NKX1-2/NKX1-2.top3.meth.up.100.down.100.bed -u > ${i%.bam}.nkx1.2.top3.bam; samtools index ${i%.bam}.nkx1.2.top3.bam ; done
+for i in `ls  ~/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A*/*RG.recal.bam`;do echo $i; time bedtools intersect -abam $i -b ~/Pipelines/data/NKX1-2/NKX1-2.top3.meth.up.100.down.100.bed -u > ${i%.bam}.nkx1.2.top3.bam; samtools index ${i%.bam}.nkx1.2.top3.bam ; done
+
+ssg29@butterfly--bio:~/Pipelines$ bedtools intersect -abam ~/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.bam -b ~/Pipelines/data/NKX1-2/NKX1-2.top3.meth.up.100.down.100.bed -u > ~/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.nkx1.2.top3.bam
+
+# move BAM file from butterfly to hpc
+for i in `ls  ~/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A*/*top3.bam*`; do j=`echo $i| cut -d/ -f1,2,3,4,5,6,7,8`; echo $i; rsync -v $i hpc:$j/; done
+for i in `ls  ~/results/SLX-8074.SLX-8080.v1/Bismark/Alignment/A*/*top3.bam*`; do j=`echo $i| cut -d/ -f1,2,3,4,5,6,7,8`; echo $i; rsync -v $i hpc:$j/; done
+
+## Reads of A007 overlapped with het SNP (chr10.126138035.T/C)
+bedtools intersect -a /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.bam -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A007/SLX-8075.SLX-8077.SLX-8081.A007.snp.filtered.nkx1.2.top3.vcf -bed -u > A007.hetSNP.chr10.126.138.035.overlap.bed
+
+## Reads of A007 overlapped with CpG (chr10.126138023)
+grep -P "chr10\t126138023" /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/MethylCall/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.CpG_report.txt | awk 'BEGIN{OFS="\t"}{print $1,$2-1,$2,$1"."$2,0,$3}'> /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/MethylCall/A007/SLX-8075.SLX-8077.SLX-8081.A007.chr10.126138023.cpg.bed
+bedtools intersect -a /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.bam -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/MethylCall/A007/SLX-8075.SLX-8077.SLX-8081.A007.chr10.126138023.cpg.bed -bed -u > A007.cpg.chr10.126.138.023.overlap.bed
+
+## CpG chr10.126138023 (Bismark)
+grep -P "chr10\t126138023" /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/MethylCall/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.CpG_report.txt
+chr10   126138023       -       3       7       CG      CGC
+## CpG chr10.126138023 (BisSNP)
+grep -P "^chr10\t126138023\t" /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A007/SLX-8075.SLX-8077.SLX-8081.A007.cpg.filtered.vcf
+chr10   126138023       .       G       .       71.82   PASS    CS=-;Context=CG,C;DP=23;MQ0=0;NS=1;REF=0        GT:BQ:BRC6:CM:CP:CU:DP:DP4:GP:GQ:SS     0/0:24.6,24.0:3,7,0,13,0,0:3:CG:7:23:13,3,0,7:0,72,387:71.82:5
+
+#######################################
+## Phasing Reads (not true phasing?) ##
+#######################################
+samtools phase -AF -b SLX-8075.SLX-8077.SLX-8081.A007 ~/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.bam > SLX-8075.SLX-8077.SLX-8081.A007.phased
+
+###########################################
+## SNPsplit (would not work with BS-Seq) ##
+###########################################
+awk 'BEGIN{OFS="\t"}!/^#/{snp=$4"/"$5; print NR,$1,$2,NR,snp}' ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A007/SLX-8075.SLX-8077.SLX-8081.A007.snp.filtered.nkx1.2.top3.vcf > ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A007/SLX-8075.SLX-8077.SLX-8081.A007.snp.filtered.nkx1.2.top3.snpsplit.txt
+
+#########################################################
+## methpipe (https://github.com/smithlabcode/methpipe) ##
+#########################################################
+# 1. .bam to .ma
+$ to-mr -verbose -output /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.mr -mapper bismark /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.bam
+# 2. .mr to .epiread
+$ methstates -v -c /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Chromosomes/ -o /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.epiread /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.mr
+# 3. ASM (CpG)
+$ allelicmeth -v -c /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Chromosomes/ -o /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.allelicmeth /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.epiread
+CHROMS: 1
+PROCESSING: chr10 [reads: 369] [cpgs: 126139089]
+CHROMS: 25
+CONVERTING: chr10
+could not convert:
+chr10   1351290 1351291 1       0       0       0       0       0       0       +
+# 4. ASM (region)
+$ amrfinder -v -c /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Chromosomes/ -o /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.amr /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.epiread 
+AMR TESTING OPTIONS: [test=LRT] [iterations=10]
+PROCESSING: chr10 [reads: 369] [cpgs: 1198199]
+========= POST PROCESSING =========
+CHROMS: 25
+CONVERTING: chr10
+WINDOWS TESTED: 133
+WINDOWS ACCEPTED: 127
+COLLAPSED WINDOWS: 1
+MERGED WINDOWS: 1
+FDR CUTOFF: 0.00524326
+WINDOWS PASSING FDR: 1
+AMRS (WINDOWS PASSING MINIMUM SIZE): 1
+
+amrtester -v -c /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Chromosomes/ -o /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.amrtester ~/Pipelines/data/NKX1-2/NKX1-2.bed /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A007/SLX-8075.SLX-8077.SLX-8081.A007.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.nkx1.2.top3.epiread
+NUMBER OF REGIONS: 1
+100%
+
+################
+## Chr7 locus ##
+################
+# 1. 4 AGA (2 Boys vs 2 Girls) meth(2 Boys)=0 (A002(AGA5M) and A008(AGA8M))
+zcat ~/results/RnBeads/AGA.Boy.Girl/CpG/all/reports-2015-03-30_04_47_PM/differential_methylation_data/diffMethTable_site_cmp1.csv.gz | awk 'BEGIN{FS=",";OFS="\t"}$2=="chr7" && $3>=64541000 && $3<=64542000 && $6==0{if($4=="+"){start=$3-1;end=$3}else{start=$3;end=$3+1}print $2,start,end,$6,$22,$4}' > ~/Pipelines/data/Chr7.DMR/chr7.AGA.Boy.zero.meth.bed
+# 2. 4 SGA (2 Boys vs 2 Girls) meth(2 Girl)=0 (A003(SGA2F) and A007(SGA3F))
+zcat ~/results/RnBeads/SGA.Boy.Girl/CpG/all/reports-2015-04-09_06_08_PM/differential_methylation_data/diffMethTable_site_cmp1.csv.gz | awk 'BEGIN{FS=",";OFS="\t"}$2=="chr7" && $3>=64541000 && $3<=64542000 && $5==0{if($4=="+"){start=$3-1;end=$3}else{start=$3;end=$3+1}print $2,start,end,$5,$21,$4}'  > ~/Pipelines/data/Chr7.DMR/chr7.SGA.Girl.zero.meth.bed
+# 3. 4 Boy (2 SGA vs 2 AGA ) meth(2 AGA)=0 (A002(AGA5M) and A008(AGA8M))
+zcat ~/results/RnBeads/SGA.AGA.Boy/CpG/all/reports-2015-05-13_04_24_PM/differential_methylation_data/diffMethTable_site_cmp1.csv.gz |  awk 'BEGIN{FS=",";OFS="\t"}$2=="chr7" && $3>=64541000 && $3<=64542000 && $5==0{if($4=="+"){start=$3-1;end=$3}else{start=$3;end=$3+1}print $2,start,end,$5,$21,$4}'  > ~/Pipelines/data/Chr7.DMR/chr7.Boy.AGA.zero.meth.bed
+# 4. 4 Girl (2 SGA vs AGA) meth(2 SGA)=0 (A003(SGA2F) and A007(SGA3F))
+zcat ~/results/RnBeads/SGA.AGA.Girl/CpG/all/reports-2015-05-15_05_09_PM/differential_methylation_data/diffMethTable_site_cmp1.csv.gz |  awk 'BEGIN{FS=",";OFS="\t"}$2=="chr7" && $3>=64541000 && $3<=64542000 && $6==0{if($4=="+"){start=$3-1;end=$3}else{start=$3;end=$3+1}print $2,start,end,$6,$22,$4}' > ~/Pipelines/data/Chr7.DMR/chr7.Girl.SGA.zero.meth.bed
+
+# 5. get A002 (AGA5M) bed file within Chr7 locus
+bedtools intersect -a ~/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A002/SLX-8075.SLX-8077.SLX-8081.A002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam -b ~/Pipelines/data/Chr7.DMR/chr7.Boy.AGA.zero.meth.bed -bed -u > SLX-8075.SLX-8077.SLX-8081.A002.AGA5M.zero.meth.bed 
+# 6. get A003 (SGA2F) bed file within chr7 locus
+bedtools intersect -a ~/results/SLX-8074.SLX-8080.v1/Bismark/Alignment/A003/SLX-8074.SLX-8080.A003.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam -b ~/Pipelines/data/Chr7.DMR/chr7.Girl.SGA.zero.meth.bed -bed -u > SLX-8074.SLX-8080.v1.A003.SGA2F.zero.meth.read.bed
+
+# 7. SNPs within Chr7 locus (making VCF)
+for i in A001 A003 A010 A012; do a=/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/$i/SLX-8074.SLX-8080.$i.snp.filtered.vcf; bedtools intersect -a $a -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed -header > ${a%.vcf}.chr7.top2.vcf; done
+for i in A002 A004 A005 A007 A008 A006; do a=/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/$i/SLX-8075.SLX-8077.SLX-8081.$i.snp.filtered.vcf; bedtools intersect -a $a -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed -header > ${a%.vcf}.chr7.top2.vcf; done
+# 8. SNPs within Chr7 locus (count SNPs)
+for i in A001 A010 A003 A012; do a=/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/$i/SLX-8074.SLX-8080.$i.snp.filtered.vcf; bedtools intersect -a $a -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed | wc -l; done
+for i in A002 A004 A005 A007 A008 A006; do a=/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/$i/SLX-8075.SLX-8077.SLX-8081.$i.snp.filtered.vcf; bedtools intersect -a $a -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed | wc -l; done
+# 9. SNPs within Chr7 locus (count het-SNPs)
+for i in A001 A010 A003 A012; do a=/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/$i/SLX-8074.SLX-8080.$i.snp.filtered.vcf; bedtools intersect -a $a -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed | grep -c "0/1:"; done
+for i in A002 A004 A005 A007 A008 A006; do a=/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/$i/SLX-8075.SLX-8077.SLX-8081.$i.snp.filtered.vcf; bedtools intersect -a $a -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed | grep -c "0/1:";
+
+# 10. Het-SNPs of A004 within chr7 locus 
+grep -v ^# /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.snp.filtered.chr7.top2.vcf
+
+# 10. on-target bam file of A004 which have 2 het-SNPs shown above (chr7.64541235 C/T & chr7.64541681 G/T)
+a=/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.bam
+#time bedtools intersect -abam $a -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed -u -f 10 > ${a%.bam}.chr7.top2.bam; samtools index ${a%.bam}.chr7.top2.bam
+time bedtools intersect -abam $a -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.snp.filtered.chr7.top2.vcf -u > ${a%.bam}.chr7.top2.hetSNP.bam; samtools index ${a%.bam}.chr7.top2.hetSNP.bam
+
+# methpipe (https://github.com/smithlabcode/methpipe) ##
+# 1. .bam to .ma
+to-mr -verbose -output /scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.mr -mapper bismark /scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.bam 
+# 2. .mr to .epiread
+methstates -v -c /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Chromosomes/ -o /scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.epiread /scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.mr
+# 3. ASM (CpG)
+allelicmeth -v -c /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Chromosomes/ -o /scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.allelicmeth /scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.epiread
+# 4. ASM (region)
+amrfinder -v -c /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Chromosomes/ -o /scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.amr /scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.epiread 
+
+###############################
+## Haloplex VCF to tab-delimi #
+###############################
+[ssg29@login-sand5 Pipelines]$ for i in `ls ~/results/SLX-7634.Homo_sapiens.v1/MUTECT/HAL*/SLX-7634*.mutect.pair.vcf.gz`; do j=`echo $i| cut -d/ -f7`; zcat $i| awk "BEGIN{OFS=\"\t\"}\$7==\"PASS\"{split(\$10,tumour,\":\"); split(\$11,normal,\":\"); print \"$j\",\$1,\$2,\$4\"/\"\$5,tumour[2],normal[2]}"; done > SLX-7634.SLX-9338.muteck.somatic.txt
+[ssg29@login-sand5 Pipelines]$ for i in `ls ~/results/SLX-9338.Homo_sapiens.v1/MUTECT/HAL*/SLX-9338*.mutect.pair.vcf.gz`; do j=`echo $i| cut -d/ -f7`; zcat $i| awk "BEGIN{OFS=\"\t\"}\$7==\"PASS\"{split(\$10,tumour,\":\"); split(\$11,normal,\":\"); print \"$j\",\$1,\$2,\$4\"/\"\$5,tumour[2],normal[2]}"; done >> SLX-7634.SLX-9338.muteck.somatic.txt
+
+###############
+## Fludigm SLX-8772
+###############
+# 1. q1 at top1
+# methylation level of AGA at chr10.126138480
+for i in `awk '$5=="q1" && $6=="AGA"{print $2}' ~/Pipelines/data/MJ.FLD.v2/mj.FLD.RnBeads.sample.sheet.txt`;do j=~/results/SLX-8772.Homo_sapiens.v1/BisSNP/$i/SLX-8772.$i.cpg.filtered.CG.bed; echo $j|cut -d'/' -f7; grep -P "^chr10\t126138382" $j; done
+# methylation level of SGA at chr10.126138480
+for i in `awk '$5=="q1" && $6=="SGA"{print $2}' ~/Pipelines/data/MJ.FLD.v2/mj.FLD.RnBeads.sample.sheet.txt`;do j=~/results/SLX-8772.Homo_sapiens.v1/BisSNP/$i/SLX-8772.$i.cpg.filtered.CG.bed; echo $j|cut -d'/' -f7; grep -P "^chr10\t126138382" $j; done
+
+# 2. q2 at top1
+for i in `awk '$5=="q2" && $6=="AGA"{print $2}' ~/Pipelines/data/MJ.FLD.v2/mj.FLD.RnBeads.sample.sheet.txt`;do j=~/results/SLX-8772.Homo_sapiens.v1/BisSNP/$i/SLX-8772.$i.cpg.filtered.CG.bed; echo $j|cut -d'/' -f7; grep -P "^chr10\t126138382" $j; done
+for i in `awk '$5=="q2" && $6=="SGA"{print $2}' ~/Pipelines/data/MJ.FLD.v2/mj.FLD.RnBeads.sample.sheet.txt`;do j=~/results/SLX-8772.Homo_sapiens.v1/BisSNP/$i/SLX-8772.$i.cpg.filtered.CG.bed; echo $j|cut -d'/' -f7; grep -P "^chr10\t126138382" $j; done
+
+# chr1 (negative control, which we expect 0% methylations)
+for i in `awk '$5=="q1"{print $2}' ~/Pipelines/data/MJ.FLD.v2/mj.FLD.RnBeads.sample.sheet.txt`;do j=~/results/SLX-8772.Homo_sapiens.v1/BisSNP/$i/SLX-8772.$i.cpg.filtered.CG.bed; echo $j|cut -d'/' -f7; grep -P "^chr1\t" $j; done
+for i in `ls /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A*/SLX-8075.SLX-8077.SLX-8081.A*.cpg.filtered.CG.bed`; do grep -P "^chr1\t231472595\t" $i; done
+
+## Top CpGs 
+sort -k7n ~/Pipelines/data/MJ.WGBS.SGA.AGA.top.chr10.cpg.bed | awk 'BEGIN{OFS="\t"}{print $1,$2,$3,"top"NR,NR,$6}' > ~/Pipelines/data/MJ.WGBS.SGA.AGA.top.chr10.cpg.named.bed
+
+## Top CpGs called by Bismark
+for i in `ls ~/results/SLX-8772.Homo_sapiens.v1/Bismark/MethylCall/*/SLX-8772.*.r_1_val_1.fq.gz_bismark_bt2_pe.q1.ontarget.sorted.bed`; do echo $i; bedtools intersect -a $i -b ~/Pipelines/data/MJ.WGBS.SGA.AGA.top10.chr10.cpg.named.bed -wa -wb -s > ${i%.bed}.top10.bed ; done
+
+# NO. of CpGs of WGBS data from a given coordinate 
+[ssg29@login-sand6 Pipelines]$ for i in `ls /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/*/SLX-8075.SLX-8077.SLX-8081.*.cpg.filtered.CG.bed`;do j=`echo $i|cut -d'/' -f8`; k=`awk 'BEGIN{cnt=0;depth=0}$1=="chr1" && $3>=231472559 && $3<=231472756{cnt+=1;depth+=$5}END{print cnt,depth/cnt}' $i`; printf "$j\t$k\n"; done
+
+########################################################
+### Concordance of CpG calls between WGBS and Fludigm ##
+########################################################
+#BS-Seq
+SLX=SLX-8772
+# FLD0193,A001 (AGA2F)
+bedtools intersect -a ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0193/$SLX.FLD0193.cpg.filtered.CG.bed -b ~/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.bed -wa -wb -s > ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0193/$SLX.FLD0193.A001.cpg.concordance.bed
+# FLD0194,A003 (SGA2F)
+bedtools intersect -a ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0194/$SLX.FLD0194.cpg.filtered.CG.bed -b ~/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.bed -wa -wb -s > ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0194/$SLX.FLD0194.A003.cpg.concordance.bed
+# FLD0195,A005 (AGA3F)
+bedtools intersect -a ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0195/$SLX.FLD0195.cpg.filtered.CG.bed -b ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A005/SLX-8075.SLX-8077.SLX-8081.A005.cpg.filtered.CG.bed -wa -wb -s > ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0195/$SLX.FLD0195.A005.cpg.concordance.bed
+# FLD0196,A007 (SGA3F)
+bedtools intersect -a ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0196/$SLX.FLD0196.cpg.filtered.CG.bed -b ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A007/SLX-8075.SLX-8077.SLX-8081.A007.cpg.filtered.CG.bed -wa -wb -s > ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0196/$SLX.FLD0196.A007.cpg.concordance.bed
+# FLD0197,A002 (AGA5M)
+bedtools intersect -a ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0197/$SLX.FLD0197.cpg.filtered.CG.bed -b ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.bed -wa -wb -s > ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0197/$SLX.FLD0197.A002.cpg.concordance.bed
+# FLD0198,A004 (SGA5M)
+bedtools intersect -a ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0198/$SLX.FLD0198.cpg.filtered.CG.bed -b ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.bed -wa -wb -s > ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0198/$SLX.FLD0198.A004.cpg.concordance.bed
+# FLD0199,A008 (AGA8M)
+bedtools intersect -a ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0199/$SLX.FLD0199.cpg.filtered.CG.bed -b ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A008/SLX-8075.SLX-8077.SLX-8081.A008.cpg.filtered.CG.bed -wa -wb -s > ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0199/$SLX.FLD0199.A008.cpg.concordance.bed
+# FLD0200,A006 (SGA8M)
+bedtools intersect -a ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0200/$SLX.FLD0200.cpg.filtered.CG.bed -b ~/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A006/SLX-8075.SLX-8077.SLX-8081.A006.cpg.filtered.CG.bed -wa -wb -s > ~/results/$SLX.Homo_sapiens.v1/BisSNP/FLD0200/$SLX.FLD0200.A006.cpg.concordance.bed
+
+#SLX=SLX-8773 (oxBS-Seq)
+awk '{FLD="~/results/SLX-8773.Homo_sapiens.v1/BisSNP/"$1"/SLX-8773."$1".cpg.filtered.CG.bed"; WGBS=$2; BARCODE=$3; command="echo "$1"; bedtools intersect -a "FLD" -b "WGBS" -wa -wb -s \> ~/results/SLX-8773.Homo_sapiens.v1/BisSNP/"$1"/SLX-8773."$1"."BARCODE".cpg.concordance.bed"; print command}' ~/Pipelines/data/MJ.FLD/MJ.FLD.v3/FLD.WGBS.oxbs.txt > dummy.sh; bash dummy.sh
+
+#SLX=SLX-8773 (BS-Seq)
+awk '{FLD="~/results/SLX-8773.Homo_sapiens.v1/BisSNP/"$1"/SLX-8773."$1".cpg.filtered.CG.bed"; WGBS=$2; BARCODE=$3; command="echo "$1"; bedtools intersect -a "FLD" -b "WGBS" -wa -wb -s \> ~/results/SLX-8773.Homo_sapiens.v1/BisSNP/"$1"/SLX-8773."$1"."BARCODE".cpg.concordance.bed"; print command}' ~/Pipelines/data/MJ.FLD/MJ.FLD.v3/FLD.WGBS.bs.txt > dummy2.sh; bash dummy2.sh
+
+# via bash 
+awk "{FLD=\"~/results/$SLX.Homo_sapiens.v2/BisSNP/\"\$1\"/$SLX.\"\$1\".cpg.filtered.CG.bed\"; WGBS=\$2; BARCODE=\$3; command=\"echo \"\$1\"; bedtools intersect -a \"FLD\" -b \"WGBS\" -wa -wb -s > ~/results/$SLX.Homo_sapiens.v2/BisSNP/\"\$1\"/$SLX.\"\$1\".\"BARCODE\".cpg.concordance.bed\"; print command}" ~/Pipelines/data/MJ.FLD/$SLX/FLD.WGBS.oxbs.txt > dummy.sh; bash dummy.sh
+
+###########################################################
+### Concordance of CpG calls between WGBS and SureSelect ##
+### use 'bin/sureselect.on.target.sh' instread           ##
+###########################################################
+# NKX1-2 (chr10)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -wa -wb -s > /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -wa -wb -s > /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -wa -wb -s > /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -wa -wb -s > /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+# MAB21L1 (chr13)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.MAB21L1.top2.500bp.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.MAB21L1.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.MAB21L1.top2.500bp.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.MAB21L1.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.MAB21L1.top2.500bp.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.MAB21L1.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.MAB21L1.top2.500bp.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.MAB21L1.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+# chr7.DMR (chr7)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+# CSMD1 (chr8)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.CSMD1.DMR.225kb.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.CSMD1.DMR.225kb.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.CSMD1.DMR.225kb.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.CSMD1.DMR.225kb.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.CSMD1.DMR.225kb.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.CSMD1.DMR.225kb.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.CSMD1.DMR.225kb.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.CSMD1.DMR.225kb.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+# C1orf216 (chr1)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.C1orf216.up.1500.down.500.grch37.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.C1orf216.up.1500.down.500.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.C1orf216.up.1500.down.500.grch37.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.C1orf216.up.1500.down.500.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.C1orf216.up.1500.down.500.grch37.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.C1orf216.up.1500.down.500.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.C1orf216.up.1500.down.500.grch37.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.C1orf216.up.1500.down.500.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+
+##################################################
+## NO of Mapped Read by Chromosome (Fludigm v2) ##
+##################################################
+samtools view ~/results/SLX-8772.Homo_sapiens.v1/Bismark/Alignment/FLD0194/SLX-8772.FLD0194.000000000-AF7HP.s_1.r_1_val_1.fq.gz_bismark_bt2_pe.q1.bam | awk '{print $3}' | sort | uniq -c | awk '{print substr($2,4),$1/2}' | sort -k1,1n
+
+###############################
+## FG: merging junctions.bed ##
+###############################
+# 1. SGA
+awk 'BEGIN{FS=","; foo=""}$6==1{split($3,a,"\""); slx=a[2]; split($4,b,"\""); barcode=b[2]; bed="~/results/"slx".Homo_sapiens.v4/TopHat/"barcode"/junctions.bed"; foo=foo" "bed}END{system ("cat "foo)}' ~/results/RNA-Seq/SGA.AGA/Meta/meta.ALL.csv > ~/results/RNA-Seq/SGA.AGA/FG.SGA.merged.junctions.bed
+bed_to_juncs < ~/results/RNA-Seq/SGA.AGA/FG.SGA.merged.junctions.bed | sort -k 1,4 -u | sort -k 1,1 > ~/results/RNA-Seq/SGA.AGA/FG.SGA.merged.junctions.junc
+
+# 2. AGA
+awk 'BEGIN{FS=","; foo=""}$6==0{split($3,a,"\""); slx=a[2]; split($4,b,"\""); barcode=b[2]; bed="~/results/"slx".Homo_sapiens.v4/TopHat/"barcode"/junctions.bed"; foo=foo" "bed}END{system ("cat "foo)}' ~/results/RNA-Seq/SGA.AGA/Meta/meta.ALL.csv > ~/results/RNA-Seq/SGA.AGA/FG.AGA.merged.junctions.bed
+bed_to_juncs < ~/results/RNA-Seq/SGA.AGA/FG.AGA.merged.junctions.bed | sort -k 1,4 -u | sort -k 1,1 > ~/results/RNA-Seq/SGA.AGA/FG.AGA.merged.junctions.junc
+
+# 3. merge both
+cat  ~/results/RNA-Seq/SGA.AGA/FG.AGA.merged.junctions.bed ~/results/RNA-Seq/SGA.AGA/FG.SGA.merged.junctions.bed > ~/results/RNA-Seq/SGA.AGA/FG.merged.junctions.bed
+bed_to_juncs <  ~/results/RNA-Seq/SGA.AGA/FG.merged.junctions.bed | sort -k 1,4 -u | sort -k 1,1 > ~/results/RNA-Seq/SGA.AGA/FG.merged.junctions.junc
+
+##
+## Prepare Map the Unmapped 
+##
+cat ~/results/$SLX.$VERSION/TopHat/*/junctions.bed >  ~/results/$SLX.$VERSION/$SLX.$VERSION.merged.junctions.bed 
+bed_to_juncs <   ~/results/$SLX.$VERSION/$SLX.$VERSION.merged.junctions.bed | sort -k 1,4 -u | sort -k 1,1 > ~/results/$SLX.$VERSION/$SLX.$VERSION.merged.junctions.junc
+rm  ~/results/$SLX.$VERSION/$SLX.$VERSION.merged.junctions.bed
+for i in `ls ~/results/$SLX.$VERSION/TopHat/*/unmapped.bam`; do echo $i; time bamutils tofastq $i| gzip -9 > ${i%.bam}.fq.gz; done
+
+##
+## FG: DEXSeq
+## 
+for i in `ls ~/results/SLX-9168.Homo_sapiens.v4/TopHat/D*/merged_accepted_hits.bam`; do echo $i; time python ~/R/x86_64-unknown-linux-gnu-library/3.1/DEXSeq/python_scripts/dexseq_count.py --paired=no --stranded=reverse --format=bam --order=pos  ~/data/Annotation/GRCh37.genes.dexseq.gff $i ${i%.bam}.dexseq.cnt.txt; done
+for i in `ls ~/results/SLX-9169.Homo_sapiens.v4/TopHat/D*/merged_accepted_hits.bam`; do echo $i; time python ~/R/x86_64-unknown-linux-gnu-library/3.1/DEXSeq/python_scripts/dexseq_count.py --paired=no --stranded=reverse --format=bam --order=pos  ~/data/Annotation/GRCh37.genes.dexseq.gff $i ${i%.bam}.dexseq.cnt.txt; done
+
+######################################
+## JD: merging junctions.bed (SE50) ##
+######################################
+cat ~/results/SLX-9788.Homo_sapiens.v1/TopHat/D*/junctions.bed  ~/results/SLX-9792.Homo_sapiens.v1/TopHat/D*/junctions.bed ~/results/SLX-9796.Homo_sapiens.v1/TopHat/D*/junctions.bed > ~/results/RNA-Seq/JD/JD.v1.merged.junctions.bed 
+bed_to_juncs <   ~/results/RNA-Seq/JD/JD.v1.merged.junctions.bed | sort -k 1,4 -u | sort -k 1,1 > ~/results/RNA-Seq/JD/JD.v1.merged.junctions.junc
+
+## PON3: merging junctions.bed
+[ssg29@login-sand1 Pipelines]$ cat ~/results/SLX-9175.Mus_musculus.v2/TopHat/D*/junctions.bed > ~/results/SLX-9175.Mus_musculus.v2/SLX-9175.Mus_musculus.v2.merged.junctions.bed
+[ssg29@login-sand1 Pipelines]$ bed_to_juncs < ~/results/SLX-9175.Mus_musculus.v2/SLX-9175.Mus_musculus.v2.merged.junctions.bed  | sort -k 1,4 -u | sort -k 1,1 > ~/results/SLX-9175.Mus_musculus.v2/SLX-9175.Mus_musculus.v2.merged.junctions.junc
+
+######################################################
+## JD: merging junctions.bed (SE125, GRCh38, final) ##
+######################################################
+[ssg29@login-sand5 Pipelines]$ cat ~/results/SLX-10281.Homo_sapiens.v1/SLX-10281.Homo_sapiens.v1.merged.junctions.bed ~/results/SLX-10402.Homo_sapiens.v1/SLX-10402.Homo_sapiens.v1.merged.junctions.bed ~/results/SLX-9792.Homo_sapiens.v1/SLX-9792.Homo_sapiens.v1.merged.junctions.bed ~/results/SLX-10284.Homo_sapiens.v1/SLX-10284.Homo_sapiens.v1.merged.junctions.bed ~/results/SLX-10285.Homo_sapiens.v1/SLX-10285.Homo_sapiens.v1.merged.junctions.bed ~/results/SLX-10283.Homo_sapiens.v1/SLX-10283.Homo_sapiens.v1.merged.junctions.bed ~/results/SLX-10287.Homo_sapiens.v1/SLX-10287.Homo_sapiens.v1.merged.junctions.bed > ~/results/RNA-Seq/JD/Junctions/JD.SE125.ALL.GRCh38.merged.junctions.bed
+
+######################################################
+## JD: merging junctions.bed (SE125, GRCh37, final) ##
+######################################################
+[ssg29@login-sand5 Pipelines]$ cat ~/results/SLX-10281.Homo_sapiens.v2/SLX-10281.Homo_sapiens.v2.merged.junctions.bed ~/results/SLX-10402.Homo_sapiens.v2/SLX-10402.Homo_sapiens.v2.merged.junctions.bed ~/results/SLX-9792.Homo_sapiens.v2/SLX-9792.Homo_sapiens.v2.merged.junctions.bed ~/results/SLX-10284.Homo_sapiens.v2/SLX-10284.Homo_sapiens.v2.merged.junctions.bed ~/results/SLX-10285.Homo_sapiens.v2/SLX-10285.Homo_sapiens.v2.merged.junctions.bed ~/results/SLX-10283.Homo_sapiens.v2/SLX-10283.Homo_sapiens.v2.merged.junctions.bed ~/results/SLX-10287.Homo_sapiens.v2/SLX-10287.Homo_sapiens.v2.merged.junctions.bed > ~/results/RNA-Seq/JD/Junctions/JD.SE125.ALL.GRCh37.merged.junctions.bed
+[ssg29@login-sand5 Pipelines]$ bed_to_juncs < ~/results/RNA-Seq/JD/Junctions/JD.SE125.ALL.GRCh37.merged.junctions.bed  | sort -k 1,4 -u | sort -k 1,1 > ~/results/RNA-Seq/JD/Junctions/JD.SE125.ALL.GRCh37.merged.junctions.junc
+
+
+#############################################################
+## Map the unmapped of unmap read to human ref via bowtie2 ##
+#############################################################
+[ssg29@login-sand5 Pipelines]$ bowtie2 --threads 2 -U /home/ssg29/results/SLX-9168.Homo_sapiens.v4/TopHat/D701_D501/unmapped/unmapped.fq.gz -x /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome 2> D701_D501.bowtie.log | samtools view -f4 - | grep -v ^@ | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > unmapped.fq.gz
+# batch version of above
+for i in `ls /home/ssg29/results/SLX-9168.Homo_sapiens.v4/TopHat/*/unmapped/unmapped.fq.gz`;do echo $i; time bowtie2 --threads 4 -U $i -x /scratch/genome/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome 2> ${i%.fq.gz}.bowtie.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > ${i%.fq.gz}.bowtie.fq.gz ; done
+
+###########################################################
+## Map the unmapped of unmap read to human ref via bbmap ##
+###########################################################
+[ssg29@login-sand5 Pipelines]$ ~/Install/bbmap/bbmap.sh minid=0.95 maxindel=3 bwr=0.16 bw=12 quickmatch fast minhits=2 path=~/Pipelines/ qtrim=rl trimq=10 untrim -Xmx23g in=/home/ssg29/results/SLX-9168.Homo_sapiens.v4/TopHat/D701_D501/unmapped/unmapped.fq.gz outu=clean.fq outm=human.fq
+java -Djava.library.path=/home/ssg29/Install/bbmap/jni/ -ea -Xmx23g -cp /home/ssg29/Install/bbmap/current/ align2.BBMap build=1 overwrite=true fastareadlen=500 minid=0.95 maxindel=3 bwr=0.16 bw=12 quickmatch fast minhits=2 path=/home/ssg29/Pipelines/ qtrim=rl trimq=10 untrim -Xmx23g in=/home/ssg29/results/SLX-9168.Homo_sapiens.v4/TopHat/D701_D501/unmapped/unmapped.fq.gz outu=clean.fq outm=human.fq
+Executing align2.BBMap [tipsearch=20, maxindel=80, minhits=2, bwr=0.18, bw=40, minratio=0.65, midpad=150, minscaf=50, quickmatch=t, rescuemismatches=15, rescuedist=800, build=1, overwrite=true, fastareadlen=500, minid=0.95, maxindel=3, bwr=0.16, bw=12, quickmatch, minhits=2, path=/home/ssg29/Pipelines/, qtrim=rl, trimq=10, untrim, -Xmx23g, in=/home/ssg29/results/SLX-9168.Homo_sapiens.v4/TopHat/D701_D501/unmapped/unmapped.fq.gz, outu=clean.fq, outm=human.fq]
+
+BBMap version 35.14
+Set MINIMUM_ALIGNMENT_SCORE_RATIO to 0.650
+Retaining first best site only for ambiguous mappings.
+Set MINIMUM_ALIGNMENT_SCORE_RATIO to 0.908
+Set genome to 1
+
+Loaded Reference:       6.095 seconds.
+Loading index for chunk 1-7, build 1
+Generated Index:        61.704 seconds.
+Analyzed Index:         13.321 seconds.
+Started output stream:  0.372 seconds.
+Started output stream:  0.001 seconds.
+Cleared Memory:         1.567 seconds.
+Processing reads in single-ended mode.
+Started read stream.
+Started 16 mapping threads.
+Detecting finished threads: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+
+   ------------------   Results   ------------------
+
+Genome:                 1
+Key Length:             13
+Max Indel:              3
+Minimum Score Ratio:    0.9081
+Mapping Mode:           normal
+Reads Used:             1353462 (67659328 bases)
+
+Mapping:                43.784 seconds.
+Reads/sec:              30912.57
+kBases/sec:             1545.31
+
+
+Read 1 data:            pct reads       num reads       pct bases          num bases
+
+mapped:                   0.3615%            4893         0.3616%             244627
+unambiguous:              0.2553%            3455         0.2553%             172749
+ambiguous:                0.1062%            1438         0.1062%              71878
+low-Q discards:           0.0000%               0         0.0000%                  0
+
+perfect best site:        0.0004%               6         0.0004%                300
+semiperfect site:         0.0011%              15         0.0011%                750
+
+Match Rate:                   NA               NA        93.8576%             229601
+Error Rate:               0.1459%             904         0.6091%               1490
+Sub Rate:                 0.1459%             904         0.6091%               1490
+Del Rate:                 0.0000%               0         0.0000%                  0
+Ins Rate:                 0.0000%               0         0.0000%                  0
+N Rate:                   0.6917%            4286         5.5333%              13536
+
+Total time:             126.963 seconds.
+
+##########
+## PON3 ##
+##########
+SLX=SLX-9175
+BARCODE=$(for i in `ls /home/ssg29/scratch/data/fastq/$SLX/$SLX*.fq.gz | grep -v lost`; do echo $i | cut -d'/' -f8 | cut -d'.' -f2 ; done | uniq)
+CASE=$(awk '$3==1{print $2}' ~/Pipelines/data/PON3/samples.info.txt)
+CONTROL=$(awk '$3==0{print $2}' ~/Pipelines/data/PON3/samples.info.txt)
+
+# rerun VaraintFiltration
+for i in `ls ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.D*.tophat.HC.snp.indel.vcf.gz`; do zcat $i > ${i%.gz}; java -Xmx60g -jar /usr/local/Cluster-Apps/gatk/3.1-1/GenomeAnalysisTK.jar -T VariantFiltration -R ~/data/STAR_Index/Mus_musculus/Ensembl/GRCm38/Mus_musculus.GRCm38.dna.primary_assembly.fa --variant ${i%.gz} -window 35 -cluster 3 -filterName FS -filter "FS > 30.0" -filterName QD -filter "QD < 2.0" -o ${i%.vcf.gz}.filtered.vcf.gz; rm ${i%.gz}; done
+
+# Extend PON3 locus
+bedtools slop -i ~/Pipelines/data/PON3/GRCm38.PON3.bed -g ~/data/STAR_Index/Mus_musculus/Ensembl/GRCm38/Mus_musculus.GRCm38.dna.primary_assembly.fa.fai -l 1000000 -r 1000000 -s -header > ~/Pipelines/data/PON3/GRCm38.PON3.2Mbp.bed
+bedtools slop -i ~/Pipelines/data/PON3/GRCm38.PON3.bed -g ~/data/STAR_Index/Mus_musculus/Ensembl/GRCm38/Mus_musculus.GRCm38.dna.primary_assembly.fa.fai -l 5000000 -r 5000000 -s -header > ~/Pipelines/data/PON3/GRCm38.PON3.10Mbp.bed
+bedtools slop -i ~/Pipelines/data/PON3/GRCm38.PON3.bed -g ~/data/STAR_Index/Mus_musculus/Ensembl/GRCm38/Mus_musculus.GRCm38.dna.primary_assembly.fa.fai -l 10000000 -r 10000000 -s -header > ~/Pipelines/data/PON3/GRCm38.PON3.20Mbp.bed
+
+# Varaint within the PON3 locus only
+for i in `ls ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.D*.tophat.HC.snp.indel.filtered.vcf.gz`; do bedtools intersect -a $i -b ~/Pipelines/data/PON3/GRCm38.PON3.2Mbp.bed -header | bgzip > ${i%.vcf.gz}.PON3.2Mbp.vcf.gz; tabix -f -p vcf ${i%.vcf.gz}.PON3.2Mbp.vcf.gz; done
+for i in `ls ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.D*.tophat.HC.snp.indel.filtered.vcf.gz`; do bedtools intersect -a $i -b ~/Pipelines/data/PON3/GRCm38.PON3.10Mbp.bed -header| bgzip > ${i%.vcf.gz}.PON3.10Mbp.vcf.gz; tabix -f -p vcf ${i%.vcf.gz}.PON3.10Mbp.vcf.gz; done
+for i in `ls ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.D*.tophat.HC.snp.indel.filtered.vcf.gz`; do bedtools intersect -a $i -b ~/Pipelines/data/PON3/GRCm38.PON3.20Mbp.bed -header| bgzip > ${i%.vcf.gz}.PON3.20Mbp.vcf.gz; tabix -f -p vcf ${i%.vcf.gz}.PON3.20Mbp.vcf.gz; done
+
+# list of case/control
+for i in $CASE; do echo ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.$i.tophat.HC.snp.indel.filtered.PON3.2Mbp.vcf.gz; done > ~/Pipelines/data/PON3/case.PON3.2Mbp.vcf.list
+for i in $CONTROL; do echo ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.$i.tophat.HC.snp.indel.filtered.PON3.2Mbp.vcf.gz; done > ~/Pipelines/data/PON3/control.PON3.2Mbp.vcf.list
+for i in $CASE; do echo ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.$i.tophat.HC.snp.indel.filtered.PON3.10Mbp.vcf.gz; done > ~/Pipelines/data/PON3/case.PON3.10Mbp.vcf.list
+for i in $CONTROL; do echo ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.$i.tophat.HC.snp.indel.filtered.PON3.10Mbp.vcf.gz; done > ~/Pipelines/data/PON3/control.PON3.10Mbp.vcf.list
+for i in $CASE; do echo ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.$i.tophat.HC.snp.indel.filtered.PON3.20Mbp.vcf.gz; done > ~/Pipelines/data/PON3/case.PON3.20Mbp.vcf.list
+for i in $CONTROL; do echo ~/results/$SLX.Mus_musculus.v2/GATK/D*/$SLX.$i.tophat.HC.snp.indel.filtered.PON3.20Mbp.vcf.gz; done > ~/Pipelines/data/PON3/control.PON3.20Mbp.vcf.list
+
+# Merge VCF of case/control
+# default rule: QUAL<-max, DP<-sum
+# --info-rules - :QUAL<-max, DP<-first_available
+bcftools merge -fPASS --info-rules DP:avg,QD:avg -l ~/Pipelines/data/PON3/case.PON3.2Mbp.vcf.list --output-type z -o ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.2Mbp.vcf.gz  
+bcftools merge -fPASS --info-rules DP:avg,QD:avg -l ~/Pipelines/data/PON3/control.PON3.2Mbp.vcf.list --output-type z -o ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.2Mbp.vcf.gz
+
+bcftools merge -fPASS --info-rules DP:avg,QD:avg -l ~/Pipelines/data/PON3/case.PON3.10Mbp.vcf.list --output-type z -o ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.10Mbp.vcf.gz  
+bcftools merge -fPASS --info-rules DP:avg,QD:avg -l ~/Pipelines/data/PON3/control.PON3.10Mbp.vcf.list --output-type z -o ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.10Mbp.vcf.gz
+
+bcftools merge -fPASS --info-rules DP:avg,QD:avg -l ~/Pipelines/data/PON3/case.PON3.20Mbp.vcf.list --output-type z -o ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.20Mbp.vcf.gz  
+bcftools merge -fPASS --info-rules DP:avg,QD:avg -l ~/Pipelines/data/PON3/control.PON3.20Mbp.vcf.list --output-type z -o ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.20Mbp.vcf.gz
+
+for i in `ls ~/results/$SLX.Mus_musculus.v2/GATK/*vcf.gz`; do tabix -f -p vcf $i; done
+
+# Varinat in Cases only
+bcftools isec -n-1 -w1 ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.2Mbp.vcf.gz ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.2Mbp.vcf.gz > ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.only.tophat.HC.snp.indel.PON3.2Mbp.vcf
+bcftools isec -n-1 -w1 ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.10Mbp.vcf.gz ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.10Mbp.vcf.gz > ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.only.tophat.HC.snp.indel.PON3.10Mbp.vcf
+bcftools isec -n-1 -w1 ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.20Mbp.vcf.gz ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.20Mbp.vcf.gz > ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.only.tophat.HC.snp.indel.PON3.20Mbp.vcf
+
+# Variant in Control only
+bcftools isec -n-1 -w1 ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.2Mbp.vcf.gz ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.2Mbp.vcf.gz > ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.only.tophat.HC.snp.indel.PON3.2Mbp.vcf
+bcftools isec -n-1 -w1 ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.10Mbp.vcf.gz ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.10Mbp.vcf.gz > ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.only.tophat.HC.snp.indel.PON3.10Mbp.vcf
+bcftools isec -n-1 -w1 ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.tophat.HC.snp.indel.PON3.20Mbp.vcf.gz ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.case.tophat.HC.snp.indel.PON3.20Mbp.vcf.gz > ~/results/$SLX.Mus_musculus.v2/GATK/$SLX.merged.control.only.tophat.HC.snp.indel.PON3.20Mbp.vcf
+
+# Common VCF of Cases
+bcftools isec -fPASS -n=2 -w1 --output 
+# Common VCF of Controls
+# Varaint in Cases only
+
+#Patch for reformatting miRDeep2 expression
+for i in $BARCODE; do awk 'BEGIN{OFS="\t"}!/^#/{cnt[$3]+=$2}END{for(precursor in cnt)print precursor,cnt[precursor]}' ~/results/$SLX.Homo_sapiens.v1/miRDeep2/core/$i/miRNAs_expressed_all_samples_*$i.csv > ~/results/$SLX.Homo_sapiens.v1/miRDeep2/core/$i/$SLX.Homo_sapiens.v1.$i.miRNA.cnt.txt ; done
+
+#######################
+### Count TS-primer ###
+#######################
+SLX=SLX-10295; VERSION=Homo_sapiens.v2
+BARCODES=$(awk '$6=="q1"{print $2}' $HOME/Pipelines/data/MJ.FLD/$SLX/RnBeads.sample.sheet.txt)
+for i in $BARCODES;do myFile=~/results/$SLX.$VERSION/Trim/$i/$SLX.$i.000000000-AH4LJ.s_1.trimming_report.txt; awk 'BEGIN{RS="=== First read: Adapter"}NR>1{print $1,$11}' $myFile > dummy1.txt; awk 'BEGIN{RS="=== Second read: Adapter"}NR>1{print $11}' $myFile > dummy2.txt; paste dummy1.txt dummy2.txt > ~/results/$SLX.$VERSION/Trim/$i/$SLX.$i.trim.cnt.txt; rm dummy1.txt dummy2.txt; done
+
+###################
+## piRBase Count ##
+###################
+parse_mappings.pl /home/ssg29/results/SLX-9176.Homo_sapiens.v2/miRDeep2/mapper/NEBsmRNA01/SLX-9176.NEBsmRNA01.mirdeep2.mapped.arf -a 0 -i 2  | awk 'BEGIN{OFS="\t"}{start=$8-1; split($1,seq,"_x"); print "chr"$6,start,$9,$1,seq[2],$11}' | intersectBed -a ~/data/Annotation/piRBase.1.0/piR_hg19_v1.0.bed.gz -b stdin -s -wao -f 0.3 | sort -k1,1 -k2,2 -k3,3 -k4,4 -k6,6 | groupBy -i stdin -grp 1,2,3,4,6 -c 11 -o sum | awk 'BEGIN{OFS="\t"}{if($6<0)cnt=0;else cnt=$6; print $1,$2,$3,$4,cnt,$5}' | sort -k4,4V > SLX-9176.NEBsmRNA01.piRBase.sorted.read.cnt.bed
+
+groupBy -i SLX-9176.NEBsmRNA01.piRBase.sorted.read.cnt.bed -grp 4 -c 5 -o sum > SLX-9176.NEBsmRNA01.piRBase.read.cnt.txt
+
+####################
+## piRBase Target ##
+####################
+miranda /home/ssg29/Pipelines/data/piR.target.fa /home/ssg29/data/Ensembl/GRCh37/Homo_sapiens.GRCh37.75.cdna.all.fa -sc 170 -en -20 -quiet -strict -out /home/ssg29/Pipelines/data/piR.target.hit.strict.txt
+grep "^>gi" /home/ssg29/Pipelines/data/piR.target.hit.strict.txt | awk '{split($10,a,"%");if(a[1]>90) print $0}' |more
+
+###############
+## Cufflinks ##
+###############
+time cuffmerge --num-threads 6 --ref-sequence $GENOME --ref-gtf $GTF -o /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v1/Cuffmerge ~/results/RNA-Seq/SGA.AGA.total.SE125/SLX-9168.SE125.SE50.stringtie.gtf.list
+
+time cuffcompare -C -G -V -o /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v1/Cuffcompare/SLX-9168 -r /home/ssg29/data/Ensembl/GRCh37/Homo_sapiens.GRCh37.82.gtf  -s /scratch/genome/Homo_sapiens/Ensembl/GRCh37/Sequence/WholeGenomeFasta/genome.fa -i ~/results/RNA-Seq/SGA.AGA.total.SE125/SLX-9168.SE125.SE50.stringtie.gtf.list  &> cuffcompare.log &
+
+
+#############
+## ChrInfo ##
+#############
+# for bedToBigBed
+awk 'BEGIN{OFS="\t"}$2~/SN/{split($2,chr,":"); split($3,len,":"); print chr[2],len[2]}' Ensembl/GRCh37/Sequence/WholeGenomeFasta/genome.dict  > ~/data/genome/Homo_sapiens.GRCh37.chromInfo
+
+########################
+## miRNA of adj.p<0.1 ##
+########################
+for i in `ls ~/results/RNA-Seq/SGA.AGA.miRNA.v2/DESeq2/*/filtered_toptags_deseq.padj.1.*.csv`;do awk 'BEGIN{FS=","}/hsa/{print $2}' $i | sed s/\"//g; done | sort | uniq > ~/results/RNA-Seq/SGA.AGA.miRNA.v2/DESeq2/filtered_toptags_deseq.padj.1.Any.txt
+
+
+##
+## miRNA dominant form (either 3p or 5p)
+##
+for i in  `ls ~/results/SLX-9794.Homo_sapiens.v2/miRDeep2/core/NEB*/miRNAs_expressed_all_samples_*.csv`;do grep miR-193b $i; done 
+
+##########################
+## Merge SE50 and Se125 ##
+##########################
+# 1. FG GRCh37 (SE125.v1 and v4)
+for j in $BARCODE; do echo -e "$SLX $j\n"; samtools merge -f ~/results/$SLX.Homo_sapiens.SE125.v1/TopHat/$j/final_merged_accepted_hits.bam ~/results/$SLX.Homo_sapiens.SE125.v1/TopHat/$j/merged_accepted_hits.bam ~/results/$SLX.Homo_sapiens.v4/TopHat/$j/merged_accepted_hits.bam; samtools index ~/results/$SLX.Homo_sapiens.SE125.v1/TopHat/$j/final_merged_accepted_hits.bam; done
+# 1. FG GRCh38 (SE125.v2 and v5)
+for j in $BARCODE; do echo -e "$SLX $j\n"; samtools merge -f ~/results/$SLX.Homo_sapiens.SE125.v2/TopHat/$j/final_merged_accepted_hits.bam ~/results/$SLX.Homo_sapiens.SE125.v2/TopHat/$j/merged_accepted_hits.bam ~/results/$SLX.Homo_sapiens.v5/TopHat/$j/merged_accepted_hits.bam; samtools index ~/results/$SLX.Homo_sapiens.SE125.v2/TopHat/$j/final_merged_accepted_hits.bam; done
+
+#######################################
+## Preprocessing of Unmapped RNA-Seq ##
+#######################################
+#1. PrinSeq 
+#1.1. for stat
+zcat /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.fq.gz | perl ~/Install/prinseq-lite/prinseq-lite.pl -fastq stdin -min_len 50 -ns_max_n 5 -lc_method dust -lc_threshold 7 -noniupac -trim_tail_left 5 trim_tail_right 5 -trim_ns_left 3 -trim_ns_right 3 -trim_qual_right 30 -out_good null -out_bad null -log /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.prinseq.log -stats_all > /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.prinseq.detail.stat
+#1.2. trim/filter fastq (remaining: 98,693 / 286,124)
+zcat /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.fq.gz | perl ~/Install/prinseq-lite/prinseq-lite.pl -fastq stdin -min_len 50 -ns_max_n 5 -lc_method dust -lc_threshold 7 -noniupac -trim_tail_left 5 trim_tail_right 5 -trim_ns_left 3 -trim_ns_right 3 -trim_qual_right 30 -out_good stdout -out_bad null -log /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.prinseq.log 2> /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.prinseq.log | gzip -9 > /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.prinseq.fq.gz
+#2. fqtrim  (remaining: 44,270 / 286,124)
+time ~/Install/fqtrim/fqtrim -l50 -y5 -q30 -w1 -m 4 -D -p 4 -r /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.fqtrim.log /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.fq.gz | gzip -9 > /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.fqtrim.fq.gz
+#3. cutadapt followed by prinseq (chosen)
+time cutadapt -q 30 -m 50 --max-n 5 --trim-n /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.fq.gz  2> /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.cutadapt.log | perl ~/Install/prinseq-lite/prinseq-lite.pl -fastq stdin -lc_method dust -lc_threshold 7 -noniupac -trim_tail_left 5 trim_tail_right 5 -out_good stdout -out_bad null 2> /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.cutadapt.prinseq.log | gzip -9 > /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D711_D508/unmapped/unmapped.bowtie2.local.cutadapt.prinseq.fq.gz
+#batch of 3 above
+for i in `ls /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/*/unmapped/unmapped.fq.gz`; do echo $i; time cutadapt -q 30 -m 50 --max-n 5 --trim-n $i 2> ${i%.fq.gz}.cutadapt.log | perl ~/Install/prinseq-lite/prinseq-lite.pl -fastq stdin -min_len 50 -ns_max_n 5 -lc_method dust -lc_threshold 7 -noniupac -trim_tail_left 5 trim_tail_right 5 -out_good stdout -out_bad null 2> ${i%.fq.gz}.cutadapt.prinseq.log | gzip -9 > ${i%.fq.gz}.prep.fq.gz; done
+
+
+#######################################
+## Map the unmapped: final filtering ##
+## for Marcus                        ##
+#######################################
+# Ver1: 1st human filtering (NCBI/GRCh38) without preprocessing
+for j in $BARCODE;do echo -e "$SLX $j"; time bowtie2 --local --threads 6 -U /home/ssg29/results/$SLX.Homo_sapiens.SE125.v2/TopHat/$j/unmapped/unmapped.fq.gz -x /home/ssg29/data/genome/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome 2> /home/ssg29/results/$SLX.Homo_sapiens.SE125.v2/TopHat/$j/unmapped/unmapped.bowtie.local.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > /home/ssg29/results/$SLX.Homo_sapiens.SE125.v2/TopHat/$j/unmapped/unmapped.bowtie2.local.fq.gz; done
+
+# 2nd human filtering (NCBI NT, config and selected clone only) after preprocessing of above
+for i in `ls /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/*/unmapped/unmapped.bowtie2.local.prep.fq.gz`; do echo $i; time bowtie2 --local --threads 6 -U $i -x /home/ssg29/data/genome/Homo_sapiens/NCBI/NT/Sequence/Bowtie2Index/genome 2> ${i%.fq.gz}.bt.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > ${i%.fq.gz}.bt.fq.gz ; done
+
+# all-in-one-go v1 (bt2 --local | prinseq)
+for i in `ls /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/*/unmapped/unmapped.prep.fq.gz`; do echo $i; time bowtie2 --local --threads 6 -U $i -x /home/ssg29/data/genome/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome 2> ${i%.fq.gz}.bt2.local.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | perl ~/Install/prinseq-lite/prinseq-lite.pl -fastq stdin -min_len 50 -ns_max_n 5 -lc_method dust -lc_threshold 7 -noniupac -ns_max_n 5 -trim_tail_left 5 trim_tail_right 5 -out_good stdout -out_bad null 2> ${i%.fq.gz}.bt2.local.prinseq.log | gzip -9 > ${i%.fq.gz}.bt2.local.fq.gz; done
+
+# all-in-one-go v2 (bt2 --local, chosen)
+for i in `ls /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/*/unmapped/unmapped.prep.fq.gz`; do echo $i; time bowtie2 --local --threads 6 -U $i -x /home/ssg29/data/genome/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome 2> ${i%.fq.gz}.bt2.local.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > ${i%.fq.gz}.bt2.local.fq.gz; done
+
+# black-list of May/2016
+for i in `ls /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/*/unmapped/unmapped.prep.bt2.local.fq.gz`; do echo $i; time bowtie2 --local --threads 4 -U $i -x /home/ssg29/data/genome/Homo_sapiens/NCBI/BlackList/Sequence/Bowtie2Index/genome 2> ${i%.fq.gz}.may2016.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > ${i%.fq.gz}.may2016.fq.gz; done
+for i in `ls /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/*/unmapped/unmapped.prep.bt2.local.fq.gz`; do echo $i; time bowtie2 --local --threads 4 -U $i -x /home/ssg29/data/genome/Homo_sapiens/NCBI/BlackList/Sequence/Bowtie2Index/genome 2> ${i%.fq.gz}.may2016.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > ${i%.fq.gz}.may2016.fq.gz; done
+
+for i in `ls /home/ssg29/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/*/unmapped/unmapped.prep.bt2.fq.gz`; do echo $i; time bowtie2 --threads 4 -U $i -x /home/ssg29/data/genome/Homo_sapiens/NCBI/BlackList/Sequence/Bowtie2Index/genome 2> ${i%.fq.gz}.may2016.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > ${i%.fq.gz}.may2016.fq.gz; done
+for i in `ls /home/ssg29/results/SLX-9169.Homo_sapiens.SE125.v2/TopHat/*/unmapped/unmapped.prep.bt2.fq.gz`; do echo $i; time bowtie2 --threads 4 -U $i -x /home/ssg29/data/genome/Homo_sapiens/NCBI/BlackList/Sequence/Bowtie2Index/genome 2> ${i%.fq.gz}.may2016.log | samtools view -f4 - | awk '{print "@"$1"\n"$10"\n+\n"$11}' | gzip -9 > ${i%.fq.gz}.may2016.fq.gz; done
+
+
+##############################
+## Non-CG (CHH & CHG)
+## Concat per-chr vcf files ##
+##############################
+export UCSC_CHR=(chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY chrM)
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.non.cpg.filtered.vcf"; i="/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/A001/$Chr/SLX-8074.SLX-8080.A001.$Chr.non.cpg.filtered.vcf"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^# $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.non.cpg.filtered.vcf"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A002/$Chr/SLX-8075.SLX-8077.SLX-8081.A002.$Chr.non.cpg.filtered.vcf"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^# $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A005/SLX-8075.SLX-8077.SLX-8081.A005.non.cpg.filtered.vcf"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A005/$Chr/SLX-8075.SLX-8077.SLX-8081.A005.$Chr.non.cpg.filtered.vcf"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^# $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A008/SLX-8075.SLX-8077.SLX-8081.A008.non.cpg.filtered.vcf"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A008/$Chr/SLX-8075.SLX-8077.SLX-8081.A008.$Chr.non.cpg.filtered.vcf"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^# $i >> $j;fi; done
+
+##############################
+## Non-CG (CHH)
+## Concat per-chr bed files ##
+##############################
+export UCSC_CHR=(chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX)
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.non.cpg.filtered.CHH.bed"; i="/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/A001/$Chr/SLX-8074.SLX-8080.A001.$Chr.non.cpg.filtered.CHH.bed"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^track $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.non.cpg.filtered.CHH.bed"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A002/$Chr/SLX-8075.SLX-8077.SLX-8081.A002.$Chr.non.cpg.filtered.CHH.bed"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^track $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A005/SLX-8075.SLX-8077.SLX-8081.A005.non.cpg.filtered.CHH.bed"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A005/$Chr/SLX-8075.SLX-8077.SLX-8081.A005.$Chr.non.cpg.filtered.CHH.bed"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^track $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A008/SLX-8075.SLX-8077.SLX-8081.A008.non.cpg.filtered.CHH.bed"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A008/$Chr/SLX-8075.SLX-8077.SLX-8081.A008.$Chr.non.cpg.filtered.CHH.bed"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^track $i >> $j;fi; done
+
+##############################
+## Non-CG (CHG)
+## Concat per-chr bed files ##
+##############################
+export UCSC_CHR=(chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX)
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.non.cpg.filtered.CHG.bed"; i="/home/ssg29/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/A001/$Chr/SLX-8074.SLX-8080.A001.$Chr.non.cpg.filtered.CHG.bed"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^track $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.non.cpg.filtered.CHG.bed"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A002/$Chr/SLX-8075.SLX-8077.SLX-8081.A002.$Chr.non.cpg.filtered.CHG.bed"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^track $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A005/SLX-8075.SLX-8077.SLX-8081.A005.non.cpg.filtered.CHG.bed"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A005/$Chr/SLX-8075.SLX-8077.SLX-8081.A005.$Chr.non.cpg.filtered.CHG.bed"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^track $i >> $j;fi; done
+
+for Chr in ${UCSC_CHR[*]}; do j="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A008/SLX-8075.SLX-8077.SLX-8081.A008.non.cpg.filtered.CHG.bed"; i="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A008/$Chr/SLX-8075.SLX-8077.SLX-8081.A008.$Chr.non.cpg.filtered.CHG.bed"; if [ $Chr = "chr1" ];then cat $i > $j ;else grep -v ^track $i >> $j;fi; done
+##
+## Find SNPs for a given flanking region of a piR loci
+##
+zcat  ~/data/Annotation/piRBase.10/piR_hg19_v1.0.bed.gz  | grep piR-hsa-28400 | bedtools flank -i stdin -g ~/data/UCSC/hg19b/hg19b.fa.fai -b 100 | bedtools intersect -a ~/data/dbSNP/Homo_sapiens/UCSC/GRCh37/common_all.vcf -b stdin
+
+
+##########
+## CPGi ##
+##########
+1. from RnBeads
+> sum(sapply(rnb.get.annotation(type="cpgislands"), length))
+[1] 27718
+
+2. from UCSC
+wc -l ~/data/Annotation/CPGi/cpgi.hg19.sorted.bed
+28691 /home/ssg29/data/Annotation/CPGi/cpgi.hg19.sorted.bed
+
+#################################
+## SureSelect v1 and v2 merger ##
+#################################
+# method 1. (q1.deduplicated.sorted.RG.bam)
+for i in $BARCODE; do mkdir /scratch/ssg29/results/$SLX.Homo_sapiens.v3/Bismark/Alignment/$i; a=/scratch/ssg29/results/$SLX.Homo_sapiens.v1/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam; b=/scratch/ssg29/results/$SLX.Homo_sapiens.v2/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam; c=/scratch/ssg29/results/$SLX.Homo_sapiens.v3/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam; echo -e "samtools merge $c"; samtools merge $c $a $b; done
+
+# method 2. (q1.deduplicated.sorted.RG.recal.bam)
+for i in $BARCODE; do mkdir_unless /scratch/ssg29/results/$SLX.Homo_sapiens.v3/Bismark/Alignment/$i; a=/scratch/ssg29/results/$SLX.Homo_sapiens.v1/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.bam; b=/scratch/ssg29/results/$SLX.Homo_sapiens.v2/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.bam; c=/scratch/ssg29/results/$SLX.Homo_sapiens.v3/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.RG.recal.bam; echo -e "samtools merge $c"; samtools merge $c $a $b; samtools sort -m 10000000000 $c ${c%.RG.recal.bam}.sorted.RG.recal; rm $c;done
+
+# method 3. (q1.deduplicated.sorted.bam)
+for i in $BARCODE; do mkdir_unless /scratch/ssg29/results/$SLX.Homo_sapiens.v4/Bismark/Alignment/$i; a=/scratch/ssg29/results/$SLX.Homo_sapiens.v1/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.bam; b=/scratch/ssg29/results/$SLX.Homo_sapiens.v2/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.bam; c=/scratch/ssg29/results/$SLX.Homo_sapiens.v4/Bismark/Alignment/$i/$SLX.$i.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.bam; echo -e "samtools merge $c"; samtools merge $c $a $b; samtools sort -m 10000000000 $c ${c%.bam}.sorted; rm $c;done
+
+## BisSNP Test Runs
+ java -Xmx60g -jar $HOME/Install/BisSNP/BisSNP-0.82.2.jar -T BisulfiteGenotyper -R $HOME/data/UCSC/hg19b/hg19b.fa -I ~/results/SLX-10409.Homo_sapiens.v3/Bismark/Alignment/HAL01/SLX-10409.HAL01.MAB21L1.RG.bam -D ~/data/dbSNP/Homo_sapiens/UCSC/GRCh37/common_all.vcf -nt 16 -L ~/Pipelines/data/MAB21L1/MAB21L1.grch37.bed -stand_call_conf 20 -stand_emit_conf 0 -mmq 1 -mbq 20 -vfn1 /home/ssg29/results/SLX-10409.Homo_sapiens.v3/BisSNP/HAL01/SLX-10409.HAL01.MAB21L1.RG.cpg.raw.vcf -vfn2 /home/ssg29/results/SLX-10409.Homo_sapiens.v3/BisSNP/HAL01/SLX-10409.HAL01.MAB21L1.RG.snp.raw.vcf 
+
+ java -Xmx60g -jar $HOME/Install/BisSNP/BisSNP-0.82.2.jar -T BisulfiteGenotyper -R $HOME/data/UCSC/hg19b/hg19b.fa -I ~/results/SLX-10409.Homo_sapiens.v3/Bismark/Alignment/HAL01/SLX-10409.HAL01.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.bam -D ~/data/dbSNP/Homo_sapiens/UCSC/GRCh37/common_all.vcf -nt 16 -L ~/Pipelines/data/MAB21L1/MAB21L1.grch37.bed -stand_call_conf 20 -stand_emit_conf 0 -mmq 1 -mbq 20 -vfn1 /home/ssg29/results/SLX-10409.Homo_sapiens.v3/BisSNP/HAL01/SLX-10409.HAL01.MAB21L1.cpg.raw.vcf -vfn2 /home/ssg29/results/SLX-10409.Homo_sapiens.v3/BisSNP/HAL01/SLX-10409.HAL01.MAB21L1.snp.raw.vcf &> SLX-10409.HAL01.MAB21L1.bam.bissnp.log
+
+ java -jar ~/Install/picard/AddOrReplaceReadGroups.jar INPUT=/home/ssg29/results/SLX-10409.Homo_sapiens.v3/Bismark/Alignment/HAL01/SLX-10409.HAL01.dummy.bam  OUTPUT=/home/ssg29/results/SLX-10409.Homo_sapiens.v3/Bismark/Alignment/HAL01/SLX-10409.HAL01.dummy.new.RG.bam RGID=SLX-10409 RGLB=SLX-10409 RGPL=illumina RGPU=run RGSM=HAL01 RGCN=CamObsGynae VALIDATION_STRINGENCY=SILENT
+
+## Bam Index via Picard
+for i in `ls /home/ssg29/results/SLX-10409.Homo_sapiens.v3/Bismark/Alignment/HAL*/SLX-10409.HAL*.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.bam`; do echo $i; java -jar $HOME/Install/picard/BuildBamIndex.jar INPUT=$i OUTPUT=${i%.bam}.bai ; done
+
+####################################################
+## Count 'alignment_not_unique' manually from BAM ##
+####################################################
+samtools view ~/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D701_D501/merged_accepted_hits.bam| awk 'BEGIN{sum=0}{for(i=1;i<=NF;i++)if($i~"NH:i"){split($i,f,":"); if(f[3]>1)print $1,f[3]}}' | sort -T /scratch/ssg29 | uniq | awk 'BEGIN{sum=0}{sum+=$2}END{print sum}'
+
+###################
+## Exon Counting ##
+###################
+[ssg29@login-sand4 Pipelines]$ awk 'BEGIN{OFS=" "}{my_exon="exon_id CSMD1.exon."NR; print $_,my_exon}' ~/results/RNA-Seq/Placentome/Cuffcompare/CTL/CTL.GRCh38.82.cuffcompare.CSMD1.XLOC_069068.gtf > ~/results/RNA-Seq/Placentome/Cuffcompare/CTL/CTL.GRCh38.82.cuffcompare.CSMD1.XLOC_069068.exon_id.gtf
+[ssg29@login-sand4 Pipelines]$ featureCounts -g exon_id -s 2 -f -a ~/results/RNA-Seq/Placentome/Cuffcompare/CTL/CTL.GRCh38.82.cuffcompare.CSMD1.XLOC_069068.exon_id.gtf -o ~/results/SLX-9168.Homo_sapiens.SE125.v2/HTSeq/D701_D501/SLX-9168.D701_D501.featureCounts.unmap.rescued.CSMD1.XLOC_069068.exon_id.txt.v2 ~/results/SLX-9168.Homo_sapiens.SE125.v2/TopHat/D701_D501/merged_accepted_hits.bam
+
+SLX=SLX-9168
+GTF=~/results/RNA-Seq/Placentome/Cuffcompare/CTL/CTL.GRCh38.82.cuffcompare.CSMD1.XLOC_069068.exon_id.gtf
+BARCODE=$(for i in `ls /home/ssg29/scratch/data/fastq/$SLX/$SLX*.fq.gz | grep -v lost`; do echo $i | cut -d'/' -f8 | cut -d'.' -f2 ; done | uniq)
+SUBREAD_DIR=~/results/$SLX.Homo_sapiens.SE125.v2/subRead
+mkdir $SUBREAD_DIR
+
+for i in $BARCODE; do echo $i; mkdir $SUBREAD_DIR/$i; time featureCounts -g exon_id -s 2 -f -a $GTF -o $SUBREAD_DIR/$i/$SLX.$i.featureCounts.GRCh38.82.CSMD1.XLOC_069068.exon_id.txt ~/results/$SLX.Homo_sapiens.SE125.v2/TopHat/$i/merged_accepted_hits.bam; done
+
+
+##
+## SALMON
+#
+*ENSG00000141639 
+ref: 0 
+novel_10: 0 
+known_novel_10: 141
+
+> dt.frag.class[fpkm.iqr>=minFpkm & evi.ratio>=0.1 & class %in% c("Novel","Known") & hgnc_symbol=="MAPK4"]
+1:          = TCONS_00167817 XLOC_036674       MAPK4       ENST00000400384
+2:          j TCONS_00169923 XLOC_036674       MAPK4       ENST00000400384
+
+
+
+[ssg29@login-sand4 Pipelines]$ grep TCONS_00167817  ~/results/SLX-11369.Homo_sapiens.v1/Salmon/GRCh38.82.known.novel.10/NoIndex/quant.sf
+TCONS_00167817  4770    4643.72 0.23546 141.049
+[ssg29@login-sand4 Pipelines]$ grep TCONS_00169923  ~/results/SLX-11369.Homo_sapiens.v1/Salmon/GRCh38.82.known.novel.10/NoIndex/quant.sf
+TCONS_00169923  4985    4858.72 0       0
+
+[ssg29@login-sand4 Pipelines]$ grep TCONS_00167817  ~/results/SLX-11369.Homo_sapiens.v1/Salmon/GRCh38.82.novel.10/NoIndex/quant.sf
+[ssg29@login-sand4 Pipelines]$ grep TCONS_00169923  ~/results/SLX-11369.Homo_sapiens.v1/Salmon/GRCh38.82.novel.10/NoIndex/quant.sf
+TCONS_00169923  4985    4863.02 0       0
+
+
+[ssg29@login-sand4 Pipelines]$ zcat /home/ssg29/data/genome/Homo_sapiens/Ensembl/GRCh38/Sequence/cDNAFasta/Homo_sapiens.GRCh38.82.cdna.all.ncrna.fa.gz | awk 'BEGIN{RS=">";OFS="\t"}/ENST00000400384/{gsub("\n","",$0); print ">"$0}'
+>ENST00000400384 ensembl_havana_transcript:known chromosome:GRCh38:18:50560078:50731824:1 gene:ENSG00000141639 gene_biotype:protein_coding transcript_biotype:protein_codingGCGGGAGCCGGAGCCCGAGCTGGAGCAGCGAGCCGGGCTGTCGGGGCGACCGCGGGAGCTCGCCGTGCGCCGTGGCTGGGACCGGCCTGGCCGAGCGCGCCGGCGCCGCGGCCGCAGACAAAGGGCGGCTCGCGCCCGGGCCGCCACGCTCTCGGGCTCTGCCTCGGGAAGGAGACTTGGTCTGAAAGATGCCACATTCCTGCAGCCTCTCTTGGTGCAGTGGAATACAGTCTTGGGCGAGGTGGCGTGGATGAGCTGGTGAAAGAGGATGCTGCCCACATCCAAAGGCTCCAGAGGATCCTGGCCTGGCAGCTGAGCTCCCCTGCATTTGGAACCTCAGGCGTAACTTGGTGTAGAGCTCATGAAAGGTGCTTGTGTTTCTCCAGCTTTTTTCACCAGTGCTTACCAGACTGGCTCAGGTTTTGGAATCTAAGGTGAGCTGGTAGAAACAGGAGAGGTAGAAAGAAGCCCCTGGATGCCTCCAGAATTCATTGATGGGATCCCTGCATACTGCTTGGAACACAGAAAGAGGCTGTGACACAGCTGAGCTTTGGAGCATCTTAAGGAGCTCAGCTCAGCAAACAACTCTTGCATTTCAGCCAGAAAGAGCCTCTTGTAACAAAGTATTCAAAGGGGAGAGTTTCTGCATCTTTTACTTTGCAGTCCACTATGGTAGAAAACTTGACATTCCATAGATAATGATACTGGGTTTTCTTTCCAAGATGCCAGCTTTAAAAGAAATATGAGCCATTCTAAGCTTTAAGAAGGGTTCAGGAAACACAGGAATTAGTAGACAGCCCTCCCAATGCAGGTTAAGACGACAGCCTGCGCCCCCAACTAGCACAGCTCAGCGAGCATGACCATATGCCATTCTCGTCTCCAGAGAGCTGGTGGCAGTGACCTCACTAGGAGAAAACACATCCCTCAGCCGTGGGACTTGACAGAATGAGGTGCGCGAGGGAGGCCGCTAGCCGAGACTTGGCCTTTCCTGACTGCCCCTGTGTTACCTGGGCAGCTCCAGATCACTGAGCCCACAATGGCTGAGAAGGGTGACTGCATCGCCAGTGTCTATGGGTATGACCTCGGTGGGCGCTTTGTTGACTTCCAACCCCTGGGCTTCGGTGTCAATGGTTTGGTGCTGTCGGCCGTGGACAGCCGGGCCTGCCGGAAGGTCGCTGTGAAGAAGATTGCCCTGAGCGATGCCCGCAGCATGAAGCACGCGCTCCGAGAGATCAAGATCATTCGGCGCCTGGACCACGACAACATCGTCAAAGTGTACGAGGTGCTCGGTCCCAAGGGCACTGACCTGCAGGGTGAGCTGTTCAAGTTCAGCGTGGCGTACATCGTCCAGGAGTACATGGAGACCGACCTGGCACGCCTGCTGGAGCAGGGCACGCTGGCAGAAGAGCATGCCAAGCTGTTCATGTACCAGCTGCTCCGCGGGCTCAAGTACATCCACTCCGCCAACGTGCTGCACAGGGACCTGAAGCCCGCCAACATCTTCATCAGCACAGAGGACCTCGTGCTCAAGATTGGGGATTTCGGGTTGGCAAGGATCGTTGATCAGCATTACTCCCACAAGGGTTATCTGTCAGAAGGGTTGGTAACAAAGTGGTACCGTTCCCCACGACTGCTCCTTTCCCCCAATAACTACACCAAAGCCATCGACATGTGGGCCGCCGGCTGCATCCTGGCTGAGATGCTTACGGGGAGAATGCTCTTTGCTGGGGCCCATGAGCTGGAGCAGATGCAACTCATCCTGGAGACCATCCCTGTAATCCGGGAGGAAGACAAGGACGAGCTGCTCAGGGTGATGCCTTCCTTTGTCAGCAGCACCTGGGAGGTGAAGAGGCCTCTGCGCAAGCTGCTCCCTGAAGTGAACAGTGAAGCCATCGACTTTCTGGAGAAGATCCTGACCTTTAACCCCATGGATCGCCTAACAGCTGAGATGGGGCTGCAACACCCCTACATGAGCCCATACTCGTGCCCTGAGGACGAGCCCACCTCACAACACCCCTTCCGCATTGAGGATGAGATCGACGACATCGTGCTGATGGCCGCTAACCAGAGCCAGCTGTCCAACTGGGACACGTGCAGTTCCAGGTACCCTGTGAGCCTGTCGTCGGACCTGGAGTGGCGGCCTGACCGGTGCCAGGACGCCAGCGAGGTACAGCGCGACCCGCGCGCGGGTTCGGCGCCACTGGCTGAGGACGTGCAGGTGGACCCGCGCAAGGACTCGCACAGCAGCTCCGAGCGCTTCCTAGAGCAGTCGCACTCGTCCATGGAGCGCGCCTTCGAGGCCGACTACGGGCGCTCCTGCGACTACAAGGTGGGGTCGCCGTCCTACCTGGACAAGCTGCTGTGGCGCGACAACAAGCCGCACCACTACTCGGAGCCCAAGCTCATCCTGGACCTGTCGCACTGGAAGCAGGCGGCCGGCGCGCCCCCCACGGCCACGGGGCTGGCGGACACGGGGGCGCGCGAGGACGAGCCGGCCAGCCTCTTCCTGGAGATCGCGCAGTGGGTCAAGAGCACGCAGGGCGGCCCAGAGCACGCCAGCCCGCCCGCCGACGACCCCGAGCGCCGCTTGTCTGCCTCGCCCCCCGGCCGCCCGGCCCCGGTGGACGGCGGCGCCAGCCCCCAGTTCGACCTGGACGTGTTCATCTCCCGCGCCCTGAAGCTCTGCACCAAGCCCGAGGACCTGCCGGACAATAAACTGGGCGACCTCAATGGTGCGTGCATCCCCGAGCACCCTGGCGACCTCGTGCAGACCGAGGCCTTCTCCAAAGAAAGGTGGTGAGGGCGGAGGGGCCGCTCCAGGCCCCACAGAGCAGGAGACCCCCAGAGAAAGCCGGGGCTGGCAGGAGGCGGCCGCCCTTCCCGCCCCTCTCTGCTGCCTTGGGGTTGGCAGAACACGTGAAGGATCCGAGGAGCGAGAGGAATGTCCATTTCTTAAACTGCCTTAATAACTAGCCTTTAACCTGTGGGAGCGGGTTTGAACAGGACCCTGGCTTAGGGGTTGATCACTTTCCTAGCAAAGGGGAGACCACATGTGGTGCACAGGGAAGAAACGGCTTTAGACAGCAGTCTGCGGGCCCCACCTGGGTGGCAGGATGCCGAGAAATCTTGCAGAGGTAGCTCCGAAACCATCTGGCCCAACTAGCCTCAACTGACAGCTGAGGAAAGGCAATTAGGCCCAGAGAGGCAGAGACACTCGCTTAAGATCACAGGCTTAGTGTGAGGACGAGCTTGAAATCCCAGTCTCCTGGCCCCCAGGCCAGGGTCTGTCCACCATAGAATGTCTTCCTCTACTGGGGTCGTTCTGGCTTTTTGTTAGAAACTTGGTCTGAGATGTTTCTTCCCTGTCCATTACCATTCGATGTTCTTTTATTCAGAGCAATGTTTCTTGTATTCTGAAACTGGAAACTGAACCAGTTTGTTTCTCCTAGTCACCAAGCATACTTTCCTGGCTCCCCAAGTACTTAAATGTTCTCATCTGTCGCACCCCTGTATTTGCCTCACCCCTGCATGGTCGGAAATCTTCGTTTCAGGTCAGAACAGCCTGGGGTCTGTGGGTAAAATCAGCCCTTCTCCCAGGCCTGTGCACACACCCCCTCAGCACTCCCTATGCACTTTCCTGACACGCAAAGACACAGCCCTCTTTCCCCACTGGGCGTCCTACCCCAGTGAGGTTGAAGGCACCAATTCCAAGAATCCCTCCAACCTCCCTGCCAGCACTCCCCCTTCACCCCACACCCGGCCCCCCCACCTAACCACAGCGCCTCTCCAGACCTACCTCGGGACCTAATGTTCTCTACATGAACTGCTCATTTGGAGGACAGCAGTGAGGTCCTGCCATAGAGCAAATGTGTTAGGAGAGAAGGTTTCACATGGGACCCAACATCCTTCATCAATACTTTCCTGAGTTTGATCATCCATTTAGCCTTGACAAACAGCAGACCCTACAGAGATGTGTTGGAGAGCACGTCGTGACCTTGGGGGCAAGGAATCCAGAAAGGTAGGAAGATATGAAAAGAGAGGTGTCAACAGCAAGGGCTCTTAGGGGTCAGGCACCAGCATGGAGACCTCATGACAAAGGAAGGGACTCAAAGCAGCAATGCCCCTCATAGTGTAGGCTAAGGTGAGTTTGGTGCATGCAAACCTGTGTGCTCACCCACAGAGCATGGGGTAATGGTGTGTAGACACAGGCCCTCTGCAGAAGCGTGGGGTGGGGACACTGACAGCCCCTATCTGGTCCCCAGGAACATTCTACCATTTCTGCCACTGGTGTTCAGCTCCTTCTCTTCCCCCAACACTCCCAAAGATACCCACAGGAAGTCCAGCCAGTTTCCAGGTAGAGGATTCCACCAGTTGGTCTTGGGCTGCGTTCACCCTCACATCACAGCACCTTAAATCTAATCAGCAAACTATAATTTGTACGTTGAAACCTGCAACACATTAGAAACTTATATTTAAAAACAGAATTAATCACACTGACCAACTTTTAAATGGAAAATATGTAAATAGGAAGTGTTTGGGTTTTGTTTTTTCTTTAAGAAAAAGAAATGTACACCACTCCTCATGTGCCATTTTGTCCTCAGAGGGCGGCTTTACTTTTTTGGTAAAGGAACAAGCTGCTGGCCTTGACCAGGAGTTCATATATAACTGTTATTACAGAGGAATTGTTATAACTACTAATGTTTTTAAAAAATTTATTAAACATTATTAAACTTGATCAGGTCAGGCCAAATAAAGTTTTATTGGAACACA
+
+>TCONS_00167817 gene=MAPK4
+
+
+>ENST00000400384 
+GCGGGAGCCGGAGCCCGAGCTGGAGCAGCGAGCCGGGCTGTCGGGGCGACCGCGGGAGCTCGCCGTGCGCCGTGGCTGGGACCGGCCTGGCCGAGCGCGCCGGCGCCGCGGCCGCAGACAAAGGGCGGCTCGCGCCCGGGCCGCCACGCTCTCGGGCTCTGCCTCGGGAAGGAGACTTGGTCTGAAAGATGCCACATTCCTGCAGCCTCTCTTGGTGCAGTGGAATACAGTCTTGGGCGAGGTGGCGTGGATGAGCTGGTGAAAGAGGATGCTGCCCACATCCAAAGGCTCCAGAGGATCCTGGCCTGGCAGCTGAGCTCCCCTGCATTTGGAACCTCAGGCGTAACTTGGTGTAGAGCTCATGAAAGGTGCTTGTGTTTCTCCAGCTTTTTTCACCAGTGCTTACCAGACTGGCTCAGGTTTTGGAATCTAAGGTGAGCTGGTAGAAACAGGAGAGGTAGAAAGAAGCCCCTGGATGCCTCCAGAATTCATTGATGGGATCCCTGCATACTGCTTGGAACACAGAAAGAGGCTGTGACACAGCTGAGCTTTGGAGCATCTTAAGGAGCTCAGCTCAGCAAACAACTCTTGCATTTCAGCCAGAAAGAGCCTCTTGTAACAAAGTATTCAAAGGGGAGAGTTTCTGCATCTTTTACTTTGCAGTCCACTATGGTAGAAAACTTGACATTCCATAGATAATGATACTGGGTTTTCTTTCCAAGATGCCAGCTTTAAAAGAAATATGAGCCATTCTAAGCTTTAAGAAGGGTTCAGGAAACACAGGAATTAGTAGACAGCCCTCCCAATGCAGGTTAAGACGACAGCCTGCGCCCCCAACTAGCACAGCTCAGCGAGCATGACCATATGCCATTCTCGTCTCCAGAGAGCTGGTGGCAGTGACCTCACTAGGAGAAAACACATCCCTCAGCCGTGGGACTTGACAGAATGAGGTGCGCGAGGGAGGCCGCTAGCCGAGACTTGGCCTTTCCTGACTGCCCCTGTGTTACCTGGGCAGCTCCAGATCACTGAGCCCACAATGGCTGAGAAGGGTGACTGCATCGCCAGTGTCTATGGGTATGACCTCGGTGGGCGCTTTGTTGACTTCCAACCCCTGGGCTTCGGTGTCAATGGTTTGGTGCTGTCGGCCGTGGACAGCCGGGCCTGCCGGAAGGTCGCTGTGAAGAAGATTGCCCTGAGCGATGCCCGCAGCATGAAGCACGCGCTCCGAGAGATCAAGATCATTCGGCGCCTGGACCACGACAACATCGTCAAAGTGTACGAGGTGCTCGGTCCCAAGGGCACTGACCTGCAGGGTGAGCTGTTCAAGTTCAGCGTGGCGTACATCGTCCAGGAGTACATGGAGACCGACCTGGCACGCCTGCTGGAGCAGGGCACGCTGGCAGAAGAGCATGCCAAGCTGTTCATGTACCAGCTGCTCCGCGGGCTCAAGTACATCCACTCCGCCAACGTGCTGCACAGGGACCTGAAGCCCGCCAACATCTTCATCAGCACAGAGGACCTCGTGCTCAAGATTGGGGATTTCGGGTTGGCAAGGATCGTTGATCAGCATTACTCCCACAAGGGTTATCTGTCAGAAGGGTTGGTAACAAAGTGGTACCGTTCCCCACGACTGCTCCTTTCCCCCAATAACTACACCAAAGCCATCGACATGTGGGCCGCCGGCTGCATCCTGGCTGAGATGCTTACGGGGAGAATGCTCTTTGCTGGGGCCCATGAGCTGGAGCAGATGCAACTCATCCTGGAGACCATCCCTGTAATCCGGGAGGAAGACAAGGACGAGCTGCTCAGGGTGATGCCTTCCTTTGTCAGCAGCACCTGGGAGGTGAAGAGGCCTCTGCGCAAGCTGCTCCCTGAAGTGAACAGTGAAGCCATCGACTTTCTGGAGAAGATCCTGACCTTTAACCCCATGGATCGCCTAACAGCTGAGATGGGGCTGCAACACCCCTACATGAGCCCATACTCGTGCCCTGAGGACGAGCCCACCTCACAACACCCCTTCCGCATTGAGGATGAGATCGACGACATCGTGCTGATGGCCGCTAACCAGAGCCAGCTGTCCAACTGGGACACGTGCAGTTCCAGGTACCCTGTGAGCCTGTCGTCGGACCTGGAGTGGCGGCCTGACCGGTGCCAGGACGCCAGCGAGGTACAGCGCGACCCGCGCGCGGGTTCGGCGCCACTGGCTGAGGACGTGCAGGTGGACCCGCGCAAGGACTCGCACAGCAGCTCCGAGCGCTTCCTAGAGCAGTCGCACTCGTCCATGGAGCGCGCCTTCGAGGCCGACTACGGGCGCTCCTGCGACTACAAGGTGGGGTCGCCGTCCTACCTGGACAAGCTGCTGTGGCGCGACAACAAGCCGCACCACTACTCGGAGCCCAAGCTCATCCTGGACCTGTCGCACTGGAAGCAGGCGGCCGGCGCGCCCCCCACGGCCACGGGGCTGGCGGACACGGGGGCGCGCGAGGACGAGCCGGCCAGCCTCTTCCTGGAGATCGCGCAGTGGGTCAAGAGCACGCAGGGCGGCCCAGAGCACGCCAGCCCGCCCGCCGACGACCCCGAGCGCCGCTTGTCTGCCTCGCCCCCCGGCCGCCCGGCCCCGGTGGACGGCGGCGCCAGCCCCCAGTTCGACCTGGACGTGTTCATCTCCCGCGCCCTGAAGCTCTGCACCAAGCCCGAGGACCTGCCGGACAATAAACTGGGCGACCTCAATGGTGCGTGCATCCCCGAGCACCCTGGCGACCTCGTGCAGACCGAGGCCTTCTCCAAAGAAAGGTGGTGAGGGCGGAGGGGCCGCTCCAGGCCCCACAGAGCAGGAGACCCCCAGAGAAAGCCGGGGCTGGCAGGAGGCGGCCGCCCTTCCCGCCCCTCTCTGCTGCCTTGGGGTTGGCAGAACACGTGAAGGATCCGAGGAGCGAGAGGAATGTCCATTTCTTAAACTGCCTTAATAACTAGCCTTTAACCTGTGGGAGCGGGTTTGAACAGGACCCTGGCTTAGGGGTTGATCACTTTCCTAGCAAAGGGGAGACCACATGTGGTGCACAGGGAAGAAACGGCTTTAGACAGCAGTCTGCGGGCCCCACCTGGGTGGCAGGATGCCGAGAAATCTTGCAGAGGTAGCTCCGAAACCATCTGGCCCAACTAGCCTCAACTGACAGCTGAGGAAAGGCAATTAGGCCCAGAGAGGCAGAGACACTCGCTTAAGATCACAGGCTTAGTGTGAGGACGAGCTTGAAATCCCAGTCTCCTGGCCCCCAGGCCAGGGTCTGTCCACCATAGAATGTCTTCCTCTACTGGGGTCGTTCTGGCTTTTTGTTAGAAACTTGGTCTGAGATGTTTCTTCCCTGTCCATTACCATTCGATGTTCTTTTATTCAGAGCAATGTTTCTTGTATTCTGAAACTGGAAACTGAACCAGTTTGTTTCTCCTAGTCACCAAGCATACTTTCCTGGCTCCCCAAGTACTTAAATGTTCTCATCTGTCGCACCCCTGTATTTGCCTCACCCCTGCATGGTCGGAAATCTTCGTTTCAGGTCAGAACAGCCTGGGGTCTGTGGGTAAAATCAGCCCTTCTCCCAGGCCTGTGCACACACCCCCTCAGCACTCCCTATGCACTTTCCTGACACGCAAAGACACAGCCCTCTTTCCCCACTGGGCGTCCTACCCCAGTGAGGTTGAAGGCACCAATTCCAAGAATCCCTCCAACCTCCCTGCCAGCACTCCCCCTTCACCCCACACCCGGCCCCCCCACCTAACCACAGCGCCTCTCCAGACCTACCTCGGGACCTAATGTTCTCTACATGAACTGCTCATTTGGAGGACAGCAGTGAGGTCCTGCCATAGAGCAAATGTGTTAGGAGAGAAGGTTTCACATGGGACCCAACATCCTTCATCAATACTTTCCTGAGTTTGATCATCCATTTAGCCTTGACAAACAGCAGACCCTACAGAGATGTGTTGGAGAGCACGTCGTGACCTTGGGGGCAAGGAATCCAGAAAGGTAGGAAGATATGAAAAGAGAGGTGTCAACAGCAAGGGCTCTTAGGGGTCAGGCACCAGCATGGAGACCTCATGACAAAGGAAGGGACTCAAAGCAGCAATGCCCCTCATAGTGTAGGCTAAGGTGAGTTTGGTGCATGCAAACCTGTGTGCTCACCCACAGAGCATGGGGTAATGGTGTGTAGACACAGGCCCTCTGCAGAAGCGTGGGGTGGGGACACTGACAGCCCCTATCTGGTCCCCAGGAACATTCTACCATTTCTGCCACTGGTGTTCAGCTCCTTCTCTTCCCCCAACACTCCCAAAGATACCCACAGGAAGTCCAGCCAGTTTCCAGGTAGAGGATTCCACCAGTTGGTCTTGGGCTGCGTTCACCCTCACATCACAGCACCTTAAATCTAATCAGCAAACTATAATTTGTACGTTGAAACCTGCAACACATTAGAAACTTATATTTAAAAACAGAATTAATCACACTGACCAACTTTTAAATGGAAAATATGTAAATAGGAAGTGTTTGGGTTTTGTTTTTTCTTTAAGAAAAAGAAATGTACACCACTCCTCATGTGCCATTTTGTCCTCAGAGGGCGGCTTTACTTTTTTGGTAAAGGAACAAGCTGCTGGCCTTGACCAGGAGTTCATATATAACTGTTATTACAGAGGAATTGTTATAACTACTAATGTTTTTAAAAAATTTATTAAACATTATTAAACTTGATCAGGTCAGGCCAAATAAAGTTTTATTGGAACACA
+>TCONS_00167817 
+GCGGGAGCCGGAGCCCGAGCTGGAGCAGCGAGCCGGGCTGTCGGGGCGACCGCGGGAGCTCGCCGTGCGCCGTGGCTGGGACCGGCCTGGCCGAGCGCGCCGGCGCCGCGGCCGCAGACAAAGGGCGGCTCGCGCCCGGGCCGCCACGCTCTCGGGCTCTGCCTCGGGAAGGAGACTTGGTCTGAAAGATGCCACATTCCTGCAGCCTCTCTTGGTGCAGTGGAATACAGTCTTGGGCGAGGTGGCGTGGATGAGCTGGTGAAAGAGGATGCTGCCCACATCCAAAGGCTCCAGAGGATCCTGGCCTGGCAGCTGAGCTCCCCTGCATTTGGAACCTCAGGCGTAACTTGGTGTAGAGCTCATGAAAGGTGCTTGTGTTTCTCCAGCTTTTTTCACCAGTGCTTACCAGACTGGCTCAGGTTTTGGAATCTAAGGTGAGCTGGTAGAAACAGGAGAGGTAGAAAGAAGCCCCTGGATGCCTCCAGAATTCATTGATGGGATCCCTGCATACTGCTTGGAACACAGAAAGAGGCTGTGACACAGCTGAGCTTTGGAGCATCTTAAGGAGCTCAGCTCAGCAAACAACTCTTGCATTTCAGCCAGAAAGAGCCTCTTGTAACAAAGTATTCAAAGGGGAGAGTTTCTGCATCTTTTACTTTGCAGTCCACTATGGTAGAAAACTTGACATTCCATAGATAATGATACTGGGTTTTCTTTCCAAGATGCCAGCTTTAAAAGAAATATGAGCCATTCTAAGCTTTAAGAAGGGTTCAGGAAACACAGGAATTAGTAGACAGCCCTCCCAATGCAGGTTAAGACGACAGCCTGCGCCCCCAACTAGCACAGCTCAGCGAGCATGACCATATGCCATTCTCGTCTCCAGAGAGCTGGTGGCAGTGACCTCACTAGGAGAAAACACATCCCTCAGCCGTGGGACTTGACAGAATGAGGTGCGCGAGGGAGGCCGCTAGCCGAGACTTGGCCTTTCCTGACTGCCCCTGTGTTACCTGGGCAGCTCCAGATCACTGAGCCCACAATGGCTGAGAAGGGTGACTGCATCGCCAGTGTCTATGGGTATGACCTCGGTGGGCGCTTTGTTGACTTCCAACCCCTGGGCTTCGGTGTCAATGGTTTGGTGCTGTCGGCCGTGGACAGCCGGGCCTGCCGGAAGGTCGCTGTGAAGAAGATTGCCCTGAGCGATGCCCGCAGCATGAAGCACGCGCTCCGAGAGATCAAGATCATTCGGCGCCTGGACCACGACAACATCGTCAAAGTGTACGAGGTGCTCGGTCCCAAGGGCACTGACCTGCAGGGTGAGCTGTTCAAGTTCAGCGTGGCGTACATCGTCCAGGAGTACATGGAGACCGACCTGGCACGCCTGCTGGAGCAGGGCACGCTGGCAGAAGAGCATGCCAAGCTGTTCATGTACCAGCTGCTCCGCGGGCTCAAGTACATCCACTCCGCCAACGTGCTGCACAGGGACCTGAAGCCCGCCAACATCTTCATCAGCACAGAGGACCTCGTGCTCAAGATTGGGGATTTCGGGTTGGCAAGGATCGTTGATCAGCATTACTCCCACAAGGGTTATCTGTCAGAAGGGTTGGTAACAAAGTGGTACCGTTCCCCACGACTGCTCCTTTCCCCCAATAACTACACCAAAGCCATCGACATGTGGGCCGCCGGCTGCATCCTGGCTGAGATGCTTACGGGGAGAATGCTCTTTGCTGGGGCCCATGAGCTGGAGCAGATGCAACTCATCCTGGAGACCATCCCTGTAATCCGGGAGGAAGACAAGGACGAGCTGCTCAGGGTGATGCCTTCCTTTGTCAGCAGCACCTGGGAGGTGAAGAGGCCTCTGCGCAAGCTGCTCCCTGAAGTGAACAGTGAAGCCATCGACTTTCTGGAGAAGATCCTGACCTTTAACCCCATGGATCGCCTAACAGCTGAGATGGGGCTGCAACACCCCTACATGAGCCCATACTCGTGCCCTGAGGACGAGCCCACCTCACAACACCCCTTCCGCATTGAGGATGAGATCGACGACATCGTGCTGATGGCCGCTAACCAGAGCCAGCTGTCCAACTGGGACACGTGCAGTTCCAGGTACCCTGTGAGCCTGTCGTCGGACCTGGAGTGGCGGCCTGACCGGTGCCAGGACGCCAGCGAGGTACAGCGCGACCCGCGCGCGGGTTCGGCGCCACTGGCTGAGGACGTGCAGGTGGACCCGCGCAAGGACTCGCACAGCAGCTCCGAGCGCTTCCTAGAGCAGTCGCACTCGTCCATGGAGCGCGCCTTCGAGGCCGACTACGGGCGCTCCTGCGACTACAAGGTGGGGTCGCCGTCCTACCTGGACAAGCTGCTGTGGCGCGACAACAAGCCGCACCACTACTCGGAGCCCAAGCTCATCCTGGACCTGTCGCACTGGAAGCAGGCGGCCGGCGCGCCCCCCACGGCCACGGGGCTGGCGGACACGGGGGCGCGCGAGGACGAGCCGGCCAGCCTCTTCCTGGAGATCGCGCAGTGGGTCAAGAGCACGCAGGGCGGCCCAGAGCACGCCAGCCCGCCCGCCGACGACCCCGAGCGCCGCTTGTCTGCCTCGCCCCCCGGCCGCCCGGCCCCGGTGGACGGCGGCGCCAGCCCCCAGTTCGACCTGGACGTGTTCATCTCCCGCGCCCTGAAGCTCTGCACCAAGCCCGAGGACCTGCCGGACAATAAACTGGGCGACCTCAATGGTGCGTGCATCCCCGAGCACCCTGGCGACCTCGTGCAGACCGAGGCCTTCTCCAAAGAAAGGTGGTGAGGGCGGAGGGGCCGCTCCAGGCCCCACAGAGCAGGAGACCCCCAGAGAAAGCCGGGGCTGGCAGGAGGCGGCCGCCCTTCCCGCCCCTCTCTGCTGCCTTGGGGTTGGCAGAACACGTGAAGGATCCGAGGAGCGAGAGGAATGTCCATTTCTTAAACTGCCTTAATAACTAGCCTTTAACCTGTGGGAGCGGGTTTGAACAGGACCCTGGCTTAGGGGTTGATCACTTTCCTAGCAAAGGGGAGACCACATGTGGTGCACAGGGAAGAAACGGCTTTAGACAGCAGTCTGCGGGCCCCACCTGGGTGGCAGGATGCCGAGAAATCTTGCAGAGGTAGCTCCGAAACCATCTGGCCCAACTAGCCTCAACTGACAGCTGAGGAAAGGCAATTAGGCCCAGAGAGGCAGAGACACTCGCTTAAGATCACAGGCTTAGTGTGAGGACGAGCTTGAAATCCCAGTCTCCTGGCCCCCAGGCCAGGGTCTGTCCACCATAGAATGTCTTCCTCTACTGGGGTCGTTCTGGCTTTTTGTTAGAAACTTGGTCTGAGATGTTTCTTCCCTGTCCATTACCATTCGATGTTCTTTTATTCAGAGCAATGTTTCTTGTATTCTGAAACTGGAAACTGAACCAGTTTGTTTCTCCTAGTCACCAAGCATACTTTCCTGGCTCCCCAAGTACTTAAATGTTCTCATCTGTCGCACCCCTGTATTTGCCTCACCCCTGCATGGTCGGAAATCTTCGTTTCAGGTCAGAACAGCCTGGGGTCTGTGGGTAAAATCAGCCCTTCTCCCAGGCCTGTGCACACACCCCCTCAGCACTCCCTATGCACTTTCCTGACACGCAAAGACACAGCCCTCTTTCCCCACTGGGCGTCCTACCCCAGTGAGGTTGAAGGCACCAATTCCAAGAATCCCTCCAACCTCCCTGCCAGCACTCCCCCTTCACCCCACACCCGGCCCCCCCACCTAACCACAGCGCCTCTCCAGACCTACCTCGGGACCTAATGTTCTCTACATGAACTGCTCATTTGGAGGACAGCAGTGAGGTCCTGCCATAGAGCAAATGTGTTAGGAGAGAAGGTTTCACATGGGACCCAACATCCTTCATCAATACTTTCCTGAGTTTGATCATCCATTTAGCCTTGACAAACAGCAGACCCTACAGAGATGTGTTGGAGAGCACGTCGTGACCTTGGGGGCAAGGAATCCAGAAAGGTAGGAAGATATGAAAAGAGAGGTGTCAACAGCAAGGGCTCTTAGGGGTCAGGCACCAGCATGGAGACCTCATGACAAAGGAAGGGACTCAAAGCAGCAATGCCCCTCATAGTGTAGGCTAAGGTGAGTTTGGTGCATGCAAACCTGTGTGCTCACCCACAGAGCATGGGGTAATGGTGTGTAGACACAGGCCCTCTGCAGAAGCGTGGGGTGGGGACACTGACAGCCCCTATCTGGTCCCCAGGAACATTCTACCATTTCTGCCACTGGTGTTCAGCTCCTTCTCTTCCCCCAACACTCCCAAAGATACCCACAGGAAGTCCAGCCAGTTTCCAGGTAGAGGATTCCACCAGTTGGTCTTGGGCTGCGTTCACCCTCACATCACAGCACCTTAAATCTAATCAGCAAACTATAATTTGTACGTTGAAACCTGCAACACATTAGAAACTTATATTTAAAAACAGAATTAATCACACTGACCAACTTTTAAATGGAAAATATGTAAATAGGAAGTGTTTGGGTTTTGTTTTTTCTTTAAGAAAAAGAAATGTACACCACTCCTCATGTGCCATTTTGTCCTCAGAGGGCGGCTTTACTTTTTTGGTAAAGGAACAAGCTGCTGGCCTTGACCAGGAGTTCATATATAACTGTTATTACAGAGGAATTGTTATAACTACTAATGTTTTTAAAAAATTTATTAAACATTATTAAACTTGATCAGGTCAGGCCAAATAAAGTTTTATTGGAACACA
+
+##
+##
+## SALMON
+#
+# RPT
+sg29@login-sand3 Pipelines]$ grep TCONS_00100428  ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82.known.novel.10/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.known.novel.10.tcons.clean.txt
+TCONS_00100428  256526
+[ssg29@login-sand3 Pipelines]$ grep TCONS_00100431  ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82.known.novel.10/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.known.novel.10.tcons.clean.txt
+TCONS_00100431  0
+[ssg29@login-sand3 Pipelines]$ grep TCONS_00102836  ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82.known.novel.10/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.known.novel.10.tcons.clean.txt
+TCONS_00102836  0
+[ssg29@login-sand3 Pipelines]$ grep TCONS_00103461   ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82.known.novel.10/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.known.novel.10.tcons.clean.txt
+TCONS_00103461  0
+[ssg29@login-sand3 Pipelines]$ grep GMFB    ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82.known.novel.10/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.known.novel.10.hgnc.clean.txt 
+GMFB    256526
+
+
+# Ref
+[ssg29@login-sand3 Pipelines]$ grep ENSG00000197045  ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.ensg.clean.txt
+ENSG00000197045 8518
+
+[ssg29@login-sand3 Pipelines]$ grep ENST00000554908 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt
+ENST00000554908 2
+[ssg29@login-sand3 Pipelines]$ grep ENST00000358056 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt
+ENST00000358056 8514
+[ssg29@login-sand3 Pipelines]$ grep ENST00000616146 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt
+ENST00000616146 0
+[ssg29@login-sand3 Pipelines]$ grep ENST00000628554 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt
+ENST00000628554 0
+[ssg29@login-sand3 Pipelines]$ grep ENST00000554163 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt
+ENST00000554163 0
+[ssg29@login-sand3 Pipelines]$ grep ENST00000554247 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt 
+ENST00000554247 0
+[ssg29@login-sand3 Pipelines]$ grep ENST00000553333 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt 
+ENST00000553333 0
+[ssg29@login-sand3 Pipelines]$ grep ENST00000553566 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt 
+ENST00000553566 0
+[ssg29@login-sand3 Pipelines]$ grep ENST00000554682 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt 
+ENST00000554682 0
+[ssg29@login-sand3 Pipelines]$ grep ENST00000553952 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/SLX-11368.NoIndex.quant.POPS.GRCh38.82.enst.clean.txt 
+ENST00000553952 2
+[ssg29@login-sand3 Pipelines]$ grep ENSG00000197045 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/quant.genes.sf 
+ENSG00000197045 477.777 460.59  2.12362 8517.94
+[ssg29@login-sand3 Pipelines]$ grep ENST00000358056 ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82/NoIndex/quant.sf
+ENST00000358056 4301    4146.49 2.1195  8513.86
+
+[ssg29@login-sand4 Pipelines]$ grep TCONS_00168491  ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82.known.novel.10/NoIndex/quant.sf                                                  
+TCONS_00168491  1760    1606.82 0       0
+[ssg29@login-sand4 Pipelines]$ grep TCONS_00168491  ~/results/SLX-11368.Homo_sapiens.v1/Salmon/GRCh38.82.novel.10/NoIndex/quant.sf
+TCONS_00168491  1760    1636.38 32.9919 4321.75
+
+
+#######################
+## hetSNP within SMS ##
+#######################
+echo "SLX BarCode Chr Pos Ref Alt RefCount AltCount" > ~/Pipelines/data/ASE/SMS.HC.ASE.GRCh38.txt
+for i in `ls /scratch/obsgynae/POPS/results/SLX*/GATK/D*/SLX*tophat.HC.ASE.txt`; do a=`echo $i | cut -d/ -f9`; SLX=`echo $a| cut -d. -f1`; Barcode=`echo $a| cut -d. -f2`; awk -v S=$SLX -v B=$Barcode '$1=="X" && $2>=21940573 && $2<=21994835{print S,B,$1,$2,$4,$5,$6,$7}' $i; done >> ~/Pipelines/data/ASE/SMS.HC.ASE.GRCh38.txt
+
+###################################
+## hetSNP within a selected gene ##
+###################################
+look at 'bin/R/chrX/hetSNP.HC.ASE.R'
