@@ -1,0 +1,13 @@
+
+[2017-09-29 15:56:30] Building transcriptome files with TopHat v2.0.12
+-----------------------------------------------
+[2017-09-29 15:56:30] Checking for Bowtie
+		  Bowtie version:	 2.2.3.0
+[2017-09-29 15:56:30] Checking for Samtools
+		Samtools version:	 1.2.24.0
+[2017-09-29 15:56:30] Checking for Bowtie index files (genome)..
+[2017-09-29 15:56:30] Checking for reference FASTA file
+[2017-09-29 15:56:30] Building transcriptome data files /home/ssg29/data/tophat/transcriptome_index/PhiX/RTA/RTA
+[2017-09-29 15:56:30] Building Bowtie index from RTA.fa
+-----------------------------------------------
+[2017-09-29 15:56:31] Transcriptome files prepared. This was the only task requested.
