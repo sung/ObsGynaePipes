@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="hg19" hasGeneTrack="true" hasSequenceTrack="true" locus="chr10:126138345-126138453" version="8">
+    <Resources>
+        <Resource path="/home/ssg29/results/SLX-8773.Homo_sapiens.v1/Bismark/Alignment/FLD0002/SLX-8773.FLD0002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam"/>
+        <Resource path="/home/ssg29/results/SLX-8773.Homo_sapiens.v1/Bismark/Alignment/FLD0146/SLX-8773.FLD0146.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam"/>
+    </Resources>
+    <Panel height="5675" name="Panel1439561282728" width="2541">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;7787.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8773.Homo_sapiens.v1/Bismark/Alignment/FLD0002/SLX-8773.FLD0002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam_coverage" name="SLX-8773.FLD0002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="4083.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8773.Homo_sapiens.v1/Bismark/Alignment/FLD0002/SLX-8773.FLD0002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam" name="SLX-8773.FLD0002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam" showSpliceJunctions="false" sortable="true" visible="true">
+            <RenderOptions colorByTag="" colorOption="BISULFITE" flagUnmappedPairs="false" groupByTag="" maxInsertSize="1000" minInsertSize="50" shadeBasesOption="QUALITY" shadeCenters="true" showAllBases="false" sortByTag=""/>
+        </Track>
+    </Panel>
+    <Panel height="5675" name="Panel1439561616044" width="2541">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;4103.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8773.Homo_sapiens.v1/Bismark/Alignment/FLD0146/SLX-8773.FLD0146.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam_coverage" name="SLX-8773.FLD0146.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3473.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8773.Homo_sapiens.v1/Bismark/Alignment/FLD0146/SLX-8773.FLD0146.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam" name="SLX-8773.FLD0146.r_1_val_1.fq.gz_bismark_bt2_pe.q1.sorted.bam" showSpliceJunctions="false" sortable="true" visible="true">
+            <RenderOptions colorByTag="" colorOption="BISULFITE" flagUnmappedPairs="false" groupByTag="" maxInsertSize="1000" minInsertSize="50" shadeBasesOption="QUALITY" shadeCenters="true" showAllBases="false" sortByTag=""/>
+        </Track>
+    </Panel>
+    <Panel height="97" name="FeaturePanel" width="2541">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;308.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="hg19_genes" name="RefSeq Genes" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="308.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.004395604395604396,0.4703296703296703,0.9252747252747253"/>
+    <HiddenAttributes>
+        <Attribute name="NAME"/>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+    </HiddenAttributes>
+</Session>

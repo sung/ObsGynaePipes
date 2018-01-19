@@ -1,0 +1,22 @@
+cellType,gene,ensg,geneDesc,Alias
+Endothelial,PECAM1,ENSG00000261371,"platelet/endothelial cell adhesion molecule 1",CD31
+Endothelial,VWF,ENSG00000110799,"von Willebrand factor",F8VWF
+Endothelial,KDR,ENSG00000128052,"kinase insert domain receptor (a type III receptor tyrosine kinase)",VEGFR2
+Trophoblast,KRT17,ENSG00000128422,"keratin 17",cytokeratin17
+Trophoblast,CSH1,ENSG00000136488,"chorionic somatomammotropin hormone 1",placental lactogen1
+Trophoblast,CSH2,ENSG00000213218,"chorionic somatomammotropin hormone 2",placental lactogen2
+Trophoblast,CGA,ENSG00000135346,"glycoprotein hormones, alpha polypeptide (chorionic gonadotropin, alpha polypeptide)",CG
+Trophoblast,CGB,ENSG00000104827,"chorionic gonadotropin, beta polypeptide (CGB3)",CG
+Trophoblast,CGB1,ENSG00000267631,"chorionic gonadotropin, beta polypeptide 1",CG
+Trophoblast,CGB2,ENSG00000104818,"chorionic gonadotropin, beta polypeptide 2",CG
+Trophoblast,CGB5,ENSG00000189052,"chorionic gonadotropin, beta polypeptide 5",CG
+Trophoblast,CGB7,ENSG00000196337,"chorionic gonadotropin, beta polypeptide 7",CG
+Trophoblast,CGB8,ENSG00000213030,"chorionic gonadotropin, beta polypeptide 8",CG
+Trophoblast,ERVW-1,ENSG00000242950,"endogenous retrovirus group W, member 1",Syncytin
+Leukocyte,PTPRC,ENSG00000081237,"protein tyrosine phosphatase, receptor type, C",CD45
+Leukocyte,CD14,ENSG00000170458,"CD14 molecule",CD14
+Leukocyte,CD68,ENSG00000129226,"CD68 molecule",CD68
+Leukocyte,CD4,ENSG00000010610,"CD4 molecule",CD4
+Leukocyte,CD8A,ENSG00000153563,"CD8a molecule",CD8
+Leukocyte,CD8B,ENSG00000172116,"CD8b molecule",CD8
+Fibroblast,VIM,ENSG00000026025,"vimentin",vimetin

@@ -1,0 +1,17 @@
+BedFile,Barcode,SampleId,SampleName,Pair,Condition,SetNo,FetalSex,Region
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL03,66,AGA80F,Pair80,AGA,Set1,F,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL46,68,SGA80F,Pair80,SGA,Set1,F,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL01,75,AGA82M,Pair82,AGA,Set1,M,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL33,77,SGA82M,Pair82,SGA,Set1,M,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL96/SLX-10409.HAL96.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL96,89,AGA14M,Pair14,AGA,Set2,M,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL47/SLX-10409.HAL47.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL47,90,SGA14M,Pair14,SGA,Set2,M,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL82/SLX-10409.HAL82.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL82,93,AGA16F,Pair16,AGA,Set2,F,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL95/SLX-10409.HAL95.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL95,94,SGA16F,Pair16,SGA,Set2,F,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL26/SLX-10409.HAL26.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL26,99,AGA19M,Pair19,AGA,Set2,M,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL48/SLX-10409.HAL48.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL48,100,SGA19M,Pair19,SGA,Set2,M,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL02/SLX-10409.HAL02.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL02,101,AGA20M,Pair20,AGA,Set2,M,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL94/SLX-10409.HAL94.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL94,102,SGA20M,Pair20,SGA,Set2,M,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL40/SLX-10409.HAL40.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL40,103,AGA21F,Pair21,AGA,Set2,F,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL49/SLX-10409.HAL49.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL49,104,SGA21F,Pair21,SGA,Set2,F,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL71/SLX-10409.HAL71.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL71,105,AGA22F,Pair22,AGA,Set2,F,VIPR2
+/home/ssg29/results/SLX-10409.Homo_sapiens.v1/BisSNP/HAL93/SLX-10409.HAL93.cpg.filtered.CG.VIPR2.DMR.5kb.bed,HAL93,106,SGA22F,Pair22,SGA,Set2,F,VIPR2

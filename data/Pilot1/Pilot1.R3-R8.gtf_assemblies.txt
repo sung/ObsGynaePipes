@@ -1,0 +1,6 @@
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/Cufflink/R3/transcripts.gtf
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/Cufflink/R4/transcripts.gtf
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/Cufflink/R5/transcripts.gtf
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/Cufflink/R6/transcripts.gtf
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/Cufflink/R7/transcripts.gtf
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/Cufflink/R8/transcripts.gtf

@@ -1,0 +1,15 @@
+########################################
+# MJ Fludigm Amplicon bed file format ##
+########################################
+awk 'BEGIN{OFS="\t"}{print $1,$2,$3,$4,$5NR,$6,$7}' data/MJ.FLD.v1/mj.amplicon.coordinates.txt.ori > data/MJ.FLD.v1/mj.amplicon.coordinates.txt
+
+awk 'BEGIN{OFS="\t"}{print $1,$2,$3,$5NR,0,$4}' data/MJ.FLD.v1/mj.amplicon.coordinates.txt.ori > data/MJ.FLD.v1/mj.amplicon.coordinates.bed
+
+bedtools sort -i data/MJ.FLD.v1/mj.amplicon.coordinates.bed > data/MJ.FLD.v1/mj.amplicon.coordinates.sorted.bed
+
+bedtools merge -i data/MJ.FLD.v1/mj.amplicon.coordinates.sorted.bed -c 4,5,6 -o distinct,mean,distinct > data/MJ.FLD.v1/mj.amplicon.coordinates.merged.bed (then manual editing of gene names)
+
+bedtools merge -i data/MJ.FLD.v1/mj.amplicon.coordinates.sorted.bed -s -c 4,5,6 -o distinct,mean,distinct > data/MJ.FLD.v1/mj.amplicon.coordinates.merged.stranded.bed
+
+awk 'BEGIN{OFS=""}{print ">"$5,"\n","^"$6}' data/MJ.FLD.v1/mj.amplicon.coordinates.txt > data/MJ.FLD.v1/mj.amplicon.forward.fasta
+awk 'BEGIN{OFS=""}{print ">"$5,"\n","^"$7}' data/MJ.FLD.v1/mj.amplicon.coordinates.txt > data/MJ.FLD.v1/mj.amplicon.reverse.fasta

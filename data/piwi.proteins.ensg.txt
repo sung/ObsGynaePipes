@@ -1,0 +1,5 @@
+hgnc_symbol,ensembl_gene_id,description
+PIWIL1,ENSG00000125207,piwi-like RNA-mediated gene silencing 1 [Source:HGNC Symbol;Acc:9007]
+PIWIL2,ENSG00000197181,piwi-like RNA-mediated gene silencing 2 [Source:HGNC Symbol;Acc:17644]
+PIWIL3,ENSG00000184571,piwi-like RNA-mediated gene silencing 3 [Source:HGNC Symbol;Acc:18443]
+PIWIL4,ENSG00000134627,piwi-like RNA-mediated gene silencing 4 [Source:HGNC Symbol;Acc:18444]

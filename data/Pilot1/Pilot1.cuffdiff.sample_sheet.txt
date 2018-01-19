@@ -1,0 +1,9 @@
+sample_id	group_label
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/TopHat/R3/accepted_hits.bam	R3
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/TopHat/R4/accepted_hits.bam	R4
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/TopHat/R5/accepted_hits.bam	R5
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/TopHat/R6/accepted_hits.bam	R6
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/TopHat/R7/accepted_hits.bam	R7
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/TopHat/R8/accepted_hits.bam	R8
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/TopHat/R9/accepted_hits.bam	R9
+/whale-data/ssg29/RNA-Seq/Results/Pilot1_v4/TopHat/R10/accepted_hits.bam	R10

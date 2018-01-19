@@ -1,0 +1,12 @@
+########################################
+# MJ Fludigm Amplicon bed file format ##
+########################################
+[ssg29@login-sand3 Pipelines]$ awk 'BEGIN{OFS="\t"}NR!=1{if($1=="chr1") gene="SPRTN2"; else if($1=="chr10") gene="NKX1-2"; else if($1=="chr20") gene="MIR941-1"; print $1,$2,$3,gene"."NR,0,$4}' data/MJ.FLD.v2/mj.FLD.amplicons.sorted.txt  | bedtools sort -i stdin > data/MJ.FLD.v2/mj.amplicon.coordinates.sorted.bed 
+
+[ssg29@login-sand3 Pipelines]$ bedtools merge -i data/MJ.FLD.v2/mj.amplicon.coordinates.sorted.bed -c 4,5,6 -o distinct,mean,distinct > data/MJ.FLD.v2/mj.amplicon.coordinates.merged.bed #then manual editing of gene names
+
+[ssg29@login-sand3 Pipelines]$ bedtools merge -i data/MJ.FLD.v2/mj.amplicon.coordinates.sorted.bed -s -c 4,5,6 -o distinct,mean,distinct > data/MJ.FLD.v2/mj.amplicon.coordinates.merged.stranded.bed
+
+[ssg29@login-sand3 Pipelines]$ awk 'BEGIN{OFS=""}NR!=1{if($1=="chr1") gene="SPRTN2"; else if($1=="chr10") gene="NKX1-2"; else if($1=="chr20") gene="MIR941-1"; print ">"gene"."NR,"\n","^"$5}' data/MJ.FLD.v2/mj.FLD.amplicons.sorted.txt > data/MJ.FLD.v2/mj.amplicon.forward.fasta
+
+[ssg29@login-sand3 Pipelines]$ awk 'BEGIN{OFS=""}NR!=1{if($1=="chr1") gene="SPRTN2"; else if($1=="chr10") gene="NKX1-2"; else if($1=="chr20") gene="MIR941-1"; print ">"gene"."NR,"\n","^"$6}' data/MJ.FLD.v2/mj.FLD.amplicons.sorted.txt > data/MJ.FLD.v2/mj.amplicon.reverse.fasta

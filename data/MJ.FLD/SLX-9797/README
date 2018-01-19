@@ -1,0 +1,12 @@
+awk 'NR!=1{print $0}' 9797_primers.txt| sort  | awk 'BEGIN{FS="\t";OFS="\t"}{if($8=="unmethylated Control")gene="unmethylated"; else if($8=="methylated controls") gene="methylated"; else if($8=="432ParkAvenue") gene="NBEA"; else if($8=="near top50")gene="top50"; else gene=$8; print $1,$2,$3,gene"."NR,0,$4}' | bedtools sort -i stdin > mj.amplicon.coordinates.sorted.bed
+bedtools merge -i mj.amplicon.coordinates.sorted.bed -c 4,5,6 -o distinct,mean,distinct > mj.amplicon.coordinates.merged.bed
+bedtools merge -i mj.amplicon.coordinates.sorted.bed -s -c 4,5,6 -o distinct,mean,distinct > mj.amplicon.coordinates.merged.stranded.bed
+
+ln -s ../MJ.FLD.v3/mj.cs.forward.fasta ./
+ln -s ../MJ.FLD.v3/mj.cs.reverse.fasta ./
+
+cat mj.cs.forward.fasta > mj.amplicon.forward.fasta
+cat mj.cs.reverse.fasta > mj.amplicon.reverse.fasta
+
+awk 'NR!=1{print $0}' 9797_primers.txt| sort | awk 'BEGIN{FS="\t";OFS=""}{if($8=="unmethylated Control")gene="unmethylated"; else if($8=="methylated controls") gene="methylated"; else if($8=="432ParkAvenue") gene="NBEA"; else if($8=="near top50")gene="top50"; else gene=$8;  print ">"gene"."NR,"\n","^"$5}' >> mj.amplicon.forward.fasta
+awk 'NR!=1{print $0}' 9797_primers.txt| sort | awk 'BEGIN{FS="\t";OFS=""}{if($8=="unmethylated Control")gene="unmethylated"; else if($8=="methylated controls") gene="methylated"; else if($8=="432ParkAvenue") gene="NBEA"; else if($8=="near top50")gene="top50"; else gene=$8;  print ">"gene"."NR,"\n","^"$6}' >> mj.amplicon.reverse.fasta

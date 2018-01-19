@@ -1,0 +1,85 @@
+# USE THIS FOR ON-TARGET
+ ~/Pipelines/data/CSMD1/CSMD1.boy.girl.dmr.bed
+
+##############################
+## TARGET REGION BED FORMAT ##
+##############################
+1. Coverage of SureSelect target regions on the NKX1-2
+bedtools coverage -a data/MJ.SureSelect/S03770311_Regions.bed -b data/NKX1-2/NKX1-2.bed
+chr10   126135591       126138753       NKX1-2  0       -       12      2450    3162    0.7748260
+
+2. Coverage of SureSelect target regions on the top3 500bp diff.meth regions of NKX1-2
+bedtools coverage -a data/MJ.SureSelect/S03770311_Regions.bed -b data/NKX1-2/NKX1-2.top3.meth.regions.bed 
+chr10   126137500       126139000       NKX1-2  0       -       5       1261    1500    0.8406667
+
+3. SureSelect target regions covering top3 500bp diff.meth regions of NKX1-2 
+bedtools intersect -a data/MJ.SureSelect/S03770311_Regions.bed -b data/NKX1-2/NKX1-2.top3.meth.regions.bed
+chr10   126137622       126137726
+chr10   126137745       126137870
+chr10   126137890       126138116
+chr10   126138136       126138634
+chr10   126138692       126139000
+
+4. Coverage of SureSelect target regions on the top2 500bp diff.meth regions of MAB21L1 (chr13) 
+bedtools coverage -a data/MJ.SureSelect/S03770311_Regions.bed -b data/MAB21L1/MAB21L1.top2.grch37.bed
+chr13   36049500        36050000        top9    0       *       1       500     500     1.0000000
+chr13   36050000        36050500        top56   0       *       1       426     500     0.8520000
+
+5. SureSelect target regions covering top2 500bp diff.meth regions of MAB21L1 (chr13) 
+bedtools intersect -a data/MJ.SureSelect/S03770311_Regions.bed -b data/MAB21L1/MAB21L1.top2.grch37.bed 
+chr13   36049500        36050000
+chr13   36050000        36050426
+
+##########################
+## SureSelect on-target ##
+##########################
+#1-a. NKX1-2 (up 1500bp and down 500bp) only 
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/NKX1-2/NKX1-2.up.1500.down.500.bed > ${i%.bed}.NKX1-2.up.1500.down.500.bed ; done
+#2-a. MAB21L1 (chr13) top2 500bp regions (genomeTiling500bp)
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/MAB21L1/MAB21L1.top2.grch37.bed > ${i%.bed}.MAB21L1.top2.500bp.bed ; done 
+#3. chr7 DMR top2 500bp regions
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/Chr7.DMR/chr7.top2.bed > ${i%.bed}.chr7.DMR.top2.500bp.bed ; done
+#4. CSMD1 (chr8) 225kb DMR regions (based on 5k tiling)
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/CSMD1/CSMD1.boy.girl.dmr.bed > ${i%.bed}.CSMD1.DMR.225kb.bed ; done
+#4. VIPR2 (chr7) 5kb DMR regions (based on 5k tiling)
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/VIPR2/VIPR2.top5k.grch37.bed > ${i%.bed}.VIPR2.DMR.5kb.bed ; done
+#5. C1orf216 (chr1) (based on boy-girl)
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/C1orf216/C1orf216.up.1500.down.500.grch37.bed > ${i%.bed}.C1orf216.up.1500.down.500.grch37.bed ; done
+
+###########################################################
+### Concordance of CpG calls between WGBS and SureSelect ##
+###########################################################
+# NKX1-2 (chr10)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -wa -wb -s > /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -wa -wb -s > /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -wa -wb -s > /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.NKX1-2.up.1500.down.500.bed -wa -wb -s > /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+# MAB21L1 (chr13)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.MAB21L1.top2.500bp.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.MAB21L1.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.MAB21L1.top2.500bp.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.MAB21L1.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.MAB21L1.top2.500bp.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.MAB21L1.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.MAB21L1.top2.500bp.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.MAB21L1.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+# chr7.DMR (chr7)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.chr7.DMR.top2.500bp.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+# CSMD1 (chr8)
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.CG.CSMD1.DMR.225kb.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.CSMD1.DMR.225kb.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL03/SLX-10409.HAL03.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.CG.CSMD1.DMR.225kb.bed -b /home/ssg29/results/SLX-8074.SLX-8080.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.CSMD1.DMR.225kb.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL46/SLX-10409.HAL46.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.CG.CSMD1.DMR.225kb.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.CSMD1.DMR.225kb.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL01/SLX-10409.HAL01.cpg.filtered.top.concordance.with.wgbs.bed
+bedtools intersect -a /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.CG.CSMD1.DMR.225kb.bed -b /home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.CSMD1.DMR.225kb.bed -wa -wb -s >> /home/ssg29/results/SLX-10409.Homo_sapiens.v2/BisSNP/HAL33/SLX-10409.HAL33.cpg.filtered.top.concordance.with.wgbs.bed
+
+#############################
+## CSMD1 putative promoter ##
+## On-Target BED           ##
+#############################
+# WGBS
+for i in `grep bed  ~/results/RnBeads/Meta/cpg.sample.annotation.sbs.csv | cut -d, -f1`; do intersectBed -header -a $i -b ~/Pipelines/data/CSMD1/CSMD1.placenta.putative.promoter.4K.GRCh37.bed > ${i%.bed}.CSMD1.placenta.putative.promoter.4K.bed ; done
+# SureSelect
+for i in `ls ~/results/SLX-10409.Homo_sapiens.v3/BisSNP/HAL*/SLX-10409.HAL*.cpg.filtered.CG.bed`; do intersectBed -header -a $i -b ~/Pipelines/data/CSMD1/CSMD1.placenta.putative.promoter.4K.GRCh37.bed > ${i%.bed}.CSMD1.placenta.putative.promoter.4K.bed ; done
+
+
+--
+Last modified 21/Oct/2016
+Sung Gong <sung@bio.cc>

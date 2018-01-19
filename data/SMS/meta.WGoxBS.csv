@@ -1,0 +1,9 @@
+BedFile,SampleId,SampleName,Pair,Condition,RunName,FetalSex
+/scratch/obsgynae/POPS/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/A001/SLX-8074.SLX-8080.A001.cpg.filtered.CG.SMS.1kb.up.down.bed,66,AGA2F,Pair2,AGA,SLX-8074.SLX-8080,F
+/scratch/obsgynae/POPS/results/SLX-8074.SLX-8080.Homo_sapiens.v1/BisSNP/A003/SLX-8074.SLX-8080.A003.cpg.filtered.CG.SMS.1kb.up.down.bed,68,SGA2F,Pair2,SGA,SLX-8074.SLX-8080,F
+/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A005/SLX-8075.SLX-8077.SLX-8081.A005.cpg.filtered.CG.SMS.1kb.up.down.bed,72,AGA3F,Pair3,AGA,SLX-8075.SLX-8077.SLX-8081,F
+/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A007/SLX-8075.SLX-8077.SLX-8081.A007.cpg.filtered.CG.SMS.1kb.up.down.bed,74,SGA3F,Pair3,SGA,SLX-8075.SLX-8077.SLX-8081,F
+/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A002/SLX-8075.SLX-8077.SLX-8081.A002.cpg.filtered.CG.SMS.1kb.up.down.bed,75,AGA5M,Pair5,AGA,SLX-8075.SLX-8077.SLX-8081,M
+/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.cpg.filtered.CG.SMS.1kb.up.down.bed,77,SGA5M,Pair5,SGA,SLX-8075.SLX-8077.SLX-8081,M
+/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A008/SLX-8075.SLX-8077.SLX-8081.A008.cpg.filtered.CG.SMS.1kb.up.down.bed,73,AGA8M,Pair8,AGA,SLX-8075.SLX-8077.SLX-8081,M
+/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A006/SLX-8075.SLX-8077.SLX-8081.A006.cpg.filtered.CG.SMS.1kb.up.down.bed,65,SGA8M,Pair8,SGA,SLX-8075.SLX-8077.SLX-8081,M
