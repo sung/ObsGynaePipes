@@ -1,2 +1,4 @@
 logs/*.log
 bin/script/*.sh
+bin/script/machine.file*
+data/SureSelect/S03770311/S03770311_Probes.txt.gz
