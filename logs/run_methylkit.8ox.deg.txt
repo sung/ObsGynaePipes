@@ -1,0 +1,173 @@
+Loading required package: methods
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following object is masked from ‘package:stats’:
+
+    xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, as.vector, cbind, colnames,
+    do.call, duplicated, eval, evalq, Filter, Find, get, intersect,
+    is.unsorted, lapply, Map, mapply, match, mget, order, paste, pmax,
+    pmax.int, pmin, pmin.int, Position, rank, rbind, Reduce, rep.int,
+    rownames, sapply, setdiff, sort, table, tapply, union, unique,
+    unlist
+
+Loading required package: IRanges
+Loading required package: GenomeInfoDb
+          A003      A001      A007      A005      A004      A002      A006
+A003 1.0000000 0.9797399 0.9817532 0.9675994 0.9686148 0.9712785 0.9677449
+A001 0.9797399 1.0000000 0.9621178 0.9783406 0.9587529 0.9714132 0.9770668
+A007 0.9817532 0.9621178 1.0000000 0.9602585 0.9756597 0.9703646 0.9479259
+A005 0.9675994 0.9783406 0.9602585 1.0000000 0.9579804 0.9584775 0.9660507
+A004 0.9686148 0.9587529 0.9756597 0.9579804 1.0000000 0.9839640 0.9578550
+A002 0.9712785 0.9714132 0.9703646 0.9584775 0.9839640 1.0000000 0.9691290
+A006 0.9677449 0.9770668 0.9479259 0.9660507 0.9578550 0.9691290 1.0000000
+A008 0.9706333 0.9621743 0.9695520 0.9582144 0.9858720 0.9834644 0.9669823
+          A008
+A003 0.9706333
+A001 0.9621743
+A007 0.9695520
+A005 0.9582144
+A004 0.9858720
+A002 0.9834644
+A006 0.9669823
+A008 1.0000000
+KernSmooth 2.23 loaded
+Copyright M. P. Wand 1997-2009
+The "ward" method has been renamed to "ward.D"; note new "ward.D2"
+          A003      A001      A007      A005      A004      A002      A006
+A003 1.0000000 0.9637003 0.9468259 0.9396966 0.9641116 0.9559654 0.9500465
+A001 0.9637003 1.0000000 0.9588182 0.9532399 0.9687307 0.9660520 0.9569095
+A007 0.9468259 0.9588182 1.0000000 0.9376157 0.9539477 0.9470370 0.9421630
+A005 0.9396966 0.9532399 0.9376157 1.0000000 0.9553333 0.9592847 0.9374300
+A004 0.9641116 0.9687307 0.9539477 0.9553333 1.0000000 0.9624289 0.9639422
+A002 0.9559654 0.9660520 0.9470370 0.9592847 0.9624289 1.0000000 0.9443340
+A006 0.9500465 0.9569095 0.9421630 0.9374300 0.9639422 0.9443340 1.0000000
+A008 0.9694803 0.9734842 0.9576494 0.9590693 0.9789807 0.9650923 0.9574025
+          A008
+A003 0.9694803
+A001 0.9734842
+A007 0.9576494
+A005 0.9590693
+A004 0.9789807
+A002 0.9650923
+A006 0.9574025
+A008 1.0000000
+The "ward" method has been renamed to "ward.D"; note new "ward.D2"
+          A003      A001      A007      A005      A004      A002      A006
+A003 1.0000000 0.9497033 0.9440790 0.9343416 0.9459813 0.9473615 0.9328638
+A001 0.9497033 1.0000000 0.9430315 0.9428531 0.9505745 0.9548564 0.9284880
+A007 0.9440790 0.9430315 1.0000000 0.9286132 0.9370874 0.9407414 0.9274047
+A005 0.9343416 0.9428531 0.9286132 1.0000000 0.9421765 0.9480669 0.9392506
+A004 0.9459813 0.9505745 0.9370874 0.9421765 1.0000000 0.9594916 0.9412005
+A002 0.9473615 0.9548564 0.9407414 0.9480669 0.9594916 1.0000000 0.9427667
+A006 0.9328638 0.9284880 0.9274047 0.9392506 0.9412005 0.9427667 1.0000000
+A008 0.9480649 0.9555894 0.9361003 0.9438160 0.9613977 0.9544288 0.9339179
+          A008
+A003 0.9480649
+A001 0.9555894
+A007 0.9361003
+A005 0.9438160
+A004 0.9613977
+A002 0.9544288
+A006 0.9339179
+A008 1.0000000
+The "ward" method has been renamed to "ward.D"; note new "ward.D2"
+          A003      A001      A007      A005      A004      A002      A006
+A003 1.0000000 0.9568969 0.9408488 0.9402300 0.9448856 0.9417594 0.9166415
+A001 0.9568969 1.0000000 0.9446007 0.9483381 0.9483766 0.9499271 0.9284833
+A007 0.9408488 0.9446007 1.0000000 0.9288952 0.9405814 0.9404767 0.9100020
+A005 0.9402300 0.9483381 0.9288952 1.0000000 0.9451435 0.9434660 0.9106890
+A004 0.9448856 0.9483766 0.9405814 0.9451435 1.0000000 0.9546583 0.9392945
+A002 0.9417594 0.9499271 0.9404767 0.9434660 0.9546583 1.0000000 0.9359669
+A006 0.9166415 0.9284833 0.9100020 0.9106890 0.9392945 0.9359669 1.0000000
+A008 0.9395145 0.9381637 0.9236452 0.9318217 0.9488189 0.9312127 0.9187051
+          A008
+A003 0.9395145
+A001 0.9381637
+A007 0.9236452
+A005 0.9318217
+A004 0.9488189
+A002 0.9312127
+A006 0.9187051
+A008 1.0000000
+The "ward" method has been renamed to "ward.D"; note new "ward.D2"
+          A003       A001       A007       A005       A004       A002
+A003 1.0000000  0.8135105  0.8551294  0.8537484  0.8560917  0.7975440
+A001 0.8135105  1.0000000  0.9668879  0.9804460  0.9704101  0.9438283
+A007 0.8551294  0.9668879  1.0000000  0.9897538  0.9997358  0.9545177
+A005 0.8537484  0.9804460  0.9897538  1.0000000  0.9927745  0.9688639
+A004 0.8560917  0.9704101  0.9997358  0.9927745  1.0000000  0.9581496
+A002 0.7975440  0.9438283  0.9545177  0.9688639  0.9581496  1.0000000
+A006 0.2755147 -0.1333847 -0.1277102 -0.1111111 -0.1252148 -0.1384091
+A008 0.8800938  0.9454045  0.9737730  0.9747542  0.9752799  0.9639613
+           A006       A008
+A003  0.2755147  0.8800938
+A001 -0.1333847  0.9454045
+A007 -0.1277102  0.9737730
+A005 -0.1111111  0.9747542
+A004 -0.1252148  0.9752799
+A002 -0.1384091  0.9639613
+A006  1.0000000 -0.1602688
+A008 -0.1602688  1.0000000
+The "ward" method has been renamed to "ward.D"; note new "ward.D2"
+Warning messages:
+1: In .Seqinfo.mergexy(x, y) :
+  Each of the 2 combined objects has sequence levels not in the other:
+  - in 'x': chr10, chr13, chr14, chr20, chr9
+  - in 'y': chrM
+  Make sure to always combine/compare objects based on the same reference
+  genome (use suppressWarnings() to suppress this warning).
+2: In .Seqinfo.mergexy(x, y) :
+  Each of the 2 combined objects has sequence levels not in the other:
+  - in 'x': chr10, chr13, chr14, chr20, chr9
+  - in 'y': chrM
+  Make sure to always combine/compare objects based on the same reference
+  genome (use suppressWarnings() to suppress this warning).
+3: In .Seqinfo.mergexy(x, y) :
+  Each of the 2 combined objects has sequence levels not in the other:
+  - in 'x': chr10, chr13, chr14, chr20, chr9
+  - in 'y': chrM
+  Make sure to always combine/compare objects based on the same reference
+  genome (use suppressWarnings() to suppress this warning).
+4: In .Seqinfo.mergexy(x, y) :
+  Each of the 2 combined objects has sequence levels not in the other:
+  - in 'x': chrM
+  - in 'y': chr10, chr13, chr14, chr20, chr9
+  Make sure to always combine/compare objects based on the same reference
+  genome (use suppressWarnings() to suppress this warning).
+5: In .Seqinfo.mergexy(x, y) :
+  Each of the 2 combined objects has sequence levels not in the other:
+  - in 'x': chrM
+  - in 'y': chr10, chr13, chr14, chr20, chr9
+  Make sure to always combine/compare objects based on the same reference
+  genome (use suppressWarnings() to suppress this warning).
+6: In .Seqinfo.mergexy(x, y) :
+  Each of the 2 combined objects has sequence levels not in the other:
+  - in 'x': chrM
+  - in 'y': chr10, chr13, chr14, chr20, chr9
+  Make sure to always combine/compare objects based on the same reference
+  genome (use suppressWarnings() to suppress this warning).
+7: In .Seqinfo.mergexy(x, y) :
+  Each of the 2 combined objects has sequence levels not in the other:
+  - in 'x': chr10, chr13, chr14, chr20, chr9
+  - in 'y': chrM
+  Make sure to always combine/compare objects based on the same reference
+  genome (use suppressWarnings() to suppress this warning).
+8: In .Seqinfo.mergexy(x, y) :
+  Each of the 2 combined objects has sequence levels not in the other:
+  - in 'x': chrM
+  - in 'y': chr10, chr13, chr14, chr20, chr9
+  Make sure to always combine/compare objects based on the same reference
+  genome (use suppressWarnings() to suppress this warning).

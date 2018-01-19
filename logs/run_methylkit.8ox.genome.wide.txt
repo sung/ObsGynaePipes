@@ -1,0 +1,266 @@
+Loading required package: methods
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following object is masked from ‘package:stats’:
+
+    xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, as.vector, cbind, colnames,
+    do.call, duplicated, eval, evalq, Filter, Find, get, intersect,
+    is.unsorted, lapply, Map, mapply, match, mget, order, paste, pmax,
+    pmax.int, pmin, pmin.int, Position, rank, rbind, Reduce, rep.int,
+    rownames, sapply, setdiff, sort, table, tapply, union, unique,
+    unlist
+
+Loading required package: IRanges
+Loading required package: GenomeInfoDb
+[1] "counting records within filtered.myobj"
+[1] 21717901
+methylation statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00   28.57   61.54   55.36   83.33  100.00 
+percentiles:
+       0%       10%       20%       30%       40%       50%       60%       70% 
+  0.00000   0.00000  20.00000  35.71429  50.00000  61.53846  72.00000  80.00000 
+      80%       90%       95%       99%     99.5%     99.9%      100% 
+ 87.50000  93.33333 100.00000 100.00000 100.00000 100.00000 100.00000 
+
+read coverage statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  10.00   12.00   15.00   17.04   20.00   47.00 
+percentiles:
+   0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   95%   99% 99.5% 
+   10    10    12    13    14    15    17    19    22    26    30    38    41 
+99.9%  100% 
+   45    47 
+
+[1] 23189298
+methylation statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00   26.67   60.00   54.45   83.33  100.00 
+percentiles:
+       0%       10%       20%       30%       40%       50%       60%       70% 
+  0.00000   0.00000  18.18182  33.33333  47.36842  60.00000  71.42857  80.00000 
+      80%       90%       95%       99%     99.5%     99.9%      100% 
+ 87.50000  93.10345 100.00000 100.00000 100.00000 100.00000 100.00000 
+
+read coverage statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  10.00   12.00   16.00   17.31   21.00   48.00 
+percentiles:
+   0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   95%   99% 99.5% 
+   10    11    12    13    14    16    17    19    22    26    30    38    41 
+99.9%  100% 
+   46    48 
+
+[1] 23204038
+methylation statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00   30.00   61.54   56.06   83.33  100.00 
+percentiles:
+        0%        10%        20%        30%        40%        50%        60% 
+  0.000000   4.761905  22.580645  37.500000  50.000000  61.538462  71.428571 
+       70%        80%        90%        95%        99%      99.5%      99.9% 
+ 80.000000  87.500000  93.750000 100.000000 100.000000 100.000000 100.000000 
+      100% 
+100.000000 
+
+read coverage statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  10.00   12.00   15.00   16.81   20.00   46.00 
+percentiles:
+   0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   95%   99% 99.5% 
+   10    10    11    13    14    15    17    19    21    25    29    37    40 
+99.9%  100% 
+   44    46 
+
+[1] 22076727
+methylation statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00   23.08   60.00   54.23   84.62  100.00 
+percentiles:
+       0%       10%       20%       30%       40%       50%       60%       70% 
+  0.00000   0.00000  15.78947  30.76923  46.15385  60.00000  72.00000  81.25000 
+      80%       90%       95%       99%     99.5%     99.9%      100% 
+ 89.47368  95.00000 100.00000 100.00000 100.00000 100.00000 100.00000 
+
+read coverage statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  10.00   12.00   15.00   16.99   20.00   48.00 
+percentiles:
+   0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   95%   99% 99.5% 
+   10    10    12    13    14    15    17    19    22    26    30    38    41 
+99.9%  100% 
+   46    48 
+
+[1] 25333842
+methylation statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00   27.27   62.50   55.87   85.00  100.00 
+percentiles:
+       0%       10%       20%       30%       40%       50%       60%       70% 
+  0.00000   0.00000  19.23077  35.00000  50.00000  62.50000  73.33333  81.81818 
+      80%       90%       95%       99%     99.5%     99.9%      100% 
+ 89.28571  94.44444 100.00000 100.00000 100.00000 100.00000 100.00000 
+
+read coverage statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   10.0    12.0    16.0    17.6    21.0    49.0 
+percentiles:
+   0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   95%   99% 99.5% 
+   10    11    12    13    14    16    18    20    23    27    31    39    42 
+99.9%  100% 
+   47    49 
+
+[1] 27712983
+methylation statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00   27.27   62.50   55.83   84.62  100.00 
+percentiles:
+        0%        10%        20%        30%        40%        50%        60% 
+  0.000000   3.225806  20.000000  35.294118  50.000000  62.500000  72.727273 
+       70%        80%        90%        95%        99%      99.5%      99.9% 
+ 81.481481  88.888889  94.444444 100.000000 100.000000 100.000000 100.000000 
+      100% 
+100.000000 
+
+read coverage statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  10.00   13.00   17.00   18.83   23.00   54.00 
+percentiles:
+   0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   95%   99% 99.5% 
+   10    11    12    14    15    17    19    21    25    30    34    43    46 
+99.9%  100% 
+   52    54 
+
+[1] 18995847
+methylation statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00   25.00   63.64   55.98   85.71  100.00 
+percentiles:
+       0%       10%       20%       30%       40%       50%       60%       70% 
+  0.00000   0.00000  17.39130  33.33333  50.00000  63.63636  75.00000  82.35294 
+      80%       90%       95%       99%     99.5%     99.9%      100% 
+ 90.00000  95.00000 100.00000 100.00000 100.00000 100.00000 100.00000 
+
+read coverage statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   10.0    12.0    15.0    16.3    19.0    45.0 
+percentiles:
+   0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   95%   99% 99.5% 
+   10    10    11    12    13    15    16    18    21    25    28    36    39 
+99.9%  100% 
+   44    45 
+
+[1] 25384333
+methylation statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00   29.41   64.29   57.10   86.36  100.00 
+percentiles:
+        0%        10%        20%        30%        40%        50%        60% 
+  0.000000   2.325581  21.052632  36.363636  50.000000  64.285714  75.000000 
+       70%        80%        90%        95%        99%      99.5%      99.9% 
+ 83.333333  90.000000  94.736842 100.000000 100.000000 100.000000 100.000000 
+      100% 
+100.000000 
+
+read coverage statistics per base
+summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  10.00   12.00   16.00   17.66   21.00   50.00 
+percentiles:
+   0%   10%   20%   30%   40%   50%   60%   70%   80%   90%   95%   99% 99.5% 
+   10    11    12    13    14    16    18    20    23    27    31    39    42 
+99.9%  100% 
+   48    50 
+
+[1] "counting records of meth"
+          A003      A001      A007      A005      A004      A002      A006
+A003 1.0000000 0.9139546 0.9064889 0.9005554 0.9116448 0.9129738 0.8992351
+A001 0.9139546 1.0000000 0.9044579 0.9042173 0.9127063 0.9141937 0.8984927
+A007 0.9064889 0.9044579 1.0000000 0.8885209 0.9027952 0.9049959 0.8873399
+A005 0.9005554 0.9042173 0.8885209 1.0000000 0.9035506 0.9044972 0.8910896
+A004 0.9116448 0.9127063 0.9027952 0.9035506 1.0000000 0.9163669 0.9051770
+A002 0.9129738 0.9141937 0.9049959 0.9044972 0.9163669 1.0000000 0.9023977
+A006 0.8992351 0.8984927 0.8873399 0.8910896 0.9051770 0.9023977 1.0000000
+A008 0.9105319 0.9117656 0.9015070 0.9024897 0.9164342 0.9147136 0.9043591
+          A008
+A003 0.9105319
+A001 0.9117656
+A007 0.9015070
+A005 0.9024897
+A004 0.9164342
+A002 0.9147136
+A006 0.9043591
+A008 1.0000000
+          A003      A001      A007      A005      A004      A002      A006
+A003 1.0000000 0.9139546 0.9064889 0.9005554 0.9116448 0.9129738 0.8992351
+A001 0.9139546 1.0000000 0.9044579 0.9042173 0.9127063 0.9141937 0.8984927
+A007 0.9064889 0.9044579 1.0000000 0.8885209 0.9027952 0.9049959 0.8873399
+A005 0.9005554 0.9042173 0.8885209 1.0000000 0.9035506 0.9044972 0.8910896
+A004 0.9116448 0.9127063 0.9027952 0.9035506 1.0000000 0.9163669 0.9051770
+A002 0.9129738 0.9141937 0.9049959 0.9044972 0.9163669 1.0000000 0.9023977
+A006 0.8992351 0.8984927 0.8873399 0.8910896 0.9051770 0.9023977 1.0000000
+A008 0.9105319 0.9117656 0.9015070 0.9024897 0.9164342 0.9147136 0.9043591
+          A008
+A003 0.9105319
+A001 0.9117656
+A007 0.9015070
+A005 0.9024897
+A004 0.9164342
+A002 0.9147136
+A006 0.9043591
+A008 1.0000000
+KernSmooth 2.23 loaded
+Copyright M. P. Wand 1997-2009
+          A003      A001      A007      A005      A004      A002      A006
+A003 1.0000000 0.9780483 0.9750024 0.9722872 0.9758856 0.9767913 0.9680045
+A001 0.9780483 1.0000000 0.9748053 0.9745951 0.9773598 0.9782272 0.9678550
+A007 0.9750024 0.9748053 1.0000000 0.9684514 0.9732905 0.9751904 0.9633116
+A005 0.9722872 0.9745951 0.9684514 1.0000000 0.9739524 0.9739010 0.9657289
+A004 0.9758856 0.9773598 0.9732905 0.9739524 1.0000000 0.9800244 0.9715876
+A002 0.9767913 0.9782272 0.9751904 0.9739010 0.9800244 1.0000000 0.9702687
+A006 0.9680045 0.9678550 0.9633116 0.9657289 0.9715876 0.9702687 1.0000000
+A008 0.9753787 0.9768960 0.9735091 0.9734690 0.9798743 0.9796572 0.9714045
+          A008
+A003 0.9753787
+A001 0.9768960
+A007 0.9735091
+A005 0.9734690
+A004 0.9798743
+A002 0.9796572
+A006 0.9714045
+A008 1.0000000
+The "ward" method has been renamed to "ward.D"; note new "ward.D2"
+Warning messages:
+1: In eval(expr, envir, enclos) : NAs introduced by coercion
+2: In eval(expr, envir, enclos) : NAs introduced by coercion
+3: In eval(expr, envir, enclos) : NAs introduced by coercion
+4: In eval(expr, envir, enclos) : NAs introduced by coercion
+5: In eval(expr, envir, enclos) : NAs introduced by coercion

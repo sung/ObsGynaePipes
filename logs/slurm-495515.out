@@ -1,0 +1,632 @@
+/home/ssg29/lib/modules.sh: line 7: module: command not found
+/home/ssg29/lib/modules.sh: line 8: module: command not found
+/home/ssg29/lib/modules.sh: line 9: module: command not found
+/home/ssg29/lib/modules.sh: line 10: module: command not found
+/home/ssg29/lib/modules.sh: line 13: module: command not found
+/home/ssg29/lib/modules.sh: line 14: module: command not found
+/home/ssg29/lib/modules.sh: line 15: module: command not found
+/home/ssg29/lib/modules.sh: line 18: module: command not found
+/home/ssg29/lib/modules.sh: line 21: module: command not found
+Changed directory to /home/ssg29/Methyl-Seq.
+
+JobID: 495515
+======
+Time: Tue Jul  8 18:00:45 BST 2014
+Running on master node: sand-1-49
+Current directory: /home/ssg29/Methyl-Seq
+
+Nodes allocated:
+================
+sand-1-49
+
+numtasks=16, numnodes=1, mpi_tasks_per_node=16 (OMP_NUM_THREADS=1)
+
+Executing command:
+==================
+bash /home/ssg29/Methyl-Seq/bin/script/SLX-8077.v1.trim.bismark.A005.C48CWACXX.s_4.sh
+
+sand-1-49
+NO. of thread=16
+
+[32mSample=SLX-8077.A005[0m
+Max insertion size=496
+time fastqc /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz -o /home/ssg29/scratch/results/SLX-8077.v1/FastQC/A005
+Started analysis of SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 5% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 10% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 15% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 20% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 25% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 30% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 35% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 40% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 45% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 50% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 55% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 60% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 65% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 70% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 75% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 80% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 85% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 90% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Approx 95% complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Analysis complete for SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+
+real	4m12.162s
+user	2m55.576s
+sys	1m15.202s
+time fastqc /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz -o /home/ssg29/scratch/results/SLX-8077.v1/FastQC/A005
+Started analysis of SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 5% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 10% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 15% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 20% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 25% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 30% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 35% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 40% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 45% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 50% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 55% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 60% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 65% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 70% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 75% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 80% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 85% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 90% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Approx 95% complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Analysis complete for SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+
+real	4m8.209s
+user	3m1.847s
+sys	1m7.555s
+
+trim_galore /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+No quality encoding type selected. Assuming that the data provided uses Sanger encoded Phred scores (default)
+
+Writing report to '/home/ssg29/scratch/results/SLX-8077.v1/Trim/A005/SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz_trimming_report.txt'
+
+SUMMARISING RUN PARAMETERS
+==========================
+Input filename: /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Quality Phred score cutoff: 20
+Quality encoding type selected: ASCII+33
+Adapter sequence: 'AGATCGGAAGAGC'
+Maximum trimming error rate: 0.1 (default)
+Minimum required adapter overlap (stringency): 5 bp
+Minimum required sequence length for both reads before a sequence pair gets removed: 20 bp
+All sequences will be trimmed by 1 bp on their 3' end to avoid problems with invalid paired-end alignments with Bowtie 1
+Running FastQC on the data once trimming has completed
+Output file(s) will be GZIP compressed
+
+Writing final adapter and quality trimmed output to SLX-8077.A005.C48CWACXX.s_4.r_1_trimmed.fq
+
+
+  >>> Now performing quality (cutoff 20) and adapter trimming in a single pass for the adapter sequence: 'AGATCGGAAGAGC' from file /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz <<< 
+10000000 sequences processed
+20000000 sequences processed
+cutadapt version 1.4.2
+Command line parameters: -f fastq -e 0.1 -q 20 -O 5 -a AGATCGGAAGAGC /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+Maximum error rate: 10.00%
+   No. of adapters: 1
+   Processed reads:     26391656
+   Processed bases:   2639165600 bp (2639.2 Mbp)
+     Trimmed reads:      6484602 (24.6%)
+   Quality-trimmed:     45995358 bp (46.0 Mbp) (1.74% of total)
+     Trimmed bases:    194943613 bp (194.9 Mbp) (7.39% of total)
+   Too short reads:            0 (0.0% of processed reads)
+    Too long reads:            0 (0.0% of processed reads)
+        Total time:    395.91 s
+     Time per read:      0.015 ms
+
+=== Adapter 1 ===
+
+Adapter 'AGATCGGAAGAGC', length 13, was trimmed 6484602 times.
+
+No. of allowed errors:
+0-9 bp: 0; 10-13 bp: 1
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+5	155786	25773.1	0	155786
+6	161926	6443.3	0	161926
+7	149222	1610.8	0	149222
+8	155566	402.7	0	155566
+9	164612	100.7	0	163274 1338
+10	151224	25.2	1	147333 3891
+11	154199	6.3	1	150019 4180
+12	151875	1.6	1	147602 4273
+13	140536	0.4	1	136275 4261
+14	145211	0.4	1	141088 4123
+15	135932	0.4	1	131945 3987
+16	138582	0.4	1	134310 4272
+17	139189	0.4	1	135061 4128
+18	136139	0.4	1	132224 3915
+19	130015	0.4	1	126051 3964
+20	131535	0.4	1	127641 3894
+21	132706	0.4	1	128781 3925
+22	129037	0.4	1	125171 3866
+23	129383	0.4	1	125530 3853
+24	127486	0.4	1	123638 3848
+25	126240	0.4	1	122486 3754
+26	124802	0.4	1	120745 4057
+27	127988	0.4	1	124104 3884
+28	121322	0.4	1	117584 3738
+29	123290	0.4	1	119464 3826
+30	124016	0.4	1	120397 3619
+31	108826	0.4	1	105436 3390
+32	111970	0.4	1	108581 3389
+33	110509	0.4	1	107178 3331
+34	108587	0.4	1	105212 3375
+35	107301	0.4	1	104023 3278
+36	109667	0.4	1	106223 3444
+37	112921	0.4	1	109078 3843
+38	127646	0.4	1	123934 3712
+39	91971	0.4	1	89066 2905
+40	93561	0.4	1	90503 3058
+41	107165	0.4	1	103715 3450
+42	90092	0.4	1	87342 2750
+43	77902	0.4	1	75302 2600
+44	74470	0.4	1	72170 2300
+45	74175	0.4	1	71842 2333
+46	74930	0.4	1	72560 2370
+47	70296	0.4	1	67912 2384
+48	73109	0.4	1	70544 2565
+49	74958	0.4	1	72242 2716
+50	80018	0.4	1	77345 2673
+51	69490	0.4	1	66985 2505
+52	65039	0.4	1	62898 2141
+53	68268	0.4	1	66090 2178
+54	55123	0.4	1	53287 1836
+55	54092	0.4	1	52360 1732
+56	54263	0.4	1	52596 1667
+57	52384	0.4	1	50717 1667
+58	48504	0.4	1	46889 1615
+59	51013	0.4	1	49355 1658
+60	45190	0.4	1	43780 1410
+61	42431	0.4	1	41003 1428
+62	56659	0.4	1	54707 1952
+63	44574	0.4	1	42648 1926
+64	41215	0.4	1	39478 1737
+65	34868	0.4	1	33408 1460
+66	29863	0.4	1	28610 1253
+67	28204	0.4	1	26767 1437
+68	28670	0.4	1	26421 2249
+69	29588	0.4	1	26379 3209
+70	44648	0.4	1	37961 6687
+71	22285	0.4	1	19483 2802
+72	12851	0.4	1	9826 3025
+73	7007	0.4	1	5427 1580
+74	3330	0.4	1	2572 758
+75	1421	0.4	1	1086 335
+76	671	0.4	1	477 194
+77	455	0.4	1	362 93
+78	287	0.4	1	237 50
+79	161	0.4	1	133 28
+80	129	0.4	1	110 19
+81	127	0.4	1	102 25
+82	103	0.4	1	84 19
+83	150	0.4	1	113 37
+84	131	0.4	1	103 28
+85	138	0.4	1	128 10
+86	195	0.4	1	180 15
+87	449	0.4	1	414 35
+88	280	0.4	1	258 22
+89	276	0.4	1	259 17
+90	285	0.4	1	250 35
+91	280	0.4	1	247 33
+92	190	0.4	1	157 33
+93	198	0.4	1	168 30
+94	186	0.4	1	153 33
+95	154	0.4	1	95 59
+96	163	0.4	1	78 85
+97	69	0.4	1	24 45
+98	28	0.4	1	6 22
+99	65	0.4	1	12 53
+100	559	0.4	1	45 514
+
+
+RUN STATISTICS FOR INPUT FILE: /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_1.fq.gz
+=============================================
+26391656 sequences processed in total
+Sequences removed because they became shorter than the length cutoff of 20 bp:	0 (0.0%)
+
+Writing report to '/home/ssg29/scratch/results/SLX-8077.v1/Trim/A005/SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz_trimming_report.txt'
+
+SUMMARISING RUN PARAMETERS
+==========================
+Input filename: /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Quality Phred score cutoff: 20
+Quality encoding type selected: ASCII+33
+Adapter sequence: 'AGATCGGAAGAGC'
+Maximum trimming error rate: 0.1 (default)
+Minimum required adapter overlap (stringency): 5 bp
+Minimum required sequence length for both reads before a sequence pair gets removed: 20 bp
+All sequences will be trimmed by 1 bp on their 3' end to avoid problems with invalid paired-end alignments with Bowtie 1
+Running FastQC on the data once trimming has completed
+Output file(s) will be GZIP compressed
+
+Writing final adapter and quality trimmed output to SLX-8077.A005.C48CWACXX.s_4.r_2_trimmed.fq
+
+
+  >>> Now performing quality (cutoff 20) and adapter trimming in a single pass for the adapter sequence: 'AGATCGGAAGAGC' from file /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz <<< 
+10000000 sequences processed
+20000000 sequences processed
+cutadapt version 1.4.2
+Command line parameters: -f fastq -e 0.1 -q 20 -O 5 -a AGATCGGAAGAGC /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+Maximum error rate: 10.00%
+   No. of adapters: 1
+   Processed reads:     26391656
+   Processed bases:   2639165600 bp (2639.2 Mbp)
+     Trimmed reads:      6382973 (24.2%)
+   Quality-trimmed:     83339020 bp (83.3 Mbp) (3.16% of total)
+     Trimmed bases:    186670894 bp (186.7 Mbp) (7.07% of total)
+   Too short reads:            0 (0.0% of processed reads)
+    Too long reads:            0 (0.0% of processed reads)
+        Total time:    403.17 s
+     Time per read:      0.015 ms
+
+=== Adapter 1 ===
+
+Adapter 'AGATCGGAAGAGC', length 13, was trimmed 6382973 times.
+
+No. of allowed errors:
+0-9 bp: 0; 10-13 bp: 1
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+5	165538	25773.1	0	165538
+6	173852	6443.3	0	173852
+7	143785	1610.8	0	143785
+8	161154	402.7	0	161154
+9	161861	100.7	0	160798 1063
+10	155237	25.2	1	152766 2471
+11	160632	6.3	1	157135 3497
+12	166022	1.6	1	161930 4092
+13	161962	0.4	1	157534 4428
+14	161298	0.4	1	157707 3591
+15	128315	0.4	1	125053 3262
+16	143100	0.4	1	139256 3844
+17	150124	0.4	1	146708 3416
+18	123500	0.4	1	120541 2959
+19	132866	0.4	1	129909 2957
+20	119946	0.4	1	117201 2745
+21	116687	0.4	1	113661 3026
+22	128893	0.4	1	125651 3242
+23	129172	0.4	1	125851 3321
+24	126962	0.4	1	123776 3186
+25	123049	0.4	1	119857 3192
+26	128436	0.4	1	125184 3252
+27	117034	0.4	1	113706 3328
+28	129815	0.4	1	126291 3524
+29	125165	0.4	1	120815 4350
+30	170502	0.4	1	167095 3407
+31	87156	0.4	1	84675 2481
+32	103908	0.4	1	101723 2185
+33	86553	0.4	1	84534 2019
+34	91503	0.4	1	89325 2178
+35	98705	0.4	1	96460 2245
+36	100767	0.4	1	98345 2422
+37	102653	0.4	1	100247 2406
+38	103512	0.4	1	101014 2498
+39	104277	0.4	1	101793 2484
+40	103331	0.4	1	100786 2545
+41	106478	0.4	1	103878 2600
+42	106789	0.4	1	104798 1991
+43	77136	0.4	1	75249 1887
+44	83986	0.4	1	82183 1803
+45	76718	0.4	1	75312 1406
+46	60966	0.4	1	59526 1440
+47	65400	0.4	1	64009 1391
+48	63251	0.4	1	61766 1485
+49	63742	0.4	1	62283 1459
+50	72433	0.4	1	70684 1749
+51	68410	0.4	1	67109 1301
+52	52038	0.4	1	50897 1141
+53	54492	0.4	1	53195 1297
+54	52156	0.4	1	50870 1286
+55	52151	0.4	1	50914 1237
+56	49442	0.4	1	48214 1228
+57	49871	0.4	1	48586 1285
+58	47597	0.4	1	46271 1326
+59	49467	0.4	1	48128 1339
+60	46444	0.4	1	45188 1256
+61	45725	0.4	1	44438 1287
+62	59831	0.4	1	57887 1944
+63	59191	0.4	1	56911 2280
+64	71624	0.4	1	68733 2891
+65	88788	0.4	1	85910 2878
+66	48106	0.4	1	46012 2094
+67	13399	0.4	1	12995 404
+68	3999	0.4	1	3829 170
+69	1571	0.4	1	1501 70
+70	928	0.4	1	878 50
+71	648	0.4	1	590 58
+72	484	0.4	1	450 34
+73	469	0.4	1	429 40
+74	374	0.4	1	338 36
+75	301	0.4	1	274 27
+76	218	0.4	1	186 32
+77	182	0.4	1	162 20
+78	174	0.4	1	150 24
+79	122	0.4	1	104 18
+80	95	0.4	1	87 8
+81	59	0.4	1	52 7
+82	52	0.4	1	45 7
+83	40	0.4	1	29 11
+84	27	0.4	1	15 12
+85	26	0.4	1	21 5
+86	20	0.4	1	12 8
+87	8	0.4	1	6 2
+88	13	0.4	1	7 6
+89	12	0.4	1	5 7
+90	22	0.4	1	14 8
+91	22	0.4	1	12 10
+92	24	0.4	1	9 15
+93	29	0.4	1	15 14
+94	41	0.4	1	32 9
+95	35	0.4	1	21 14
+96	22	0.4	1	10 12
+97	4	0.4	1	2 2
+98	4	0.4	1	3 1
+99	4	0.4	1	0 4
+100	41	0.4	1	10 31
+
+
+RUN STATISTICS FOR INPUT FILE: /home/ssg29/scratch/data/fastq/SLX-8077.A005.C48CWACXX.s_4.r_2.fq.gz
+=============================================
+26391656 sequences processed in total
+Sequences removed because they became shorter than the length cutoff of 20 bp:	0 (0.0%)
+
+Validate paired-end files SLX-8077.A005.C48CWACXX.s_4.r_1_trimmed.fq and SLX-8077.A005.C48CWACXX.s_4.r_2_trimmed.fq
+file_1: SLX-8077.A005.C48CWACXX.s_4.r_1_trimmed.fq, file_2: SLX-8077.A005.C48CWACXX.s_4.r_2_trimmed.fq
+
+
+>>>>> Now validing the length of the 2 paired-end infiles: SLX-8077.A005.C48CWACXX.s_4.r_1_trimmed.fq and SLX-8077.A005.C48CWACXX.s_4.r_2_trimmed.fq <<<<<
+Writing validated paired-end read 1 reads to SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Writing validated paired-end read 2 reads to SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+
+Total number of sequences analysed: 26391656
+
+Number of sequence pairs removed: 203136 (0.77%)
+
+
+  >>> Now running FastQC on the validated data SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz<<<
+
+Started analysis of SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 5% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 10% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 15% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 20% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 25% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 30% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 35% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 40% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 45% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 50% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 55% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 60% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 65% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 70% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 75% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 80% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 85% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 90% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Approx 95% complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+Analysis complete for SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz
+
+  >>> Now running FastQC on the validated data SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz<<<
+
+Started analysis of SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 5% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 10% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 15% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 20% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 25% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 30% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 35% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 40% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 45% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 50% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 55% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 60% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 65% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 70% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 75% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 80% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 85% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 90% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Approx 95% complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Analysis complete for SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Deleting both intermediate output files SLX-8077.A005.C48CWACXX.s_4.r_1_trimmed.fq and SLX-8077.A005.C48CWACXX.s_4.r_2_trimmed.fq
+
+====================================================================================================
+
+
+real	33m7.617s
+user	31m50.571s
+sys	5m12.515s
+
+bismark -1 /home/ssg29/scratch/results/SLX-8077.v1/Trim/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz -2 
+Path to Bowtie 2 specified as: bowtie2
+Alignments will be written out in BAM format. Samtools found here: '/usr/local/Cluster-Apps/samtools/0.1.19/bin/samtools'
+Reference genome folder provided is /home/ssg29/scratch/UCSC/hg19b/	(absolute path is '/scratch/ssg29/UCSC/hg19b/)'
+FastQ format assumed (by default)
+Attention: using more than 4 cores per alignment thread has been reported to have diminishing returns. If possible try to limit -p to a value of 4
+Each Bowtie 2 instance is going to be run with 16 threads. Please monitor performance closely and tune down if needed!
+Library is assumed to be strand-specific (directional), alignments to strands complementary to the original top or bottom strands will be ignored (i.e. not performed!)
+Output will be written into the directory: /scratch/ssg29/results/SLX-8077.v1/Bismark/Alignment/A005/
+
+Using temp directory: /home/ssg29/scratch/results/SLX-8077.v1/scratch/A005
+Temporary files will be written into the directory: /scratch/ssg29/results/SLX-8077.v1/scratch/A005/
+
+Paired-end alignments will be performed
+=======================================
+
+The provided filenames for paired-end alignments are /home/ssg29/scratch/results/SLX-8077.v1/Trim/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz and /home/ssg29/scratch/results/SLX-8077.v1/Trim/A005/SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Input files are in FastQ format
+Writing a C -> T converted version of the input file SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz to /scratch/ssg29/results/SLX-8077.v1/scratch/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_C_to_T.fastq
+
+Created C -> T converted version of the FastQ file SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz (26188520 sequences in total)
+
+Writing a G -> A converted version of the input file SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz to /scratch/ssg29/results/SLX-8077.v1/scratch/A005/SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz_G_to_A.fastq
+
+Created G -> A converted version of the FastQ file SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz (26188520 sequences in total)
+
+Input files are SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_C_to_T.fastq and SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz_G_to_A.fastq (FastQ)
+Now running 2 instances of Bowtie 2 against the bisulfite genome of /scratch/ssg29/UCSC/hg19b/ with the specified options: -q --score-min L,0,-0.2 -p 16 --reorder --ignore-quals --no-mixed --no-discordant --maxins 496
+
+Now starting a Bowtie 2 paired-end alignment for CTread1GAread2CTgenome (reading in sequences from /scratch/ssg29/results/SLX-8077.v1/scratch/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_C_to_T.fastq and /scratch/ssg29/results/SLX-8077.v1/scratch/A005/SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz_G_to_A.fastq, with the options: -q --score-min L,0,-0.2 -p 16 --reorder --ignore-quals --no-mixed --no-discordant --maxins 496 --norc))
+Found first alignment:
+SN1078:314:4:1101:1165:2086#ACAGTGA/1	99	chr18_CT_converted	30409624	23	28M4D71M	=	30409686	161	GTGTGTGTGTAAGAAAGAGAGAGGTTAGGAGAGAAATAATATTTATTTAAATAGTGTAAGGGAAAGAAAATATAATATAAGTTATTTTATGGGATTTAG	?@@FDEFDHFFHHIIJIJIJGEFH<CGGIIHIHGIJEHIIJJJJJIJJJIIJII@FCFGIGIHGADGHGFHHHFHHEFDFFCEDEEEEEDEDDDCCDDC	AS:i:-17	XN:i:0	XM:i:0	XO:i:1	XG:i:4	NM:i:4	MD:Z:28^GAGA71	YS:i:0	YT:Z:CP
+SN1078:314:4:1101:1165:2086#ACAGTGA/2	147	chr18_CT_converted	30409686	23	99M	=	30409624	-161	AGGGAAAGAAAATATAATATAAGTTATTTTATGGGATTTAGATTTGAATTAATTAGTTATAAGAGATATTTTAAGGAATATTATATAGAATTTGAATGT	FHHHHHGGIIHIIJIJJIJIJJIGGEJIIJIIHHJGGGFIEDBHIGGGGJJHGGFJJIIIEIJJJJJJJJJJJJIIJJJJJJJJJJHHGGHFDFFFCCC	AS:i:0	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:99	YS:i:-17	YT:Z:CP
+Now starting a Bowtie 2 paired-end alignment for CTread1GAread2GAgenome (reading in sequences from /scratch/ssg29/results/SLX-8077.v1/scratch/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_C_to_T.fastq and /scratch/ssg29/results/SLX-8077.v1/scratch/A005/SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz_G_to_A.fastq, with the options: -q --score-min L,0,-0.2 -p 16 --reorder --ignore-quals --no-mixed --no-discordant --maxins 496 --nofw))
+Found first alignment:
+SN1078:314:4:1101:1165:2086#ACAGTGA/1	77	*	0	0	*	*	0	0	GTGTGTGTGTAAGAAAGAGAGAGGTTAGGAGAGAAATAATATTTATTTAAATAGTGTAAGGGAAAGAAAATATAATATAAGTTATTTTATGGGATTTAG	?@@FDEFDHFFHHIIJIJIJGEFH<CGGIIHIHGIJEHIIJJJJJIJJJIIJII@FCFGIGIHGADGHGFHHHFHHEFDFFCEDEEEEEDEDDDCCDDC	YT:Z:UP
+SN1078:314:4:1101:1165:2086#ACAGTGA/2	141	*	0	0	*	*	0	0	ACATTCAAATTCTATATAATATTCCTTAAAATATCTCTTATAACTAATTAATTCAAATCTAAATCCCATAAAATAACTTATATTATATTTTCTTTCCCT	CCCFFFDFHGGHHJJJJJJJJJJIIJJJJJJJJJJJJIEIIIJJFGGHJJGGGGIHBDEIFGGGJHHIIJIIJEGGIJJIJIJJIJIIHIIGGHHHHHF	YT:Z:UP
+
+>>> Writing bisulfite mapping results to SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_bismark_bt2_pe.bam <<<
+
+Current working directory is: /home/ssg29/Methyl-Seq
+
+Now reading in and storing sequence information of the genome specified in: /scratch/ssg29/UCSC/hg19b/
+
+chr chr1 (249250621 bp)
+chr chr2 (243199373 bp)
+chr chr3 (198022430 bp)
+chr chr4 (191154276 bp)
+chr chr5 (180915260 bp)
+chr chr6 (171115067 bp)
+chr chr7 (159138663 bp)
+chr chr8 (146364022 bp)
+chr chr9 (141213431 bp)
+chr chr10 (135534747 bp)
+chr chr11 (135006516 bp)
+chr chr12 (133851895 bp)
+chr chr13 (115169878 bp)
+chr chr14 (107349540 bp)
+chr chr15 (102531392 bp)
+chr chr16 (90354753 bp)
+chr chr17 (81195210 bp)
+chr chr18 (78077248 bp)
+chr chr19 (59128983 bp)
+chr chr20 (63025520 bp)
+chr chr21 (48129895 bp)
+chr chr22 (51304566 bp)
+chr chrX (155270560 bp)
+chr chrY (59373566 bp)
+chr chrM (16571 bp)
+
+
+Reading in the sequence files /home/ssg29/scratch/results/SLX-8077.v1/Trim/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz and /home/ssg29/scratch/results/SLX-8077.v1/Trim/A005/SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz
+Processed 1000000 sequence pairs so far
+Processed 2000000 sequence pairs so far
+Processed 3000000 sequence pairs so far
+Processed 4000000 sequence pairs so far
+Processed 5000000 sequence pairs so far
+Processed 6000000 sequence pairs so far
+Processed 7000000 sequence pairs so far
+Processed 8000000 sequence pairs so far
+Processed 9000000 sequence pairs so far
+Processed 10000000 sequence pairs so far
+Processed 11000000 sequence pairs so far
+Processed 12000000 sequence pairs so far
+Processed 13000000 sequence pairs so far
+Processed 14000000 sequence pairs so far
+Processed 15000000 sequence pairs so far
+Processed 16000000 sequence pairs so far
+Processed 17000000 sequence pairs so far
+Processed 18000000 sequence pairs so far
+Processed 19000000 sequence pairs so far
+Processed 20000000 sequence pairs so far
+Processed 21000000 sequence pairs so far
+Processed 22000000 sequence pairs so far
+Processed 23000000 sequence pairs so far
+Processed 24000000 sequence pairs so far
+Processed 25000000 sequence pairs so far
+Processed 26000000 sequence pairs so far
+26188520 reads; of these:
+  26188520 (100.00%) were paired; of these:
+    15728841 (60.06%) aligned concordantly 0 times
+    9213683 (35.18%) aligned concordantly exactly 1 time
+    1245996 (4.76%) aligned concordantly >1 times
+39.94% overall alignment rate
+26188520 reads; of these:
+  26188520 (100.00%) were paired; of these:
+    15721894 (60.03%) aligned concordantly 0 times
+    9220324 (35.21%) aligned concordantly exactly 1 time
+    1246302 (4.76%) aligned concordantly >1 times
+39.97% overall alignment rate
+Processed 26188520 sequences in total
+
+
+Successfully deleted the temporary files /scratch/ssg29/results/SLX-8077.v1/scratch/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_C_to_T.fastq and /scratch/ssg29/results/SLX-8077.v1/scratch/A005/SLX-8077.A005.C48CWACXX.s_4.r_2_val_2.fq.gz_G_to_A.fastq
+
+Final Alignment report
+======================
+Sequence pairs analysed in total:	26188520
+Number of paired-end alignments with a unique best hit:	18211942
+Mapping efficiency:	69.5%
+
+Sequence pairs with no alignments under any condition:	6680250
+Sequence pairs did not map uniquely:	1296328
+Sequence pairs which were discarded because genomic sequence could not be extracted:	0
+
+Number of sequence pairs with unique best (first) alignment came from the bowtie output:
+CT/GA/CT:	9106681	((converted) top strand)
+GA/CT/CT:	0	(complementary to (converted) top strand)
+GA/CT/GA:	0	(complementary to (converted) bottom strand)
+CT/GA/GA:	9105261	((converted) bottom strand)
+
+Number of alignments to (merely theoretical) complementary strands being rejected in total:	0
+
+Final Cytosine Methylation Report
+=================================
+Total number of C's analysed:	674479098
+
+Total methylated C's in CpG context:	21942693
+Total methylated C's in CHG context:	2216111
+Total methylated C's in CHH context:	3180816
+Total methylated C's in Unknown context:	2
+
+Total unmethylated C's in CpG context:	18230264
+Total unmethylated C's in CHG context:	162870724
+Total unmethylated C's in CHH context:	466038490
+Total unmethylated C's in Unknown context:	23
+
+C methylated in CpG context:	54.6%
+C methylated in CHG context:	1.3%
+C methylated in CHH context:	0.7%
+C methylated in unknown context (CN or CHN):	8.0%
+
+
+Generating pie chart
+
+====================
+Bismark run complete
+====================
+
+
+real	551m51.535s
+user	3008m55.003s
+sys	5716m10.049s
+samtools view -bh -q 1 /home/ssg29/scratch/results/SLX-8077.v1/Bismark/Alignment/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_bismark_bt2_pe.bam -o /home/ssg29/scratch/results/SLX-8077.v1/Bismark/Alignment/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_bismark_bt2_pe.q1.bam 
+
+real	14m24.862s
+user	14m1.822s
+sys	0m23.209s
+samtools view -u -F 0x100 /home/ssg29/scratch/results/SLX-8077.v1/Bismark/Alignment/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_bismark_bt2_pe.bam | samtools flagstat - > /home/ssg29/scratch/results/SLX-8077.v1/Bismark/Alignment/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_bismark_bt2_pe.bam.flagstat
+[bam_header_read] EOF marker is absent. The input is probably truncated.
+
+real	1m47.711s
+user	1m34.544s
+sys	0m21.203s
+samtools view -u -F 0x100 /home/ssg29/scratch/results/SLX-8077.v1/Bismark/Alignment/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_bismark_bt2_pe.q1.bam | samtools flagstat - > /home/ssg29/scratch/results/SLX-8077.v1/Bismark/Alignment/A005/SLX-8077.A005.C48CWACXX.s_4.r_1_val_1.fq.gz_bismark_bt2_pe.q1.bam.flagstat
+[bam_header_read] EOF marker is absent. The input is probably truncated.
+
+real	1m42.719s
+user	1m29.420s
+sys	0m20.954s
+[32mA005 done[0m

@@ -1,0 +1,213 @@
+Changed directory to /home/ssg29/Pipelines/logs.
+
+JobID: 1279176
+======
+Time: Fri Apr 24 14:39:04 BST 2015
+Running on master node: sand-6-77
+Current directory: /home/ssg29/Pipelines/logs
+
+Nodes allocated:
+================
+sand-6-77
+
+numtasks=16, numnodes=1, mpi_tasks_per_node=16 (OMP_NUM_THREADS=1)
+
+Executing command:
+==================
+bash /home/ssg29/Pipelines/bin/script/SLX-9615.A016.tophat.persample.sh
+
+sand-6-77
+NO. of thread=16
+
+[32mSample=SLX-9615.A016[0m
+fastqc /home/ssg29/data/fastq/SLX-9615/SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz -o /home/ssg29/results/SLX-9615.Mus_musculus.v1/FastQC/A016
+Started analysis of SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 5% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 10% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 15% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 20% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 25% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 30% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 35% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 40% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 45% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 50% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 55% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 60% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 65% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 70% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 75% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 80% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 85% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 90% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Approx 95% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Analysis complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+
+real	11m5.515s
+user	7m56.119s
+sys	3m10.385s
+
+trim_galore -a GATCGGAAGAGCACACGTCTGAACTCCAGTCAC -o /home/ssg29/results/SLX-9615.Mus_musculus.v1/Trim/A016 --fastqc --quality 5 --stringency 5 /home/ssg29/data/fastq/SLX-9615/SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+No quality encoding type selected. Assuming that the data provided uses Sanger encoded Phred scores (default)
+
+Writing report to '/home/ssg29/results/SLX-9615.Mus_musculus.v1/Trim/A016/SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz_trimming_report.txt'
+
+SUMMARISING RUN PARAMETERS
+==========================
+Input filename: /home/ssg29/data/fastq/SLX-9615/SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Quality Phred score cutoff: 5
+Quality encoding type selected: ASCII+33
+Adapter sequence: 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC'
+Maximum trimming error rate: 0.1 (default)
+Minimum required adapter overlap (stringency): 5 bp
+Minimum required sequence length before a sequence gets removed: 20 bp
+Running FastQC on the data once trimming has completed
+Output file(s) will be GZIP compressed
+
+Writing final adapter and quality trimmed output to SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+
+
+  >>> Now performing quality (cutoff 5) and adapter trimming in a single pass for the adapter sequence: 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC' from file /home/ssg29/data/fastq/SLX-9615/SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz <<< 
+10000000 sequences processed
+20000000 sequences processed
+30000000 sequences processed
+40000000 sequences processed
+50000000 sequences processed
+60000000 sequences processed
+70000000 sequences processed
+80000000 sequences processed
+90000000 sequences processed
+100000000 sequences processed
+110000000 sequences processed
+cutadapt version 1.4.2
+Command line parameters: -f fastq -e 0.1 -q 5 -O 5 -a GATCGGAAGAGCACACGTCTGAACTCCAGTCAC /home/ssg29/data/fastq/SLX-9615/SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+Maximum error rate: 10.00%
+   No. of adapters: 1
+   Processed reads:    117406186
+   Processed bases:   5870309300 bp (5870.3 Mbp)
+     Trimmed reads:       152402 (0.1%)
+   Quality-trimmed:       281122 bp (0.3 Mbp) (0.00% of total)
+     Trimmed bases:      5739134 bp (5.7 Mbp) (0.10% of total)
+   Too short reads:            0 (0.0% of processed reads)
+    Too long reads:            0 (0.0% of processed reads)
+        Total time:   1652.06 s
+     Time per read:      0.014 ms
+
+=== Adapter 1 ===
+
+Adapter 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC', length 33, was trimmed 152402 times.
+
+No. of allowed errors:
+0-9 bp: 0; 10-19 bp: 1; 20-29 bp: 2; 30-33 bp: 3
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+5	25973	114654.5	0	25973
+6	5195	28663.6	0	5195
+7	2696	7165.9	0	2696
+8	693	1791.5	0	693
+9	2228	447.9	0	427 1801
+10	2202	112.0	1	360 1842
+11	1509	28.0	1	302 1207
+12	442	7.0	1	267 175
+13	268	1.7	1	214 54
+14	216	0.4	1	202 14
+15	182	0.1	1	174 8
+16	143	0.0	1	139 4
+17	166	0.0	1	161 5
+18	118	0.0	1	115 3
+19	101	0.0	1	96 5
+20	100	0.0	2	95 4 1
+21	74	0.0	2	68 5 1
+22	76	0.0	2	70 5 1
+23	63	0.0	2	56 6 1
+24	70	0.0	2	68 2
+25	60	0.0	2	57 3
+26	58	0.0	2	55 3
+27	62	0.0	2	59 3
+28	63	0.0	2	59 3 0 1
+29	69	0.0	2	64 3 1 1
+30	90	0.0	3	84 5 1
+31	68	0.0	3	63 4 0 1
+32	62	0.0	3	56 2 0 4
+33	87	0.0	3	76 10 0 1
+34	88	0.0	3	78 8 1 1
+35	105	0.0	3	95 7 3
+36	102	0.0	3	95 4 3
+37	132	0.0	3	127 3 2
+38	149	0.0	3	137 7 1 4
+39	156	0.0	3	149 6 0 1
+40	167	0.0	3	155 10 2
+41	127	0.0	3	112 11 2 2
+42	162	0.0	3	151 10 0 1
+43	125	0.0	3	113 6 3 3
+44	251	0.0	3	238 9 3 1
+45	113	0.0	3	103 5 3 2
+46	324	0.0	3	303 18 1 2
+47	106	0.0	3	99 4 1 2
+48	48	0.0	3	39 4 0 5
+49	152	0.0	3	125 20 2 5
+50	106961	0.0	3	100554 5979 347 81
+
+
+RUN STATISTICS FOR INPUT FILE: /home/ssg29/data/fastq/SLX-9615/SLX-9615.A016.C66Y8ANXX.s_5.r_1.fq.gz
+=============================================
+117406186 sequences processed in total
+Sequences removed because they became shorter than the length cutoff of 20 bp:	109485 (0.1%)
+
+
+  >>> Now running FastQC on the data <<<
+
+Started analysis of SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 5% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 10% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 15% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 20% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 25% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 30% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 35% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 40% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 45% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 50% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 55% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 60% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 65% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 70% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 75% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 80% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 85% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 90% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Approx 95% complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+Analysis complete for SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+
+real	40m21.599s
+user	40m29.696s
+sys	2m55.281s
+
+tophat2 -p 16 --library-type fr-firststrand --output-dir /home/ssg29/results/SLX-9615.Mus_musculus.v1/TopHat/A016 --max-multihits 10 --prefilter-multihits -transcriptome-index=/home/ssg29/data/tophat/transcriptome_index/Mus_musculus/GRCm38 /scratch/genome/Mus_musculus/Ensembl/GRCm38/Sequence/Bowtie2Index/genome /home/ssg29/results/SLX-9615.Mus_musculus.v1/Trim/A016/SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed.fq.gz
+
+[2015-04-24 15:30:32] Beginning TopHat run (v2.0.12)
+-----------------------------------------------
+[2015-04-24 15:30:32] Checking for Bowtie
+		  Bowtie version:	 2.2.3.0
+[2015-04-24 15:30:32] Checking for Samtools
+		Samtools version:	 0.1.19.0
+[2015-04-24 15:30:32] Checking for Bowtie index files (transcriptome)..
+[2015-04-24 15:30:32] Checking for Bowtie index files (genome)..
+[2015-04-24 15:30:32] Checking for reference FASTA file
+[2015-04-24 15:30:32] Generating SAM header for /scratch/genome/Mus_musculus/Ensembl/GRCm38/Sequence/Bowtie2Index/genome
+[2015-04-24 15:30:43] Reading known junctions from GTF file
+[2015-04-24 15:30:54] Pre-filtering multi-mapped left reads
+[2015-04-24 15:30:54] Mapping SLX-9615.A016.C66Y8ANXX.s_5.r_1_trimmed to genome genome with Bowtie2 
+[2015-04-24 15:53:54] Preparing reads
+	 left reads: min. length=20, max. length=50, 117070923 kept reads (225778 discarded)
+[2015-04-24 16:10:45] Using pre-built transcriptome data..
+[2015-04-24 16:10:47] Mapping left_kept_reads to transcriptome GRCm38 with Bowtie2 
+[2015-04-24 16:29:40] Resuming TopHat pipeline with unmapped reads
+[2015-04-24 17:19:42] Mapping left_kept_reads.m2g_um_seg1 to genome genome with Bowtie2 (1/2)
+[2015-04-24 17:44:35] Mapping left_kept_reads.m2g_um_seg2 to genome genome with Bowtie2 (2/2)
+[2015-04-24 18:09:56] Searching for junctions via segment mapping
+	Coverage-search algorithm is turned on, making this step very slow
+	Please try running TopHat again with the option (--no-coverage-search) if this step takes too much time or memory.
+slurmstepd: *** JOB 1279176 CANCELLED AT 2015-04-26T02:45:52 DUE TO TIME LIMIT on sand-6-77 ***
+slurmstepd: task_p_post_term: rmdir(/cgroup/cpuset/slurm1279176/slurm1279176.4294967294_0) failed Device or resource busy

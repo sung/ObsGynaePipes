@@ -1,0 +1,238 @@
+login-sand3
+NO. of thread=16
+
+[32mSample=PNAS-2013.SRR530646[0m
+Max insertion size=500
+time fastqc /home/ssg29/scratch/data/fastq/PNAS-2013/PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz -o /home/ssg29/scratch/results/PNAS-2013.v1/FastQC/SRR530646
+Started analysis of PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 5% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 10% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 15% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 20% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 25% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 30% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 35% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 40% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 45% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 50% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 55% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 60% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 65% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 70% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 75% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 80% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 85% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 90% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 95% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Approx 100% complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Analysis complete for PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+
+real	19m27.483s
+user	13m27.503s
+sys	6m1.246s
+
+trim_galore /home/ssg29/scratch/data/fastq/PNAS-2013/PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+No quality encoding type selected. Assuming that the data provided uses Sanger encoded Phred scores (default)
+
+Writing report to '/home/ssg29/scratch/results/PNAS-2013.v1/Trim/SRR530646/PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz_trimming_report.txt'
+
+SUMMARISING RUN PARAMETERS
+==========================
+Input filename: /home/ssg29/scratch/data/fastq/PNAS-2013/PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Quality Phred score cutoff: 20
+Quality encoding type selected: ASCII+33
+Adapter sequence: 'AGATCGGAAGAGC'
+Maximum trimming error rate: 0.1 (default)
+Minimum required adapter overlap (stringency): 5 bp
+Minimum required sequence length before a sequence gets removed: 20 bp
+Running FastQC on the data once trimming has completed
+Output file(s) will be GZIP compressed
+
+Writing final adapter and quality trimmed output to PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+
+
+  >>> Now performing quality (cutoff 20) and adapter trimming in a single pass for the adapter sequence: 'AGATCGGAAGAGC' from file /home/ssg29/scratch/data/fastq/PNAS-2013/PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz <<< 
+10000000 sequences processed
+20000000 sequences processed
+30000000 sequences processed
+40000000 sequences processed
+50000000 sequences processed
+60000000 sequences processed
+70000000 sequences processed
+80000000 sequences processed
+90000000 sequences processed
+100000000 sequences processed
+110000000 sequences processed
+cutadapt version 1.4.2
+Command line parameters: -f fastq -e 0.1 -q 20 -O 5 -a AGATCGGAAGAGC /home/ssg29/scratch/data/fastq/PNAS-2013/PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+Maximum error rate: 10.00%
+   No. of adapters: 1
+   Processed reads:    115648023
+   Processed bases:  11564802300 bp (11564.8 Mbp)
+     Trimmed reads:     63028837 (54.5%)
+   Quality-trimmed:    611869427 bp (611.9 Mbp) (5.29% of total)
+     Trimmed bases:   2088222759 bp (2088.2 Mbp) (18.06% of total)
+   Too short reads:            0 (0.0% of processed reads)
+    Too long reads:            0 (0.0% of processed reads)
+        Total time:   1968.55 s
+     Time per read:      0.017 ms
+
+=== Adapter 1 ===
+
+Adapter 'AGATCGGAAGAGC', length 13, was trimmed 63028837 times.
+
+No. of allowed errors:
+0-9 bp: 0; 10-13 bp: 1
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+5	940134	112937.5	0	940134
+6	1002934	28234.4	0	1002934
+7	929603	7058.6	0	929603
+8	1012970	1764.6	0	1012970
+9	1093206	441.2	0	1089994 3212
+10	1005129	110.3	1	970094 35035
+11	1041271	27.6	1	997568 43703
+12	1084723	6.9	1	1039395 45328
+13	993298	1.7	1	945160 48138
+14	1059108	1.7	1	1005661 53447
+15	1087044	1.7	1	1031877 55167
+16	1105285	1.7	1	1049572 55713
+17	1084690	1.7	1	1029168 55522
+18	1096198	1.7	1	1040692 55506
+19	1124592	1.7	1	1067583 57009
+20	1119517	1.7	1	1062856 56661
+21	1132637	1.7	1	1075792 56845
+22	1128311	1.7	1	1071550 56761
+23	1200106	1.7	1	1139360 60746
+24	1146141	1.7	1	1088299 57842
+25	1200690	1.7	1	1139617 61073
+26	1265442	1.7	1	1200016 65426
+27	1256861	1.7	1	1192730 64131
+28	1174874	1.7	1	1114351 60523
+29	1282443	1.7	1	1215699 66744
+30	1422825	1.7	1	1349178 73647
+31	1202297	1.7	1	1140515 61782
+32	1254194	1.7	1	1190966 63228
+33	1171598	1.7	1	1111583 60015
+34	1304689	1.7	1	1237839 66850
+35	1272519	1.7	1	1208743 63776
+36	1157002	1.7	1	1098938 58064
+37	1169539	1.7	1	1110795 58744
+38	1160135	1.7	1	1102071 58064
+39	1105698	1.7	1	1049947 55751
+40	1146996	1.7	1	1089298 57698
+41	1106926	1.7	1	1051231 55695
+42	1174509	1.7	1	1115312 59197
+43	1195276	1.7	1	1134897 60379
+44	1086389	1.7	1	1031500 54889
+45	1103819	1.7	1	1047812 56007
+46	1156352	1.7	1	1097543 58809
+47	998986	1.7	1	947170 51816
+48	1081334	1.7	1	1025173 56161
+49	1109767	1.7	1	1052386 57381
+50	1081573	1.7	1	1026549 55024
+51	915275	1.7	1	868934 46341
+52	880683	1.7	1	835230 45453
+53	937388	1.7	1	889332 48056
+54	894928	1.7	1	848921 46007
+55	831884	1.7	1	788706 43178
+56	859327	1.7	1	814883 44444
+57	702365	1.7	1	665604 36761
+58	649619	1.7	1	615323 34296
+59	639066	1.7	1	604730 34336
+60	605792	1.7	1	572718 33074
+61	530269	1.7	1	501469 28800
+62	475706	1.7	1	450328 25378
+63	421411	1.7	1	398362 23049
+64	366427	1.7	1	345985 20442
+65	312411	1.7	1	293665 18746
+66	267664	1.7	1	244762 22902
+67	270628	1.7	1	247573 23055
+68	171081	1.7	1	155999 15082
+69	130435	1.7	1	118349 12086
+70	75635	1.7	1	68666 6969
+71	37767	1.7	1	35040 2727
+72	11912	1.7	1	11165 747
+73	3691	1.7	1	3429 262
+74	1025	1.7	1	953 72
+75	418	1.7	1	378 40
+76	200	1.7	1	161 39
+77	204	1.7	1	152 52
+78	207	1.7	1	161 46
+79	256	1.7	1	226 30
+80	452	1.7	1	403 49
+81	2265	1.7	1	2096 169
+82	83	1.7	1	60 23
+83	202	1.7	1	166 36
+84	232	1.7	1	193 39
+85	124	1.7	1	89 35
+86	154	1.7	1	110 44
+87	41	1.7	1	8 33
+88	43	1.7	1	6 37
+89	62	1.7	1	16 46
+90	49	1.7	1	5 44
+91	65	1.7	1	10 55
+92	57	1.7	1	8 49
+93	84	1.7	1	1 83
+94	73	1.7	1	3 70
+95	79	1.7	1	2 77
+96	87	1.7	1	3 84
+97	92	1.7	1	3 89
+98	104	1.7	1	1 103
+99	169	1.7	1	3 166
+100	1016	1.7	1	0 1016
+
+
+RUN STATISTICS FOR INPUT FILE: /home/ssg29/scratch/data/fastq/PNAS-2013/PNAS-2013.SRR530646.CELL.s_1.r_1.fq.gz
+=============================================
+115648023 sequences processed in total
+Sequences removed because they became shorter than the length cutoff of 20 bp:	3246759 (2.8%)
+
+
+  >>> Now running FastQC on the data <<<
+
+Started analysis of PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 5% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 10% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 15% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 20% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 25% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 30% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 35% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 40% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 45% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 50% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 55% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 60% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 65% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 70% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 75% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 80% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 85% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 90% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Approx 95% complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Analysis complete for PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+
+real	63m25.390s
+user	61m9.860s
+sys	5m45.244s
+
+bismark -1 /home/ssg29/scratch/results/PNAS-2013.v1/Trim/SRR530646/PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+Path to Bowtie 2 specified as: bowtie2
+Alignments will be written out in BAM format. Samtools found here: '/usr/local/Cluster-Apps/samtools/0.1.19/bin/samtools'
+Reference genome folder provided is /home/ssg29/scratch/UCSC/hg19b/	(absolute path is '/scratch/ssg29/UCSC/hg19b/)'
+FastQ format assumed (by default)
+Each Bowtie 2 instance is going to be run with 4 threads. Please monitor performance closely and tune down if needed!
+
+Files to be analysed:
+/home/ssg29/scratch/results/PNAS-2013.v1/Trim/SRR530646/PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz
+
+-X/--maxins can only be used for paired-end mapping!
+
+
+real	0m6.078s
+user	0m0.036s
+sys	0m0.020s
+[031m/home/ssg29/scratch/results/PNAS-2013.v1/Bismark/Alignment/SRR530646/PNAS-2013.SRR530646.CELL.s_1.r_1_trimmed.fq.gz_bismark_bt2_se.bam not found[0m
+
