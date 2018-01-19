@@ -1,0 +1,443 @@
+#!/usr/bin/Rscript --vanilla
+# Sung Gong <sung@bio.cc>
+
+library(RnBeads)
+
+logger.start("Logger started", fname = NA )
+##########
+# Config #
+##########
+cat("Loading configuation...\n")
+source("~/Pipelines/config/RnBeads.sbs.R")
+cat("Loading configuration done...\n")
+
+# pdf output filename 
+#pdf.file.name<- file.path(run.dir,paste0('rnb.met.diff.plot.',time.stamp,'.pdf'))
+#pdf(file=pdf.file.name)
+
+#####################################
+## 1. Load RnBeads Diff Met Result ##
+#####################################
+# results/RnBeads/SGA.AGA/CpG/RData/rnb.meth.diff.enstTiling500.RData
+rnb.dm.rdata<-file.path(rdata.dir,paste0("rnb.meth.diff.",my.region,".RData")) # this will store 'rnb.diff.met' which is a list of data.frame for sites, promoters...
+
+# my.run.date defined in config/RnBeads.sbs.R
+# ~/results/RnBeads/SGA.AGA/CpG/all/reports-2015-01-21_04_30_PM/differential_rnbDiffMeth
+rnb.dm.input<-file.path(run.dir, paste0(my.run.date,"/differential_rnbDiffMeth")) 
+if(file.exists(rnb.dm.rdata)){
+	cat(paste0("Loading rnb.dm.rdata: ",rnb.dm.rdata,"...\n"))
+	load(rnb.dm.rdata) # loading "rnb.diff.met"
+	cat("rnb.diff.met loaded\n")
+}else{
+	# load RnBead Objects
+	if(file.exists(preprocessed.rnb.set.dir) && file.exists(rnb.dm.input)){ 
+		###########################
+		# User-defined annotation #
+		###########################
+		# function 'set.user.annotation' defined
+		source("~/Pipelines/bin/R/RnBeads/set.user.annotation.sbs.R") 
+
+		# 1. load RnBSet object
+		cat(paste0("Importing rnb.set (preprocessed RnBeads data) from ",preprocessed.rnb.set.dir,"...\n"))
+		# rnb.region.types.for.analysis(rnb.set) returns the region(s) that you intend to analyse
+		rnb.set<-load.rnb.set(path=preprocessed.rnb.set.dir)  # isa 'RnBSet'
+
+		# 2. load annotation data
+		rnb.anno<-list()
+		for(i in c("sites",rnb.region.types.for.analysis(rnb.set))){
+			cat(paste0("Loading rnb.anno (annotation) for ",i,"...\n"))
+			rnb.anno[[i]] <-annotation(rnb.set, type=i, add.names=TRUE) # isa list of data.frame
+
+		}
+		# 3. load methylation data
+		if(FALSE){
+			rnb.meth<-list()
+			for(i in c("sites",rnb.region.types.for.analysis(rnb.set))){
+				cat(paste0("Loading rnb.meth (methylation data) for ",i,"...\n"))
+				rnb.meth[[i]] <-meth(rnb.set, type=i, row.names=TRUE)       # methylation level of my.region
+			}
+		}
+		# 4. load diff meth data
+		cat(paste0("Loading ",rnb.dm.input, " (diff methylation RnBeads object) for ",my.region,"...\n"))
+		rnb.diff.obj<-load.rnb.diffmeth(path=rnb.dm.input) # isa 'RnBDiffMeth'
+
+		cat("rnb.diff.obj:\n")
+		str(rnb.diff.obj)
+
+		rnb.dm<-list()
+		for(i in c("sites",get.region.types(rnb.diff.obj))){
+			cat(paste0("Loading rnb.diff.obj (diff methylation data) for ",i,"...\n"))
+			rnb.dm[[i]]<-get.table(rnb.diff.obj, get.comparisons(rnb.diff.obj), i, return.data.frame=TRUE) # isa list data.frame (or matrix if return.data.frame=FALSE)
+			#summary(rnb.dm[[i]])
+		}
+		# check length(get.region.types(rnb.diff.obj)) length(rnb.region.types.for.analysis(rnb.set)) same?
+		rnb.diff.met<-list()
+		for(i in c("sites",rnb.region.types.for.analysis(rnb.set))){
+			cat(paste0("Joining diff methylation data & annotation for ",i,"...\n"))
+			rnb.diff.met[[i]]<-data.frame(rnb.anno[[i]], rnb.dm[[i]])
+
+			cat(paste0("rnb.diff.met ordered by combinedRank and fdr for ",i,"...\n"))
+			if(i=="sites"){
+				rnb.diff.met[[i]]<-rnb.diff.met[[i]][order(rnb.diff.met[[i]]$combinedRank, rnb.diff.met[[i]]$diffmeth.p.adj.fdr),]
+			}else{
+				rnb.diff.met[[i]]<-rnb.diff.met[[i]][order(rnb.diff.met[[i]]$combinedRank, rnb.diff.met[[i]]$comb.p.adj.fdr),]
+			}
+
+			cat(paste0("rnb.diff.met created for ",i,"\n\n"))
+		}
+
+		cat(paste0("saving rnb.diff.met as a RData object to ",rnb.dm.rdata,"...\n"))
+		save(rnb.diff.met, file=rnb.dm.rdata)
+		cat(paste0(rnb.dm.rdata," created\n"))
+
+		rm(rnb.set, rnb.diff.obj, rnb.anno, rnb.dm)
+		cat("destorying rnb.set and rnb.diff.obj...\n")
+		destroy(rnb.set) #The ff files behind an RnBeads object can be deleted completely from the hard disk by executing the destructor method:
+		destroy(rnb.diff.obj) #The ff files behind an RnBeads object can be deleted completely from the hard disk by executing the destructor method:
+	# load .csv file directly
+	}else{
+		stop(paste0(preprocessed.rnb.set.dir, " or ", rnb.dm.input, " not avaialble. Stopped!\n"))
+		# Below tries to read methylation result (.csv) directly, but not recommended.
+		if(FALSE){
+			#~/results/RnBeads/SGA.AGA/CpG/enstTiling500/reports-2015-01-16_12PM/differential_methylation_data/diffMethTable_region_cmp1_enstTiling500.csv"
+			rnb.dm.input<-file.path(run.dir, "reports-2015-01-16_12PM/differential_methylation_data/diffMethTable_region_cmp1_enstTiling500.csv")
+			rnb.diff.met<-read.csv(file=rnb.dm.input, header=TRUE, stringsAsFactors=TRUE ) # a dataframe
+
+			################################
+			# Load User-defined annotation #
+			################################
+			# function 'set.user.annotation' defined
+			source("~/Pipelines/bin/R/RnBeads/set.user.annotation.sbs.R") 
+			if (my.annotation) set.user.annotation(my.annotation.file, my.annotation.RData, my.region)
+
+			# Check user-defined annotation 
+			rnb.anno<-rnb.get.annotation(type=my.region) # isa 'GenomicRegionLists'
+
+			# then join rnb.diff.met & rnb.anno 
+		}
+	}# end of if(file.exists(preprocessed.rnb.set.dir) && file.exists(rnb.dm.input))
+} # end of if(file.exists(rnb.dm.rdata))
+
+###################################################
+# if no p.value returned from RnBeads             #
+# which is the case of one sample within a group  #
+###################################################
+if(my.project=="5hmC.SGA.AGA"){
+	#################
+	## Get P.value ##
+	## data.frame  ##
+	#################
+	query<-rnb.diff.met[["sites"]] # isa data.frame 
+	# x is a data.frame from the subject with only one element
+	get.pvalue<-function(x,i){ 
+		if(i=='genes' || i=='promoters' || i=='enstTiling500'){
+			select<-query$Chromosome==x$Chromosome & query$Strand==x$Strand & query$Start>=x$Start & query$End<=x$End
+		#tiling, genomeTiling500
+		}else{
+			select<-query$Chromosome==x$Chromosome & query$Start>=x$Start & query$End<=x$End
+		}
+		dummy<-query[select,]
+		if(nrow(dummy)>=1){
+			#based on weighted mean 
+			my.pvalue<-wilcox.test(dummy$mean.g1*dummy$mean.covg.g1, dummy$mean.g2*dummy$mean.covg.g2, paired=TRUE)$p.value
+			return(ifelse(is.nan(my.pvalue),1,my.pvalue))
+		}else{
+			return(1)
+		}
+	} #end of function get.pvalue
+	# for each regional analysis
+	#my.target.region<-c("tiling","genes","promoters","genomeTiling500")
+	my.target.region<-c("genomeTiling500")
+	for(i in my.target.region){
+		cat("region type=",i,"\n")
+		# get pvalue of diff.met from the function 'get.pvalue' defined and shown above
+		my.pvalue.list<-lapply(split(rnb.diff.met[[i]], rownames(rnb.diff.met[[i]])), get.pvalue, i) # isa list
+		# update pvalue of the rnb.diff.met
+		rnb.diff.met[[i]]$comb.p.val<-as.numeric(my.pvalue.list[rownames(rnb.diff.met[[i]])])
+		# update adjusted pvalue of the rnb.diff.met
+		rnb.diff.met[[i]]$comb.p.adj.fdr<-p.adjust(rnb.diff.met[[i]]$comb.p.val, method="BH")
+		# update rank
+		rnb.diff.met[[i]]$combinedRank=mapply(
+			max,
+			nrow(rnb.diff.met[[i]])+1-rank(abs(rnb.diff.met[[i]]$mean.mean.diff), ties.method="min"),
+			nrow(rnb.diff.met[[i]])+1-rank(abs(rnb.diff.met[[i]]$mean.mean.quot.log2), ties.method="min"),
+			rank(rnb.diff.met[[i]]$comb.p.val, ties.method="min")
+		)
+	} #end of foreach region
+	# save updated rnb.diff.met
+	new.rnb.dm.rdata<-file.path(rdata.dir,paste0("new.rnb.meth.diff.",my.region,".RData")) # this will store 'rnb.diff.met' which is a list of data.frame for sites, promoters...
+	cat(paste0("saving new.rnb.diff.met as a RData object to ",new.rnb.dm.rdata,"...\n"))
+	save(rnb.diff.met, file=new.rnb.dm.rdata)
+	cat(paste0(new.rnb.dm.rdata," created\n"))
+} #end of if(my.project=="5hmC.SGA.AGA")
+
+############################
+## Write Top Diff by Rank ##
+############################
+for(i in names(rnb.diff.met)){
+	my.diff.met<-rnb.diff.met[[i]][order(rnb.diff.met[[i]]$combinedRank),]
+	###########################
+	# filtering based on Rank
+	###########################
+	if(i=="sites"){select<-TRUE}else{select<-my.diff.met$num.sites >= median(my.diff.met$num.sites)}
+	top.diff.met<-head(my.diff.met[select,],n=100)
+	#top.diff.met[,c("Chromosome","Start","End","Strand","id","symbol","mean.mean.g1","mean.mean.g2","mean.mean.diff","mean.mean.quot.log2","comb.p.adj.fdr","num.sites", "combinedRank")]
+	write.csv(top.diff.met, file=file.path(run.dir,paste0(i,".top100.by.rank.csv")))
+}
+
+		# DEBUG mode
+		if(FALSE){
+			subject<-rnb.diff.met[[i]]
+			select<-subject$num.sites>=3
+			subject<-head(subject[select,],n=30)
+			# get pvalue of diff.met from the function 'get.pvalue' defined and shown above
+			my.pvalue.list<-lapply(split(subject, rownames(subject)), get.pvalue, i) # isa list
+			# update pvalue of the rnb.diff.met
+			subject$comb.p.val<-as.numeric(my.pvalue.list[rownames(subject)]) # ia a numeric vector
+			# update adjusted pvalue of the rnb.diff.met
+			subject$comb.p.adj.fdr<-p.adjust(subject$comb.p.val, method="BH")
+			# update rank
+			subject$combinedRank=mapply(
+				max,
+				nrow(subject)+1-rank(abs(subject$mean.mean.diff), ties.method="min"),
+				nrow(subject)+1-rank(abs(subject$mean.mean.quot.log2), ties.method="min"),
+				rank(subject$comb.p.val, ties.method="min")
+			)
+		}#end of DEBUG
+	if(FALSE){
+		###################
+		# list of GRanges #
+		###################
+		gr.diff.met<-lapply(rnb.diff.met, function(dummy) 
+			GRanges(
+				seqnames<-as.character(dummy$Chromosome), 
+				ranges<-IRanges(start=dummy$Start, end=dummy$End),
+				strand<-as.character(dummy$Strand), 
+				data.frame(dummy[,5:ncol(dummy)])
+			)
+		)
+		#################
+		## Get P.value ##
+		## GRanges     ##
+		#################
+		for(i in names(gr.diff.met)[2:length(names(gr.diff.met))]){
+			subject<-gr.diff.met[[i]] # isa GRanges
+			subject<-split(subject,names(my.gr.region)) # isa GRangesList
+
+			lapply(subject, get.gr.pvalue)
+		}
+
+		query<-gr.diff.met[["sites"]] # isa GRanges
+		get.gr.pvalue<-function(x){
+			dummy<-subsetByOverlaps(query, x) # isa GRanges
+			#get p-value
+			#based on mean 
+			#t.test(dummy$mean.g1, dummy$mean.g2, paired=TRUE)$p.value
+			#wilcox.test(dummy$mean.g1, dummy$mean.g2, paired=TRUE)$p.value
+
+			#based on weighted mean 
+			#t.test(dummy$mean.g1*dummy$mean.covg.g1, dummy$mean.g2*dummy$mean.covg.g2, paired=TRUE)$p.value
+			#return(wilcox.test(dummy$mean.g1*dummy$mean.covg.g1, dummy$mean.g2*dummy$mean.covg.g2, paired=TRUE)$p.value)
+			return(ifelse(is.nan(wilcox.test(dummy$mean.g1*dummy$mean.covg.g1, dummy$mean.g2*dummy$mean.covg.g2, paired=TRUE)$p.value), 1, wilcox.test(dummy$mean.g1*dummy$mean.covg.g1, dummy$mean.g2*dummy$mean.covg.g2, paired=TRUE)$p.value))
+		}
+	} #end of if FALSE
+
+##############################
+# manhattan plot using qqman #
+##############################
+library(qqman)
+for(i in names(rnb.diff.met)){
+	cat("type=",i,"\n")
+	my.diff.met<-rnb.diff.met[[i]]
+	###########################
+	# filtering based on Rank
+	###########################
+	if(i=="sites"){select<-TRUE}else{select<-my.diff.met$num.sites >= median(my.diff.met$num.sites)}
+	upper<-log(max(my.diff.met[select,]$combinedRank))
+
+	cat("making a data.frame for manhattan plot\n")
+	if(i=="sites"){
+		top.diff.met<-paste0(my.diff.met[select,]$Chromosome, ".", my.diff.met[select,]$Start)[1:10]
+		dummy<-with(my.diff.met[select,], 
+				data.frame(
+					SNP=paste0(my.diff.met[select,]$Chromosome, ".", my.diff.met[select,]$Start),
+					CHR=sapply(substr(as.character(Chromosome),4,nchar(as.character(Chromosome))), # chromosome (e.g. chr1, chr2, chrX, chrM)
+						function(i) if(i=="X"){i<-23}else if(i=="Y"){i<-24}else if(i=="M"){i<-25}else{i<-as.numeric(i)}),
+					BP=Start,
+					P=diffmeth.p.val,
+					P.ADJ=diffmeth.p.adj.fdr,
+					RANK=upper-log(combinedRank),
+					NUM.SITE=1
+				))
+	}else if(i=="enstTiling500" || i=="genomeTiling500"){
+		top.diff.met<-as.character(head(my.diff.met[select,c("id")],n=10))
+		dummy<-with(my.diff.met[select,], 
+				data.frame(
+					SNP=as.character(id),
+					CHR=sapply(substr(as.character(Chromosome),4,nchar(as.character(Chromosome))), # chromosome (e.g. chr1, chr2, chrX, chrM)
+						function(i) if(i=="X"){i<-23}else if(i=="Y"){i<-24}else if(i=="M"){i<-25}else{i<-as.numeric(i)}),
+					BP=Start,
+					P=comb.p.val,
+					P.ADJ=comb.p.adj.fdr,
+					RANK=upper-log(combinedRank),
+					NUM.SITE=num.sites
+				))
+	}else{
+		top.diff.met<-paste0(my.diff.met[select,]$Chromosome, ".", my.diff.met[select,]$Start)[1:10]
+		dummy<-with(my.diff.met[select,], 
+				data.frame(
+					SNP=paste0(my.diff.met[select,]$Chromosome, ".", my.diff.met[select,]$Start),
+					CHR=sapply(substr(as.character(Chromosome),4,nchar(as.character(Chromosome))), # chromosome (e.g. chr1, chr2, chrX, chrM)
+						function(i) if(i=="X"){i<-23}else if(i=="Y"){i<-24}else if(i=="M"){i<-25}else{i<-as.numeric(i)}),
+					BP=Start,
+					P=comb.p.val,
+					P.ADJ=comb.p.adj.fdr,
+					RANK=upper-log(combinedRank),
+					NUM.SITE=num.sites
+				))
+	}
+	cat("plotting a manhattan plot\n")
+	my.filename=file.path(run.dir,paste0(my.project,'.',i,".manhattan"))
+	#png(filename=paste0(my.filename,".png"),width=2560,height=1600)
+	tiff(filename=paste0(my.filename,".tiff"),width=16,height=9,units="in",res=300, compression = 'lzw')
+	manhattan(dummy, p = "RANK", logp = FALSE, ylab = paste0(round(upper,2),"-log(combinedRank)"), 
+		genomewideline = FALSE, suggestiveline = FALSE, 
+		main = paste0("Manhattan plot of ",i," (",nrow(my.diff.met[select,])," regions of >=",median(my.diff.met$num.sites),"CpGs)"), 
+		highlight = top.diff.met,
+		chrlabs = c(1:22, "X", "Y")
+	) 
+	dev.off()
+} # end of foreach names(rnb.diff.met)
+
+#########################################################
+## Plot Methylation Difference in the Gene of Interest 
+#########################################################
+if(!exists("rnb.set")){
+	# 1. load RnBSet object
+	cat(paste0("Importing rnb.set (preprocessed RnBeads data) from ",preprocessed.rnb.set.dir,"...\n"))
+	# rnb.region.types.for.analysis(rnb.set) returns the region(s) that you intend to analyse
+	rnb.set<-load.rnb.set(path=preprocessed.rnb.set.dir)  # isa 'RnBSet'
+}
+library(GenomicFeatures)
+#up and down flank size
+my.upflank=2500 #up from TSS
+my.downflank=500 # down form TES
+my.local.db<-"~/data/Annotation/hg19ensGene.sqlite" #annotation db
+hg19ensGene<- loadDb(my.local.db) # load annotation from local file
+gr.ensg<-genes(hg19ensGene)
+
+library(biomaRt)
+#https://support.bioconductor.org/p/62347/
+#ensembl <- useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
+grch37 = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice", dataset="hsapiens_gene_ensembl")
+fields <- c("ensembl_gene_id", "hgnc_symbol","chromosome_name","strand","start_position","end_position") # get the gene names
+
+my.gene.list<-c("NKX1-2","NBEA","MAB21L1","GRM7","BHLHB9","ABCB10P1","CD14")
+for(my.gene in my.gene.list){
+	my.ensg=getBM(attributes = fields, filters = "hgnc_symbol", values=my.gene, mart = grch37) # is a data.frame
+	my.gr.ensg<-gr.ensg[mcols(gr.ensg)$gene_id %in% my.ensg$ensembl_gene_id] # NKX1-2
+	my.gr.ext.ensg<-promoters(my.gr.ensg, upstream=my.upflank, downstream=end(my.gr.ensg)-start(my.gr.ensg)+1+my.downflank) # includes 2000 +TSS and 100 +TES 
+
+	chrom <-as.character(seqnames(my.gr.ext.ensg))
+	start <-start(my.gr.ext.ensg)
+	end <- end(my.gr.ext.ensg) 
+	for(my.group in my.group.list){ # my.group.list defined within the config
+		if(my.project=='5hmC.SGA.AGA'){
+			# rnb.sample.groups returns NULL
+			# as there's only one sample within a group
+			# so, manually set up the group definition to display
+			sample.grouping<-list(`AGA`=c(2), `SGA`=c(1))
+		}else{	
+			sample.grouping<-rnb.sample.groups(rnb.set)[[my.group]]
+		}
+		cat(paste0("making a methylation locus profile for ",my.gene,"\n"))
+		my.filename=file.path(run.dir,paste0(my.project,'.',my.gene,".methylation.profile.by.",my.group))
+
+		#png(filename=paste0(my.filename,".png"),width=2560,height=1600, res=300)
+		tiff(filename=paste0(my.filename,".tiff"),width=16,height=9,units="in",res=300, compression = 'lzw')
+		rnb.plot.locus.profile(rnb.set, chrom, start, end, grps=sample.grouping)
+		dev.off()
+	}
+}
+
+if(FALSE){
+	plot.diff.met<-function(my.region, my.gene){
+		my.gene.rnb.diff.met<-rnb.diff.met$my.region[rnb.diff.met$symbol==my.gene,]
+		if(as.character(unique(my.gene.rnb.diff.met$Strand))=="+"){
+			my.gene.rnb.diff.met<-my.gene.rnb.diff.met[order(my.gene.rnb.diff.met$enst, my.gene.rnb.diff.met$Start, decreasing=FALSE),] # sort by enst, then position
+		}else if(as.character(unique(my.gene.rnb.diff.met$Strand))=="-"){
+			my.gene.rnb.diff.met<-my.gene.rnb.diff.met[order(my.gene.rnb.diff.met$enst, my.gene.rnb.diff.met$Start, decreasing=TRUE),] # sort by enst, then position
+		}else{
+			cat(paste0(my.gene, " has more than one strand. Plot stopped!\n"))
+			return(1)
+		}
+
+		my.gene.rnb.diff.met$Chromosome<-droplevels(my.gene.rnb.diff.met$Chromosome)
+		my.gene.rnb.diff.met$id<-droplevels(my.gene.rnb.diff.met$id)
+		my.gene.rnb.diff.met$enst<-droplevels(my.gene.rnb.diff.met$enst)
+		my.gene.rnb.diff.met$ensg<-droplevels(my.gene.rnb.diff.met$ensg)
+		my.gene.rnb.diff.met$symbol<-droplevels(my.gene.rnb.diff.met$symbol)
+		my.gene.rnb.diff.met$enst_biotype<-droplevels(my.gene.rnb.diff.met$enst_biotype)
+
+		diff.met.enst.list<-split(my.gene.rnb.diff.met, my.gene.rnb.diff.met$enst)
+		for(i in names(diff.met.enst.list)){
+			dummy<-diff.met.enst.list[[i]]
+			# get the index for tiling array
+			# ENST00000451024.12 => 12
+			tiling.index<-sapply(dummy$id, function(x) as.numeric(substr(as.character(x), nchar(as.character(dummy[1,]$enst))+2, nchar(as.character(x)))) ) # get the index
+			#data.frame(index=tiling.index, perc.met=dummy$mean.mean.g1, group=as.factor("AGA"), col="red")
+
+			# plot
+			matplot(dummy[,c("mean.mean.g1", "mean.mean.g2")], pch=20, xaxt="n", main=paste0("enstTiling500 across ",my.gene," (",i,")"),
+					xlab="Tiling index", ylab="% Methylation", col=my.col, cex=0.5) # xaxt="n" disables x-axis
+			lines(stats::lowess(dummy$mean.mean.g1), col=my.col["AGA"], lty=2, lwd=3) # lty=2 (----), #lwd: thickness
+			lines(stats::lowess(dummy$mean.mean.g2), col=my.col["SGA"], lty=2, lwd=3)
+			axis(1, at=1:nrow(dummy), lab=tiling.index)
+			#legend("topright", legend=names(my.col), lty=2, lwd=3, cex=2, col=my.col)
+		}
+	} # end of 'plot.diff.met' function
+
+	for(i in names(rnb.diff.met)){
+		###################
+		# diagnostic plot
+		###################
+		cat("Making diagonstic plots for ",i,"...\n")
+		if(i=="sites"){
+			plot(my.diff.met$mean.mean.diff, -log10(my.diff.met$diffmeth.p.val+0.01), main=i, xlab="%met(AGA)-%met(SGA)", col="#00000020", cex=0.1)
+			plot(my.diff.met$mean.mean.diff, -log10(my.diff.met$diffmet.p.adj.fdr), main=i, xlab="%met(AGA)-%met(SGA)", col="#00000020", cex=0.1)
+		}else{
+			plot(my.diff.met$mean.mean.diff, -log10(my.diff.met$comb.p.val), main=i, xlab="%met(AGA)-%met(SGA)", col="#00000020", cex=0.1)
+			plot(my.diff.met$mean.mean.diff, -log10(my.diff.met$com,b.p.adj.fdr), main=i, xlab="%met(AGA)-%met(SGA)", col="#00000020", cex=0.1)
+		}
+			
+		plot(my.diff.met$mean.mean.diff, my.diff.met$combinedRank, main=i, xlab="%met(AGA)-%met(SGA)", col="#00000020", cex=0.1)
+
+		if(i=="enstTiling500"){
+			cat("Making gene methylation profiles...\n")
+			plot.diff.met(i, 'NKX1-2')
+			plot.diff.met(i, 'RP13-238F13.3')
+			plot.diff.met(i, 'NBEA')
+			plot.diff.met(i, 'MAB21L1')
+			plot.diff.met(i, 'GRM7')
+		}
+
+		##########################
+		# conventional filtering
+		##########################
+		#select<-abs(my.diff.met$mean.mean.diff)>=0.25 & my.diff.met$comb.p.adj.fdr<=0.05
+		if(i=="sites"){
+			select<-my.diff.met$diffmet.p.adj.fdr<=0.05
+		}else{
+			select<-my.diff.met$comb.p.adj.fdr<=0.05
+		}
+		top.diff.met<-my.diff.met[select,]
+		top.diff.met<-top.diff.met[order(abs(top.diff.met$mean.mean.diff), decreasing=TRUE),]
+	}
+} # end of if FALSE
+
+warnings() # print out the warnings
+logger.completed()
+logger.close()
+
+#dev.off()
+cat("All done\n")

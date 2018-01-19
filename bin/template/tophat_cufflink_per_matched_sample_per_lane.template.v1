@@ -1,0 +1,286 @@
+#!/bin/bash
+# Author: Sung Gong <ssg29@cam.ac.uk>
+# First created: 11/Apr/2014
+# Last modified: 22/Apr/2014 
+# assumes 1 case and 1 control
+
+RESULT_DIR=MY_RESULT_DIR
+PROJECT=MY_PROJECT
+TOP_DIR=$RESULT_DIR/$PROJECT 
+BowtieIndexBase=MY_BOWTIE_INDEX
+Genome="$BowtieIndexBase.fa" 
+GTF=MY_GTF
+FASTQ_DIR=MY_FASTQ_DIR
+CASECTR="MY_CASECTR" # case and control (e.g. R3_R4)
+SAMPLES="MY_SAMPLES" # case and control (e.g. R3 R4)
+LANES="MY_LANES" # (e.g. 3 4 5)
+GENE="MY_GENE" # a gene name to display within R script
+NT=MY_NT # NO. of thread to use
+LIB_TYPE="MY_LIB_TYPE"
+CASECTR_DIR=$TOP_DIR/Cuffdiff/$CASECTR # e.g. Cuffdiff/R3_R4
+GTF_ASM=$CASECTR_DIR/gtf_assemblies.txt # per-sample 'transcripts.gtf' file
+										# e.g. /whale-data/ssg29/RNA-Seq/results/Pilot1/Cuffdiff/R3_R4/gtf_assemblies.txt
+CUFFDIFF_LABEL=${SAMPLES/ /,} #R3,R4
+
+# define a function
+function mkdir_unless(){
+	if [ ! -d $1 ]; then
+		mkdir $1
+	fi	
+}
+
+mkdir_unless $TOP_DIR	
+mkdir_unless $TOP_DIR/FastQC
+mkdir_unless $TOP_DIR/TopHat
+mkdir_unless $TOP_DIR/Cufflink
+mkdir_unless $TOP_DIR/Cuffmerge
+mkdir_unless $TOP_DIR/Cuffnorm
+mkdir_unless $TOP_DIR/Cuffdiff
+mkdir_unless $CASECTR_DIR # e.g. /whale-data/ssg29/RNA-Seq/results/Pilot1/Cuffdiff/R3_R4
+
+<<case-control
+#case 
+/whale-data/dscj1/PE_data/R3.3.fq.gz
+/whale-data/dscj1/PE_data/R3.4.fq.gz
+/whale-data/dscj1/PE_data/R3.5.fq.gz
+#control
+/whale-data/dscj1/PE_data/R4.3.fq.gz
+/whale-data/dscj1/PE_data/R4.4.fq.gz
+/whale-data/dscj1/PE_data/R4.5.fq.gz
+case-control
+
+Sample_array=() #an array for $SAMPLES
+Cuffdiff_array=() #an array to feed cuffdiff
+lane_cnt=1 # to count total NO of lane per pair (case-control) 
+# for each sample 
+# do 1.tophat and 2.cufflink
+for Sample in $SAMPLES
+do
+	lane_cnt_per_sample=1 # to count total NO of lane per sample
+	printf "\n\e[32mSample=$Sample\e[0m\n"
+
+	Sample_array+=($Sample) #push it
+
+	BAM_array=() #an array per sample
+	for LaneNO in $LANES
+	do
+		printf "\n\t\e[32mLane=$LaneNO\e[0m\n"
+		FastQ_file=$FASTQ_DIR/$Sample.$LaneNO.fq.gz #e.g. /whale-data/dscj1/PE_data/R3.3.fq.gz
+		if [ -s $FastQ_file ]; then
+			################
+			#1. Run fastqc #
+			################
+			if [[ `hostname` =~ 'elephant.bio.cam.ac.uk' ]]; then
+				echo skip fastqc
+				#echo "fastqc $FastQ_file -o $TOP_DIR/FastQC"
+				#time fastqc $FastQ_file -o $TOP_DIR/FastQC 
+			fi
+
+			###################################################################
+			#2. tophat: Map the reads for each sample to the reference genome #
+			#output: $TOPDIR/TopHat/$Sample/Lane$LaneNO/accepted_hits.bam
+			###################################################################
+			mkdir_unless $TOP_DIR/TopHat/$Sample # TopHat/R3
+			TOPHAT_OUT=$TOP_DIR/TopHat/$Sample/Lane$LaneNO # TopHat/R3/Lane3
+			mkdir_unless $TOPHAT_OUT
+
+			echo -e "\ntophat2 -p $NT --library-type $LIB_TYPE --output-dir $TOPHAT_OUT -G $GTF $BowtieIndexBase $FastQ_file"
+			#time tophat2 -p $NT --library-type $LIB_TYPE --output-dir $TOPHAT_OUT -G $GTF $BowtieIndexBase $FastQ_file
+		else
+			echo -e "\e[031m$FastQ_file not found\e[0m\n"
+			exit
+		fi
+
+		BAM_file=$TOPHAT_OUT/accepted_hits.bam
+		if [ -s $BAM_file ]; then
+			BAM_array+=($BAM_file) #push it
+		else
+			echo -e "\e[031m$BAM_file not found\e[0m\n"
+			exit
+		fi
+
+
+		#####################################################
+		#3. cufflinks: Assemble transcripts for each sample #
+		#output: $TOP_DIR/Cufflink/$Sample/Lane$LaneNO/transcripts.gtf 
+		#####################################################
+		if [ -s $TOPHAT_OUT/accepted_hits.bam ]; then
+			mkdir_unless $TOP_DIR/Cufflink/$Sample # Cufflink/R3
+			CUFFLINK_OUT=$TOP_DIR/Cufflink/$Sample/Lane$LaneNO # Cufflink/R3/Lane3
+			# cufflinks will make the output dir($CUFFLINK_OUT) if not exist 
+			# --GTF: reference transcript only (http://cufflinks.cbcb.umd.edu/manual.html)
+			# --GTF-guide: reference transcript + novel (http://cufflinks.cbcb.umd.edu/howitworks#hrga)
+			echo -e "\ncufflinks -p $NT --library-type $LIB_TYPE --GTF-guide $GTF --output-dir $CUFFLINK_OUT $TOPHAT_OUT/accepted_hits.bam"
+			#time cufflinks -p $NT --library-type $LIB_TYPE --GTF-guide $GTF --output-dir $CUFFLINK_OUT $TOPHAT_OUT/accepted_hits.bam
+		else
+			echo -e "\e[031m$TOPHAT_OUT/accepted_hits.bam not found. tophat failed? \e[0m\n"
+			exit
+		fi
+
+		##############################################
+		#4. write a gtf assembly file  for cuffmerge #
+		#output: $TOP_DIR/Cuffdiff/$CASECTR/gtf_assemblies.txt, which is $GTF_ASM (merging case-control)
+		#output: $TOP_DIR/Cufflink/$Sample/gtf_assemblies.txt (merging per sample)
+		##############################################
+		if [ -s $CUFFLINK_OUT/transcripts.gtf ]; then
+			if [ $lane_cnt -eq 1 ]; then
+				echo $CUFFLINK_OUT/transcripts.gtf > $GTF_ASM
+			else
+				echo $CUFFLINK_OUT/transcripts.gtf >> $GTF_ASM
+			fi
+
+			if [ $lane_cnt_per_sample -eq 1 ]; then
+				echo $CUFFLINK_OUT/transcripts.gtf > $TOP_DIR/Cufflink/$Sample/gtf_assemblies.txt
+			else
+				echo $CUFFLINK_OUT/transcripts.gtf >> $TOP_DIR/Cufflink/$Sample/gtf_assemblies.txt
+			fi
+		else
+			echo -e "\e[031m$CUFFLINK_OUT/transcripts.gtf not found. cufflinks failed? \e[0m\n"
+			exit
+		fi
+
+		let "lane_cnt++"
+		let "lane_cnt_per_sample++"
+
+	done # end of per lane
+
+	# input for cuffmerge and cuffdiff
+	Merged_BAM=$(printf ",%s" "${BAM_array[@]}")
+	Merged_BAM=${Merged_BAM:1} 
+	Cuffdiff_array+=($Merged_BAM) #push it
+
+	#6. cuffmerge per sample (merging multiple lanes)
+	# $TOP_DIR/Cuffmerge/$Sample # Cuffmerge/R3
+	#output: $TOP_DIR/Cuffmerge/$Sample/merged.gtf
+	if [ -s $TOP_DIR/Cufflink/$Sample/gtf_assemblies.txt ]; then
+		echo -e "\ncuffmerge -o $TOP_DIR/Cuffmerge/$Sample -g $GTF -s $Genome -p $NT $TOP_DIR/Cufflink/$Sample/gtf_assemblies.txt"
+		#cuffmerge -o $TOP_DIR/Cuffmerge/$Sample -g $GTF -s $Genome -p $NT $TOP_DIR/Cufflink/$Sample/gtf_assemblies.txt
+	else
+		echo -e "\e[031m$TOP_DIR/Cufflink/$Sample/gtf_assemblies.txt not found. cufflinks failed? \e[0m\n"
+		exit
+	fi
+
+	#6. cuffquant - optional from cufflinks >=2.2.0
+
+	#7. cuffnorm per sample 
+	if [ -s $TOP_DIR/Cuffmerge/$Sample/merged.gtf ]; then
+		echo "\ntime cuffnorm -o $TOP_DIR/Cuffnorm/$Sample -p $NT -L $Sample $TOP_DIR/Cuffmerge/$Sample/merged.gtf $Merged_BAM"
+		#time cuffnorm -o $TOP_DIR/Cuffnorm/$Sample -p $NT -L $Sample $TOP_DIR/Cuffmerge/$Sample/merged.gtf $Merged_BAM
+	else
+		echo -e "\e[031m$TOP_DIR/Cuffmerge/$Sample/merged.gtf not found. cuffmerge failed? \e[0m\n"
+		#exit
+	fi
+
+done # end of per sample
+
+#########################################################################################################
+#8. cuffmerge: Run Cuffmerge on all your assemblies to create a single merged transcriptome annotation: #
+# this merges both case and control
+#output: $CASECTR_DIR/merged.gtf
+#running time: 291m (5h) for R3-R4
+#########################################################################################################
+if [ -s $GTF_ASM ]; then
+	echo -e "\ncuffmerge -o $CASECTR_DIR -g $GTF -s $Genome -p $NT $GTF_ASM"
+	#time cuffmerge -o $CASECTR_DIR -g $GTF -s $Genome -p $NT $GTF_ASM
+else
+	echo -e "\e[031m$GTF_ASM not found. cufflinks failed? \e[0m\n"
+	exit
+fi
+
+if [ -s $CASECTR_DIR/merged.gtf ]; then
+	#################################
+	# 9. cuffnorm per case-control
+	#################################
+	echo -e "\ntime cuffnorm -o $TOP_DIR/Cuffnorm/$CASECTR -p $NT -L $CUFFDIFF_LABEL $CASECTR_DIR/merged.gtf ${Cuffdiff_array[0]} ${Cuffdiff_array[1]}"
+	time cuffnorm -o $TOP_DIR/Cuffnorm/$CASECTR -p $NT -L $CUFFDIFF_LABEL $CASECTR_DIR/merged.gtf ${Cuffdiff_array[0]} ${Cuffdiff_array[1]}
+
+	################################################################################################################################
+	# 10. cuffdiff: Run Cuffdiff by using the merged transcriptome assembly along with the BAM files from TopHat for each replicate: #
+	#output: *.diff, *.fpkm_tracking, *.count_tracking, *.read_group_tracking, read_groups.info, run.info and bias_params.info
+	# Modeling fragment count overdispersion.
+	# Q: which dispersion model to use?
+	# http://cufflinks.cbcb.umd.edu/manual.html#library_norm_meth
+	#running time: 302m (5h) for R3-R4
+	################################################################################################################################
+	echo -e "\ncuffdiff -o $CASECTR_DIR --library-type $LIB_TYPE -b $Genome -p $NT -L $CUFFDIFF_LABEL -u $CASECTR_DIR/merged.gtf ${Cuffdiff_array[0]} ${Cuffdiff_array[1]}"
+	#time cuffdiff -o $CASECTR_DIR --library-type $LIB_TYPE -b $Genome -p $NT -L $CUFFDIFF_LABEL -u $CASECTR_DIR/merged.gtf ${Cuffdiff_array[0]} ${Cuffdiff_array[1]}
+else
+	echo -e "\e[031m$CASECTR_DIR/merged.gtf not found. cuffmerge failed? \e[0m\n"
+	exit
+fi
+
+###############################################################
+# 8. cummeRbund R script
+# running time: real    17m37.568s
+###############################################################
+echo "#!/usr/bin/Rscript --vanilla
+# Sung Gong <sung@bio.cc>
+# see http://www.nature.com/nprot/journal/v7/n3/pdf/nprot.2012.016.pdf
+# install unless there (already installed at ram--bio)
+source('http://www.bioconductor.org/biocLite.R')
+biocLite('cummeRbund')
+
+library(cummeRbund)
+
+# output filename 
+pdf_file_name<- '$CASECTR_DIR/diff'
+pdf (file=paste(pdf_file_name,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'))
+
+cuff_data <- readCufflinks('$CASECTR_DIR')
+
+# Plot the distribution of expression levels for each sample
+csDensity(genes(cuff_data))
+
+# Compare the expression of each gene in two conditions with a scatter plot 
+csScatter(genes(cuff_data), '${Sample_array[0]}', '${Sample_array[1]}')
+
+# Create a volcano plot to inspect differentially expressed genes
+csVolcano(genes(cuff_data), '${Sample_array[0]}', '${Sample_array[1]}')
+
+# Plot expression levels for genes of interest with bar plots
+mygene<- getGene(cuff_data,'$GENE')
+expressionBarplot(mygene)
+
+# Plot individual isoform expression levels of selected genes of interest with bar plots
+expressionBarplot(isoforms(mygene))
+
+# quickly inspect the number of genes and transcripts that are differentially expressed between two samples
+gene_diff_data <- diffData(genes(cuff_data))
+sig_gene_data <- subset(gene_diff_data, (significant == 'yes'))
+write.table(sig_gene_data, '$CASECTR_DIR/diff_genes.txt', sep='\t', row.names = F, col.names = T, quote = F)
+
+# isoform
+isoform_diff_data <- diffData(isoforms(cuff_data), '${Sample_array[0]}', '${Sample_array[1]}')
+sig_isoform_data <- subset(isoform_diff_data, (significant == 'yes'))
+write.table(sig_isoform_data, '$CASECTR_DIR/diff_isoform.txt', sep='\t', row.names = F, col.names = T, quote = F)
+
+# tss
+tss_diff_data <- diffData(TSS(cuff_data), '${Sample_array[0]}', '${Sample_array[1]}')
+sig_tss_data <- subset(tss_diff_data, (significant == 'yes'))
+write.table(sig_tss_data, '$CASECTR_DIR/diff_tss.txt', sep='\t', row.names = F, col.names = T, quote = F)
+
+# cds
+cds_diff_data <- diffData(CDS(cuff_data), '${Sample_array[0]}', '${Sample_array[1]}')
+sig_cds_data <- subset(cds_diff_data, (significant == 'yes'))
+write.table(sig_cds_data, '$CASECTR_DIR/diff_cds.txt', sep='\t', row.names = F, col.names = T, quote = F)
+
+# promoter
+promoter_diff_data <- distValues(promoters(cuff_data))
+sig_promoter_data <- subset(promoter_diff_data, (significant == 'yes'))
+write.table(sig_promoter_data, '$CASECTR_DIR/diff_promoter.txt', sep='\t', row.names = F, col.names = T, quote = F)
+
+# splicing
+splicing_diff_data <- distValues(splicing(cuff_data))
+sig_splicing_data <- subset(splicing_diff_data, (significant == 'yes'))
+write.table(sig_splicing_data, '$CASECTR_DIR/diff_splicing.txt', sep='\t', row.names = F, col.names = T, quote = F)
+
+# relCDS
+relCDS_diff_data <- distValues(relCDS(cuff_data))
+sig_relCDS_data <- subset(relCDS_diff_data, (significant == 'yes'))
+write.table(sig_relCDS_data, '$CASECTR_DIR/diff_relCDS.txt', sep='\t', row.names = F, col.names = T, quote = F)
+
+" > $CASECTR_DIR/script.R
+
+cd $CASECTR_DIR
+echo R CMD BATCH script.R
+#time R CMD BATCH script.R

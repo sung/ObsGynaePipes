@@ -1,0 +1,1 @@
+for i in `ls  ~/data/fastq/SLX-9342.PE75/dups/*.fq.gz`; do FN=`echo $i | cut -d'/' -f8`; echo $FN; time zcat $i | awk 'NR%4==1{n=$0}NR%4==2{s=$0}NR%4==0{print n,s,$0}' | sort -S 60G -k 1,1 -u | awk '{print $1,$2"\n"$3"\n""+\n"$4}' | gzip -9 --rsyncable > ~/data/fastq/SLX-9342.PE75/$FN; done

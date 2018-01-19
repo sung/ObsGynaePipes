@@ -1,0 +1,17 @@
+1. trim_bismark_template.v4.sh
+for each lanes of fastq
+	fastqc
+merge forward
+merge reverse
+trim merged pair-end
+bismark <- merged fastq (merged fw & merged rv)
+
+2. trim_bismark_template.v5.sh
+for each lanes of fastq
+	fastqc
+for each pair-end
+	trim
+bismark <- each pair-end fastq
+
+
+

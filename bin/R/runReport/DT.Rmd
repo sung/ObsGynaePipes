@@ -1,0 +1,9 @@
+---
+title: "DT Demo"
+output: html_document
+---
+
+```{r include = TRUE}
+library(DT)
+datatable(iris)
+```

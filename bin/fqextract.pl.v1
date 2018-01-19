@@ -1,0 +1,27 @@
+#!/usr/bin/perl -w 
+# impression from https://www.biostars.org/p/10353/
+# coded by Sung Gong <ssg29@cam.ac.uk>
+# crated in 6/Jun/2014
+# [fixme] if more than 2 <header> (e.g. @SN012 @M01686), only the first will be used 
+
+die("Usage: cat in.fq | $0 <header> <max_length_of_read>\n") unless (scalar(@ARGV) == 2);
+my $header= shift(@ARGV);
+my $max_len= shift(@ARGV);
+my $flag = 0;
+$/="\n\@$header";
+while (<>) {
+	$cnt++;
+	@field=split(/\n/);
+	$len=length($field[1]);
+
+	next if $len>=$max_len;
+	if($cnt==1){
+		print "[$cnt]$field[0]\n$field[1]\n$field[2]\n$field[3]\n";
+	}else{
+		print "[$cnt]\@$header$field[0]\n$field[1]\n$field[2]\n$field[3]\n";
+	}
+}
+
+
+
+
