@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="hg19" hasGeneTrack="true" hasSequenceTrack="true" locus="chr7:64541170-64541298" version="8">
+    <Resources>
+        <Resource path="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.snp.filtered.chr7.top2.vcf"/>
+        <Resource path="/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.bam"/>
+        <Resource hyperlink="http://genome.ucsc.edu/cgi-bin/hgTrackUi?g=cpgIslandExt" name="CpG Islands" path="http://www.broadinstitute.org/igvdata/annotations/hg19/cpgIslands.hg19.bed"/>
+    </Resources>
+    <Panel height="206" name="DataPanel" width="2541">
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,153,0" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="http://www.broadinstitute.org/igvdata/annotations/hg19/cpgIslands.hg19.bed" name="CpG Islands" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count"/>
+        <Track SQUISHED_ROW_HEIGHT="4" altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorMode="GENOTYPE" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.Homo_sapiens.v1/BisSNP/A004/SLX-8075.SLX-8077.SLX-8081.A004.snp.filtered.chr7.top2.vcf" name="SLX-8075.SLX-8077.SLX-8081.A004.snp.filtered.chr7.top2.vcf" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count"/>
+    </Panel>
+    <Panel height="603" name="Panel1456158739838" width="2541">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;37.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.bam_coverage" name="SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="27.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/scratch/obsgynae/POPS/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.bam" name="SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.recal.chr7.top2.hetSNP.bam" showSpliceJunctions="false" sortable="true" visible="true">
+            <RenderOptions colorByTag="" colorOption="BISULFITE" flagUnmappedPairs="false" groupByTag="" maxInsertSize="1000" minInsertSize="50" shadeBasesOption="QUALITY" shadeCenters="true" showAllBases="true" sortByTag=""/>
+        </Track>
+    </Panel>
+    <Panel height="544" name="FeaturePanel" width="2541">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;308.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="hg19_genes" name="RefSeq Genes" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="308.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.1523809523809524,0.5978021978021978"/>
+    <HiddenAttributes>
+        <Attribute name="NAME"/>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+    </HiddenAttributes>
+</Session>

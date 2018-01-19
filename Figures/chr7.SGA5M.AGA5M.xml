@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="hg19" hasGeneTrack="true" hasSequenceTrack="true" locus="chr7:64540474-64542528" version="8">
+    <Resources>
+        <Resource path="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A002/SLX-8075.SLX-8077.SLX-8081.A002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam"/>
+        <Resource path="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam"/>
+    </Resources>
+    <Panel height="40" name="DataPanel" width="2541">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;97.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam_coverage" name="SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="97.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <Panel height="1435" name="Panel1433343161329" width="2541">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A004/SLX-8075.SLX-8077.SLX-8081.A004.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam" name="SGA5M (A004)" showSpliceJunctions="false" sortable="true" visible="true">
+            <RenderOptions colorByTag="" colorOption="BISULFITE" flagUnmappedPairs="false" groupByTag="" maxInsertSize="1000" minInsertSize="50" shadeBasesOption="QUALITY" shadeCenters="true" showAllBases="false" sortByTag=""/>
+        </Track>
+    </Panel>
+    <Panel height="1475" name="Panel1433343175385" width="2541">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;97.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A002/SLX-8075.SLX-8077.SLX-8081.A002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam_coverage" name="SLX-8075.SLX-8077.SLX-8081.A002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="97.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/home/ssg29/results/SLX-8075.SLX-8077.SLX-8081.v1/Bismark/Alignment/A002/SLX-8075.SLX-8077.SLX-8081.A002.r_1_val_1.fq.gz_bismark_bt2_pe.q1.deduplicated.sorted.RG.bam" name="AGA5M (A002)" showSpliceJunctions="false" sortable="true" visible="true">
+            <RenderOptions colorByTag="" colorOption="BISULFITE" flagUnmappedPairs="false" groupByTag="" maxInsertSize="1000" minInsertSize="50" shadeBasesOption="QUALITY" shadeCenters="true" showAllBases="false" sortByTag=""/>
+        </Track>
+    </Panel>
+    <Panel height="49" name="FeaturePanel" width="2541">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;308.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="hg19_genes" name="RefSeq Genes" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="308.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.029304029304029304,0.4835164835164835,0.9633699633699634"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>
