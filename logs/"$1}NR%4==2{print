@@ -1,2 +1,0 @@
-zcat /home/ssg29/results/SLX-10291.Homo_sapiens.v1/Trim/NEBsmRNA02/SLX-10291.NEBsmRNA02.trim.merged.fq.gz | awk NR%4==1{print " $0} > /home/ssg29/results/SLX-10291.Homo_sapiens.v1/Trim/NEBsmRNA02/SLX-10291.NEBsmRNA02.trim.merged.fasta
-

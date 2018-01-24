@@ -771,3 +771,10 @@ ssg29              0 | CHARNOCK-JONES-CLINCLOUD         0 |       200,000   200,
 ssg29        220,987 | CHARNOCK-JONES-SL2   233,847 |       248,745    14,898
 ssg29              0 | CHARNOCK-JONES-SL4         0 |        19,200    19,200
 Sun Jan  7 00:03:19 GMT 2018
+User           Usage |        Account     Usage | Account Limit Available (CPU hrs)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29        135,123 | CHARNOCK-JONES   169,911 |       369,837   199,926
+ssg29              0 | CHARNOCK-JONES-CLINCLOUD         0 |       200,000   200,000
+ssg29        220,987 | CHARNOCK-JONES-SL2   233,847 |       248,745    14,898
+ssg29              0 | CHARNOCK-JONES-SL4         0 |        19,200    19,200
+Sun Jan 21 00:03:17 GMT 2018
