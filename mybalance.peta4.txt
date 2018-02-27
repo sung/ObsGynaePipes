@@ -1,0 +1,17 @@
+Sun 28 Jan 00:00:04 GMT 2018
+Sun  4 Feb 00:00:03 GMT 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29              0 | CHARNOCK-JONES-SL2-CPU         0 |       267,877   267,877
+ssg29              0 | CHARNOCK-JONES-SL3-CPU         0 |       200,000   200,000
+Mon  5 Feb 10:00:05 GMT 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29              0 | CHARNOCK-JONES-SL2-CPU         0 |       267,877   267,877
+ssg29              0 | CHARNOCK-JONES-SL3-CPU         0 |       200,000   200,000
+Sun 11 Feb 00:00:11 GMT 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29              0 | CHARNOCK-JONES-SL2-CPU         0 |       267,877   267,877
+ssg29              0 | CHARNOCK-JONES-SL3-CPU         0 |       200,000   200,000
+Sun 18 Feb 00:00:11 GMT 2018
