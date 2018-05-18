@@ -1,8 +1,0 @@
-pdf("SLX-9342.Homo_sapiens.SE50.v1.D701_D501.splice_events.pdf")
-events=c(0.734784306537,0.583364547056,98.6667091705)
-pie(events,col=c(2,3,4),init.angle=30,angle=c(60,120,150),density=c(70,70,70),main="splicing events",labels=c("partial_novel 1%","complete_novel 1%","known 99%"))
-dev.off()
-pdf("SLX-9342.Homo_sapiens.SE50.v1.D701_D501.splice_junction.pdf")
-junction=c(0.887520376743,0.67922477812,98.4332548451)
-pie(junction,col=c(2,3,4),init.angle=30,angle=c(60,120,150),density=c(70,70,70),main="splicing junctions",labels=c("partial_novel 1%","complete_novel 1%","known 98%"))
-dev.off()
