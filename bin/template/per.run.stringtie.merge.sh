@@ -4,9 +4,9 @@
 # Last modified: 26/May/2015
 # Optimised and customised to run at the Darwin HPC
 
-source $HOME/RNA-Seq/config/rna_seq.config # export envrionment variables
-source $HOME/lib/sung.sh #defines 'mkdir_unless'
-source $HOME/config/sung.bash #defines PATH 
+source $HOME/Pipelines/config/rna_seq.config # export envrionment variables
+source $HOME/Pipelines/lib/sung.sh #defines 'mkdir_unless'
+source $HOME/config/sung.hpc.bash #defines PATH 
 
 #PROJECT=SGA.AGA.total.SE125
 #PROJECT=PET

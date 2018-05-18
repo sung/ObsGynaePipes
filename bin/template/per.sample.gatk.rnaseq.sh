@@ -1,14 +1,15 @@
 #!/bin/bash
 # Author: Sung Gong <ssg29@cam.ac.uk>
-# First created: 17/Aug/2015
 # Last modified: 2/Jun/2016
+# First created: 17/Aug/2015
 # Copied mostly from ~/Pipelines/bin/template/per.barcode.gatk.sh (for amplicon-based targetted resequencing)
 # https://www.broadinstitute.org/gatk/guide/article?id=3891
 # https://www.broadinstitute.org/gatk/guide/article?id=1247
+# Based on GATK3
 
-source $HOME/RNA-Seq/config/rna_seq.config # export envrionment variables
-source $HOME/lib/sung.sh
-source $HOME/config/sung.bash #defines PATH 
+source $HOME/Pipelines/config/rna_seq.config # export envrionment variables
+source $HOME/Pipelines/lib/sung.sh #
+source $HOME/config/sung.hpc.bash #defines PATH 
 
 SLX="MY_SLX" # e.g. SLX-8080 
 PROJECT="MY_SLX"."MY_VERSION" # e.g. SLX-8080.v1
@@ -18,10 +19,10 @@ Cell="MY_CELL" # e.g. C48CWACXX
 Lane="MY_LANE" # e.g. s_1 
 Chunk="MY_CHUNK" # e.g. 1 
 
-mkdir_unless $PROJECT_DIR
-mkdir_unless $PROJECT_DIR/GATK
-mkdir_unless $PROJECT_DIR/scratch
-mkdir_unless $PROJECT_DIR/scratch/$Barcode
+mkdir -p $PROJECT_DIR
+mkdir -p $PROJECT_DIR/GATK
+mkdir -p $PROJECT_DIR/scratch
+mkdir -p $PROJECT_DIR/scratch/$Barcode
 
 echo -e `hostname`
 echo -e "NO. of thread=$NT"
@@ -111,9 +112,14 @@ fi
 
 # input: merged_accepted_hits.RG.markDup.split.bam
 # output: merged_accepted_hits.RG.markDup.split.realigned.bam
-##########################
-## 3. Indel Realignment ##
-##########################
+##################################################################################
+## 3. Indel Realignment                                                         ##
+## Note that indel realignment is no longer necessary for variant discovery     ##
+## if you plan to use a variant caller that performs a haplotype assembly step, ##
+## such as HaplotypeCaller or MuTect2. However it is still required when using  ##
+## legacy callers such as UnifiedGenotyper or the original MuTect.              ##
+##################################################################################
+#https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php
 if [ $RUN_GATK_REALIGN -eq 1 ]; then
 	My_bam=$PROJECT_DIR/TopHat/$Barcode/merged_accepted_hits.RG.markDup.split.bam 
 	if [ ! -s $My_bam ];then
@@ -121,7 +127,7 @@ if [ $RUN_GATK_REALIGN -eq 1 ]; then
 		exit
 	fi
 
-	mkdir_unless $PROJECT_DIR/GATK/$Barcode
+	mkdir -p $PROJECT_DIR/GATK/$Barcode
 	My_interval=$PROJECT_DIR/GATK/$Barcode/$SLX.$Barcode.$Cell.gatk.bam.intervals # will be made
 	# Creating Intervals
 	if [ ! -s $My_interval ];then
@@ -182,8 +188,7 @@ if [ $RUN_GATK_BASE_RECAL -eq 1 ]; then
 		echo -e "\e[031m$My_bam is expected but not found\e[0m\n"
 		exit
 	fi
-
-	mkdir_unless $PROJECT_DIR/GATK/$Barcode
+	mkdir -p $PROJECT_DIR/GATK/$Barcode
 	My_recalTable=$PROJECT_DIR/GATK/$Barcode/$SLX.$Barcode.$Cell.gatk.realigned.bam.recalibTable.grp # will be made
 	###BaseRecalibrator
 	if [ -s $My_bam ]; then
@@ -219,7 +224,7 @@ if [ $RUN_GATK_BASE_RECAL -eq 1 ]; then
 			-S LENIENT \
 			--out  ${My_bam%.bam}.recalibrated.bam
 	else
-		echo -e "\e[031m$My_bam not found\e[0m\n"
+		echo -e "\e[031m$My_bam or $My_recalTable not found\e[0m\n"
 		exit
 
 	fi
@@ -240,9 +245,10 @@ fi
 # input: merged_accepted_hits.RG.markDup.split.realigned.recalibrated.bam
 # output: $SLX.$Barcode.tophat.HC.snp.indel.vcf.gz
 My_HC_VCF=$PROJECT_DIR/GATK/$Barcode/$SLX.$Barcode.tophat.HC.snp.indel.vcf.gz
-#####################
-## Variant Calling ##
-#####################
+#########################
+## Variant Calling     ##
+## via HaplotypeCaller ##
+#########################
 #https://www.broadinstitute.org/gatk/guide/article?id=3891
 if [ $RUN_GATK_HC -eq 1 ];then
 	My_bam=$PROJECT_DIR/TopHat/$Barcode/merged_accepted_hits.RG.markDup.split.realigned.recalibrated.bam
@@ -251,7 +257,7 @@ if [ $RUN_GATK_HC -eq 1 ];then
 		exit
 	fi
 
-	mkdir_unless $PROJECT_DIR/GATK/$Barcode
+	mkdir -p $PROJECT_DIR/GATK/$Barcode
 	###Calling Initial HaplotypeCaller###
 	echo -e "java -Xmx$GATK_MEM -jar $GATK_HOME/GenomeAnalysisTK.jar -T HaplotypeCaller -I $My_bam\n"
 	time java -Xmx$GATK_MEM -jar -Djava.io.tmpdir=$PROJECT_DIR/scratch/$Barcode $GATK_HOME/GenomeAnalysisTK.jar \

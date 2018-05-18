@@ -13,7 +13,7 @@ if(TR_PREFIX=="GRCh38"){
 	my.biotype.file<-file.path("~/data/Annotation", paste("ensembl",TR_PREFIX,ENS_VER,"biotype.txt",sep="."))
 	#bioType
 	#http://rest.ensembl.org/info/biotypes/homo_sapiens
-	myBiotype=read.delim(my.biotype.file) # ed by bin/R/Cuffcompare/cuffcompare.R
+	myBiotype=read.delim(my.biotype.file) # used by bin/R/Cuffcompare/cuffcompare.R
 	my.cgi.file<-'~/data/Annotation/CPGi/cpgi.hg38.bed' # only for the methylation analysis
 
 	#biomart
@@ -23,7 +23,7 @@ if(TR_PREFIX=="GRCh38"){
 	#myMart = grch38
 
 	my.gene.gtf<-file.path("~/data/genome/Homo_sapiens/Ensembl", paste0(TR_PREFIX,"/Annotation/Genes/Homo_sapiens.",TR_PREFIX,".",ENS_VER,".gtf.gz"))
-}else{
+}else{ # GRCh37
 	myGenome="hg19" # for goseq (run supportedGenomes())
 	my.local.db<-"~/data/Annotation/hg19ensGene.sqlite" #annotation db
 	#my.local.db<-"~/data/Annotation/GRCh37.p13.TxEnsembl.sqlite"
@@ -37,6 +37,7 @@ if(TR_PREFIX=="GRCh38"){
 	myMart = grch37
 
 	my.gene.gtf<-"~/data/genome/Homo_sapiens/Ensembl/GRCh37/Annotation/Genes/Homo_sapiens.GRCh37.75.gtf.local"
+	#my.gene.gtf<-"~/data/genome/Homo_sapiens/Ensembl/GRCh37/Annotation/Genes/Homo_sapiens.GRCh37.82.gtf"
 }
 #gr.ensg<-genes(loadDb(my.local.db)) # from GenomicFeatures
 #grl.exons.by.gene <- exonsBy(loadDb(my.local.db),"gene") # isa "GRangeList"

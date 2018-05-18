@@ -8,9 +8,9 @@
 # See bin/merge.junctions.sh ##
 ###############################
 
-source $HOME/RNA-Seq/config/rna_seq.config # export envrionment variables
-source $HOME/lib/sung.sh #defines 'mkdir_unless'
-source $HOME/config/sung.bash #defines PATH 
+source $HOME/Pipelines/config/rna_seq.config # export envrionment variables
+source $HOME/Pipelines/lib/sung.sh #defines 'mkdir_unless'
+source $HOME/config/sung.hpc.bash #defines PATH 
 
 SLX="MY_SLX" # e.g. SLX-8080 
 PROJECT="MY_SLX"."MY_VERSION" # e.g. SLX-8080.v1

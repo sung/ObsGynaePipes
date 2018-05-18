@@ -1,0 +1,52 @@
+Changed directory to /home/ssg29/Pipelines/logs.
+
+JobID: 1135727
+======
+Time: Thu 29 Mar 16:07:23 BST 2018
+Running on master node: cpu-e-529
+Current directory: /home/ssg29/Pipelines/logs
+
+Nodes allocated:
+================
+cpu-e-529
+
+numtasks=32, numnodes=1, mpi_tasks_per_node=32 (OMP_NUM_THREADS=1)
+
+Executing command:
+==================
+bash /home/ssg29/Pipelines/bin/script/SLX-Xten2017.Homo_sapiens.v1.23409_1.per.barcode.gatk4.XXX.sh
+
+cpu-e-529
+NO. of thread=32
+
+[32mSample=SLX-Xten2017.XXX.23409_1[0m
+samtools index /home/ssg29/results/SLX-Xten2017.Homo_sapiens.v1/BWA/23409_1/SLX-Xten2017.23409_1.XXX.bwa.samblaster.recal.sorted.bam
+
+
+real	39m39.932s
+user	38m47.681s
+sys	0m46.083s
+/home/ssg29/Install/GATK/gatk-4.0.3.0/gatk HaplotypeCaller -I /home/ssg29/results/SLX-Xten2017.Homo_sapiens.v1/BWA/23409_1/SLX-Xten2017.23409_1.XXX.bwa.samblaster.recal.sorted.bam -O /home/ssg29/results/SLX-Xten2017.Homo_sapiens.v1/GATK/23409_1/SLX-Xten2017.23409_1.XXX.bwa.samblaster.recal.HC.g.vcf.gz 2> /home/ssg29/results/SLX-Xten2017.Homo_sapiens.v1/GATK/23409_1/SLX-Xten2017.23409_1.XXX.HaplotypeCaller.log
+
+
+real	2016m43.672s
+user	2160m56.561s
+sys	18m32.941s
+[032mDone: GATK HaplotypeCaller [0m
+
+bgzip -f /home/ssg29/results/SLX-Xten2017.Homo_sapiens.v1/GATK/23409_1/SLX-Xten2017.23409_1.XXX.bwa.samblaster.recal.HC.g.vcf.gz
+
+
+real	10m21.461s
+user	9m49.756s
+sys	0m18.914s
+tabix -f -p vcf /home/ssg29/results/SLX-Xten2017.Homo_sapiens.v1/GATK/23409_1/SLX-Xten2017.23409_1.XXX.bwa.samblaster.recal.HC.g.vcf.gz.gz
+
+[E::hts_hopen] fail to open file '/home/ssg29/results/SLX-Xten2017.Homo_sapiens.v1/GATK/23409_1/SLX-Xten2017.23409_1.XXX.bwa.samblaster.recal.HC.g.vcf.gz.gz'
+[E::hts_open] fail to open file '/home/ssg29/results/SLX-Xten2017.Homo_sapiens.v1/GATK/23409_1/SLX-Xten2017.23409_1.XXX.bwa.samblaster.recal.HC.g.vcf.gz.gz'
+/home/ssg29/Pipelines/bin/script/SLX-Xten2017.Homo_sapiens.v1.23409_1.per.barcode.gatk4.XXX.sh: line 227: 191723 Segmentation fault      tabix -f -p vcf $My_HC_VCF.gz
+
+real	0m0.126s
+user	0m0.001s
+sys	0m0.005s
+[32m23409_1 done for per.barcode.gatk4[0m

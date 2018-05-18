@@ -4,7 +4,7 @@
 # using R-makrdown
 #
 library(data.table)
-library(ggExtra)
+library(ggExtra) # to use ggMarginal
 source("~/Pipelines/config/graphic.R")
 time.stamp <- format(Sys.time(), '%Y-%m-%d_%I_%M_%p')
 

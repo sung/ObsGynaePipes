@@ -1,19 +1,14 @@
 #!/usr/bin/Rscript --vanilla
 # Sung Gong <sung@bio.cc>
 
-library(edgeR)
 library(DESeq2)
 library(genefilter) # for rowVar
 library(gplots) # for heatmap.2
 library(BiocParallel)
-library(data.table)
 
-source("~/Pipelines/config/Annotation.R")
+source("~/Pipelines/config/Annotation.R") # load dt.ensg gr.ensg
 source("~/Pipelines/config/graphic.R")
-source("~/lib/multiplot.R") # 'multiplot' is called within 'plotExp' below
-							# called by 'bin/R/MJ.RNA/get.expression.profile.R'
-							# ddsFpm should have been defined
-NP=16 # No. of worker process for DESeq
+NP=8 # No. of worker process for DESeq
 register(MulticoreParam(NP))
 
 #################
@@ -30,11 +25,13 @@ register(MulticoreParam(NP))
 #myProject=paste("Boy.Girl.FG.JD.mature.miRNA",TR_PREFIX,sep=".")
 #myProject=paste("Boy.Girl.FG.JD.pre.miRNA",TR_PREFIX,sep=".")
 #myProject=paste("Boy.Girl.FG.JD.piRNA",TR_PREFIX,sep=".")
-#sampleType='AGA' # healthy samples from JD and FG
+#sampleType='ALL' # all samples from JD and FG (including chrY for Salmon GRCh38.82)
+#sampleType='AGA' # healthy samples from JD and FG (including chrY for Salmon GRCh38.82)
 #sampleType='SGA'
 #sampleType='PET'
 #sampleType='CASE'
-#sampleType='BR' # with chrY genes
+#sampleType='BR' # chrY genes included for this type to compare with plasma samples
+#sampleType='BR.Salmon' # chrY genes included for this type to compare with plasma samples
 
 ###################################
 ## CSMD1 exon count from RoadMap ##
@@ -50,8 +47,8 @@ register(MulticoreParam(NP))
 ##############################
 #myProject=paste("PET.RPT",TR_PREFIX,sep=".") # Re-constructed Placenta Transcrptome
 #myProject=paste("PET.RPT.TX",TR_PREFIX,sep=".") # Re-constructed Placenta Transcrptome
-#myProject=paste("PET",TR_PREFIX,"salmon",sep=".") 
-#myProject=paste("PET",TR_PREFIX,"featureCount",sep=".") 
+#myProject=paste("PET",TR_PREFIX,"salmon",sep=".")  # DESeq ==1.10 and 1.18.1
+#myProject=paste("PET",TR_PREFIX,"featureCount",sep=".")  # DESeq2 ==1.18.1
 #sampleType='ALL'				   # All samples (i.e n=110 of FG samples)
 #myProject="PET.piRNA"	
 
@@ -59,13 +56,14 @@ register(MulticoreParam(NP))
 # DEGs between SGA and AGA #
 ############################
 #myProject=paste("SGA.AGA.SE125",TR_PREFIX,"salmon",sep=".")		# totalRNA-Seq (SGA.AGA.total): GRCh37|GRCh38
-myProject=paste("SGA.AGA.SE125",TR_PREFIX,"HTSeq",sep=".")		# totalRNA-Seq (SGA.AGA.total): GRCh37|GRCh38
+#myProject=paste("SGA.AGA.SE125",TR_PREFIX,"HTSeq",sep=".")		# totalRNA-Seq (SGA.AGA.total): GRCh37|GRCh38
+#myProject=paste("SGA.AGA.SE125",TR_PREFIX,"featureCount",sep=".")		# totalRNA-Seq (SGA.AGA.total): GRCh37|GRCh38
 #myProject=paste("SGA.AGA.miRNA",TR_PREFIX,sep=".")		# miRNA from the small RNA-Seq (v1: GRCh37, v2: GRCh38)
 #myProject=paste("SGA.AGA.piRNA",TR_PREFIX,sep=".")		# piRNA from the small RNA-Seq (v1: GRCh37, v2: GRCh38)
 #myProject=paste("SGA.AGA.RPT",TR_PREFIX,sep=".") # Re-constructed Placenta Transcrptome
 #myProject=paste("SGA.AGA.RPT.TX",TR_PREFIX,sep=".") # Re-constructed Placenta Transcrptome (tcons_xx based)
 
-sampleType='ALL'				   # All samples (i.e n=110 of FG samples)
+#sampleType='ALL'				   # All samples (i.e n=110 of FG samples)
 #sampleType='ALL.PHEN'			   # 11 SGA vs. 11 matched AGA where all measurements (pappa, gvel, doppler, pet are avaiable)
 #sampleType='LOW.PAPPA'			   # 8 low PAPP-A SGA vs. 8 matched AGA of which 4 PAPPA are unknown <NA>
 #sampleType='LOW.PAPPA.UNIQ'	   # 3 unique low PAPP-A SGA vs. 3 matched AGA
@@ -111,6 +109,8 @@ sampleType='ALL'				   # All samples (i.e n=110 of FG samples)
 #myProject='Retosiban.piRNA'
 #myProject='Retosiban.GRCh38.2nd'
 #sampleType='R8' #ALL, Stretch, R8, R6, Dosage
+#myProject='Trophoblast.IA' # GRCh38.90 salmon
+#sampleType='F.siRNA' #M.DFMO F.DFMO M.siRNA F.siRNA
 
 ####################################
 ## FG Plasma Samples              ##
@@ -118,16 +118,49 @@ sampleType='ALL'				   # All samples (i.e n=110 of FG samples)
 ## SLX-9342: SE50, PE75, PE150    ##
 ## SLX-9345: SE50, PE75           ##
 ## All based on GRCh38            ##
+## based on DESeq2 < 1.16         ##
 ####################################
-#myProject="Plasma.2017" # Plasma.2016
-#sampleType='ALL'      # Plasma.2017 (F-M)
-#sampleType='PLS.PT'      # Plasma.2016 12WK vs. Placenta
-#sampleType='PLS12WK.PT'      # Plasma.2016 12WK vs. Placenta
-#sampleType='PLS36WK.PT'      # Plasma.2016 36WK vs. Placenta
-#sampleType='PLS36WK.12WK'
+#myProject="Plasma.2017"    # Plasma.2017 or Plasma.2016
+#sampleType='ALL'    # PE75+PE150 Plasma.2017 (F-M)
+#sampleType='ALL.Salmon'    # Plasma.2017 PE75 GRCh38.82 
+#sampleType='GA.36'          # Plasma.2017 GA 12, 20, 28, 36 wk
+#sampleType='PLS.PT'       # Plasma.2016 12WK vs. Placenta
+#sampleType='PLS12WK.PT'   # Plasma.2016 12WK vs. Placenta
+#sampleType='PLS36WK.PT'   # Plasma.2016 36WK vs. Placenta
+#sampleType='PLS36WK.12WK' # Plasma.2016
+
+###########################################
+## Illumina Plasma Breach Samples         #
+## N=83 samples (83 BAM files received )  # 
+## from 22 patients (11 males 11 females) #
+## BAM files mapped against hg19          #
+## featureCount based on GRCh37.82        #
+## Salmon based on GRCh38.82              #
+## based on DESeq2 1.18                   #
+###########################################
+#myProject="Plasma.ILM.2017" #
+#sampleType='ALL'      # (F-M)
+#sampleType='ALL.Salmon'    # Plasma.2017 PE75 GRCh38.82 
+#sampleType='GA.36'          # Plasma.2017 GA 12, 20, 28, 36 wk
+
+###########################################
+## Illumina Placenta Breach Samples       #
+## N=19 samples (19 BAM files received )  # 
+## from 22 patients (11 males 11 females) #
+## but BR18 missing from library (female) #
+## BR09 missing from BAM (male)           #
+## BR14 missing from BAM (female)         #
+## BR17,BR08 NOT SENT (n=2)               #
+## BAM files mapped against hg19          #
+## based on DESeq2 1.18                   #
+###########################################
+myProject=paste("Boy.Girl.ILM",TR_PREFIX,sep=".")
+#sampleType="BR" # F-M
+sampleType="BR.Salmon" # F-M
 
 #############################
 ## SML Cholestatis samples ##
+## based on DESeq2 1.18.1  ##
 #############################
 #myProject="Cholestasis.2017"
 #sampleType='ALL' 
@@ -145,7 +178,7 @@ sampleType='ALL'				   # All samples (i.e n=110 of FG samples)
 #sampleType='Blood_Vessel'      # Boy vs. Girl 
 #sampleType='Brain'      # Boy vs. Girl 
 #sampleType='Colon'      # Boy vs. Girl 
-#sampleType='Esophagus'      # Boy vs. Girl 
+#sampleType='Esophagus'      # Boy vs. Girl
 #sampleType='Heart'      # Boy vs. Girl 
 #sampleType='Liver'      # Boy vs. Girl 
 #sampleType='Lung'      # Boy vs. Girl 
@@ -168,7 +201,7 @@ resultDir <-'~/results'
 RNAresultDir <-paste0(resultDir,'/RNA-Seq/',myProject)
 deg.metaDir  <-paste0(RNAresultDir,'/Meta')
 #dex.metaDir  <-paste0(RNAresultDir,'/Meta.DEXSeq')
-RDataDir <-paste0(RNAresultDir,'/RData'); if(!file.exists(RDataDir)){dir.create(RDataDir)}
+#RDataDir <-paste0(RNAresultDir,'/RData'); if(!file.exists(RDataDir)){dir.create(RDataDir)}
 clusterHome <- paste0(RNAresultDir,'/Cluster'); if(!file.exists(clusterHome)){dir.create(clusterHome)}
 cluster.dir=paste0(clusterHome,'/',sampleType); if(!file.exists(cluster.dir)){dir.create(cluster.dir)}
 if(myProject!="PDN"){
@@ -176,7 +209,8 @@ if(myProject!="PDN"){
 	#edgeR.dir=paste0(edgeRHome,'/',sampleType); if(!file.exists(edgeR.dir)){dir.create(edgeR.dir)}
 	#DegHome <- paste0(RNAresultDir,'/DEG'); if(!file.exists(DegHome)){dir.create(DegHome)}
 	#deg.dir=paste0(DegHome,'/',sampleType); if(!file.exists(deg.dir)){dir.create(deg.dir)}
-	deseqHome <- paste0(RNAresultDir,'/DESeq2'); if(!file.exists(deseqHome)){dir.create(deseqHome)}
+	#deseqHome <- paste0(RNAresultDir,'/DESeq2'); if(!file.exists(deseqHome)){dir.create(deseqHome)}
+	deseqHome <- paste0(RNAresultDir,'/', paste("DESeq2",packageVersion("DESeq2"),sep=".")); if(!file.exists(deseqHome)){dir.create(deseqHome)}
 	deseq.dir=paste0(deseqHome,'/',sampleType); if(!file.exists(deseq.dir)){dir.create(deseq.dir)}
 }else{
 	deseq.dir=RDataDir
@@ -225,17 +259,17 @@ if(grepl("miRNA",myProject)){
 # re-constructed trascriptome based on our own RNA-Seq
 }else if(grepl("RPT",myProject)){ 
 	my.bed="~/results/RNA-Seq/Placentome/Cuffcompare/POPS/POPS.GRCh38.novel.10.tr.reconstruction.gtf"
-	my.filter=ifelse(grepl("TX",myProject),"transcript_id","gene_name")
+	my.filter=ifelse(grepl("TX",myProject),"transcript_id","gene_name") # gene_name for 'hgnc_symbol'
 	my.id=my.filter
 	my.target<-rtracklayer::import(my.bed) # isa 'GRanges'
 	my.target.list<-split(my.target, mcols(my.target)[[my.filter]]) # isa 'GRangeList'
+	#my.target.list<-split(my.target, mcols(my.target)[["nearest_ref"]]) # isa 'GRangeList'
 # total RNA-Seq (quantified either featureCount or Salmon)
 }else{ 
 	my.filter="ensembl_gene_id"
 	my.id="hgnc_symbol"
 	my.fields <- c("chromosome_name", my.filter, "hgnc_symbol","description", "gene_biotype")
 	my.target.list<-split(gr.exon, mcols(gr.exon)[["gene_id"]]) # gr.exon from config/Annotation.R
-    is.BM=FALSE
 }
 
 ############
@@ -296,6 +330,8 @@ selectSamples<-function(my.type, my.all){
 		my.samples<-my.all[my.all$Condition==1,]
 	}else if(my.type=='BR'){ # Breech samples from JD 
 		my.samples<-my.all[my.all$Source=="JD-BR",]
+	}else if(my.type=='BR.Salmon'){ # Breech samples from JD 
+		my.samples<-my.all[my.all$Source=="JD-BR",]
 	}else if(my.type=='Boys'){ # Boys only (n=44)
 		my.samples<-my.all[my.all$Pair %in% names(which(sapply(split(my.all[my.all$Sex=="M",], my.all[my.all$Sex=="M",]$Pair), nrow)==2)),] # Boys
 	}else if(my.type=='Girls'){ # Girls only (n=56)
@@ -324,6 +360,22 @@ selectSamples<-function(my.type, my.all){
 	}else if(my.type=='Dosage'){
 		my.samples<-my.all[my.all$Condition %in% c("H", "R8", "R6"),]
 		my.samples$Condition<-relevel(my.samples$Condition,"H")
+	#IA Trophoblast samples
+	}else if(my.type=='M.DFMO'){
+		my.samples<-my.all[my.all$Sex=="M" & my.all$Condition %in% c("Vehicle", "DFMO"),]
+		my.samples$Condition<-relevel(my.samples$Condition,"Vehicle")
+	}else if(my.type=='F.DFMO'){
+		my.samples<-my.all[my.all$Sex=="F" & my.all$Condition %in% c("Vehicle", "DFMO"),]
+		my.samples$Condition<-relevel(my.samples$Condition,"Vehicle")
+	}else if(my.type=='M.siRNA'){
+		my.samples<-my.all[my.all$Sex=="M" & my.all$Condition %in% c("Control", "siRNA"),]
+		my.samples$Condition<-relevel(my.samples$Condition,"Control")
+	}else if(my.type=='F.siRNA'){
+		my.samples<-my.all[my.all$Sex=="F" & my.all$Condition %in% c("Control", "siRNA"),]
+		my.samples$Condition<-relevel(my.samples$Condition,"Control")
+	# Plasma.2017 samples
+    }else if(my.type=="GA.12"|my.type=="GA.20"|my.type=="GA.28"|my.type=="GA.36"){
+        my.samples<-my.all[paste0("GA.",my.all$GA)==my.type,]
 	# Plasma.2016 samples
 	}else if(my.type=='PLS.PT'){
 		my.samples<-my.all[my.all$Sex=="M" & my.all$Condition==0,] # all healthy (condition=0) males (sex=M) and 12wk GA for placenta
@@ -359,7 +411,7 @@ if(grepl("^SGA.AGA",myProject)){
 		samples$Condition<-as.factor(samples$Condition)
 	}else{
 		samples.all = read.csv(paste0(metaDir,"/meta.ALL.csv"), stringsAsFactors=FALSE)
-		samples.all[c(3:ncol(samples.all))]=lapply(samples.all[c(3:ncol(samples.all))], as.factor) # column 3-End as factor 
+		samples.all[c(3:ncol(samples.all))]=lapply(samples.all[c(3:ncol(samples.all))], as.factor) # column 3-End as factor
 		rownames(samples.all)<-samples.all$SampleName
 
 		if(file.exists(paste0(metaDir,"/meta.Pheno.csv"))){
@@ -416,9 +468,19 @@ if(grepl("^SGA.AGA",myProject)){
 			samples<-selectSamples(parentType, samples.all) # samples for parentType
 			samples<-samples[samples$Pair %in% samples[samples$SampleName %in% uniqSampleName,]$Pair,]
 		}else{
-			samples<-selectSamples(sampleType, samples.all)
+            ## SAMPLE EXCLUSION AS PER JUSTYNA AND FRANCESCA (ORIGINALLY FROM THE LANCET PAPER) 30/APR/2018
+            ## SampleName: 88 decidual contaminated
+            my.blacklist<-samples.all$SampleName=="88" | samples.all$PET==1 | samples.all$HT==1 | samples.all$GH==1
+            my.bad.pair<-as.character(samples.all[my.blacklist,]$Pair)
+            # sex-mismatch
+            my.bad.pair<-c(my.bad.pair,"P13","P5")
+            samples<-samples.all[!samples.all$Pair %in% my.bad.pair,] # n=80 (40 SGA & 40 matched controls)
+            # sex-mismatch
+            #dt.samples<-data.table(samples.all[!samples.all$Pair %in% samples.all[my.blacklist,]$Pair,])
+            #dt.samples[,.N,"Pair,Sex"]
+            #dcast.data.table(dt.samples[,.N,"Pair,Sex"], Pair~Sex)[!is.na(F*M),Pair] 
 		}
-	}
+    }
 	##############
 	## Encoding ##
 	##############
@@ -447,16 +509,17 @@ if(grepl("^SGA.AGA",myProject)){
 	}
 #Boy.Girl, Boy.Girl.miRNA, Boy.Girl.piRNA
 }else if(grepl("^Boy.Girl",myProject)){
-	# black list
-	#outLiers=list(`IGFBP1`=c("84C","88","80C","06C"),`SNORD3C`=c("02C","87C"), `Breech`=c("93C","94C"))
-	outLiers=list(`IGFBP1`=c("84C","88","80C"), `Breech`=c("93C","94C"))
+	# black list to exclude (contaminated)
+	#outLiers=list(`IGFBP1`=c("06C","80C","84C","88"),`SNORD3C`=c("02C","87C"), `Breech`=c("93C","94C"))
+	#outLiers=list(`IGFBP1`=c("80C","84C","88"), `Breech`=c("93C","94C")) 
+    outLiers=list(`Failed`=c("91"),`IGFBP1`=c("80C","84C","88")) # as of 17/Apr/2018
 	if(grepl("iRNA",myProject)){outLiers[["Failed"]]=c("20P","20C")}
 
-	samples.all = read.csv(paste0(metaDir,"/meta.ALL.csv"), stringsAsFactors=FALSE)
+	#samples.all = read.csv(paste0(metaDir,"/meta.ALL.Salmon.csv"), stringsAsFactors=FALSE)
+	samples.all = read.csv(paste0(metaDir,"/meta.ALL.csv"), stringsAsFactors=FALSE) # n=321 for ALL samples (FG=114, JD=188, JD-BR=19)
 	samples.all[c(3:ncol(samples.all))]=lapply(samples.all[c(3:ncol(samples.all))], as.factor) # 3rd column to the end: as factor 
 	rownames(samples.all)<-samples.all$SampleName
 	samples<-selectSamples(sampleType, samples.all)
-
 	# add 'SampleId' column if not there (for 'collapseReplciates')
 	if(!any(colnames(samples.all) %in% c("SampleId"))){
 		samples$SampleId<-samples$SampleName
@@ -464,6 +527,7 @@ if(grepl("^SGA.AGA",myProject)){
 	cat("Removing samples from the black list (outliers)...\n")
 	samples<-samples[!samples$SampleName %in% unname(unlist(outLiers)),]
 }else if(grepl("^PET",myProject)){
+    # 12-pairs excluded either batch-effect or decidual contamination (30/APR/2018)
 	outLiers=c("PET08","PET16","PET20","PET60","PET64","PET75","PET76","PET77","PET78","PET79","PET80","PET84")
 
 	samples.all = read.csv(paste0(metaDir,"/meta.",sampleType,".csv"),stringsAsFactors=FALSE)
@@ -481,11 +545,18 @@ if(grepl("^SGA.AGA",myProject)){
 	samples.all[c(3:ncol(samples.all))]=lapply(samples.all[c(3:ncol(samples.all))], as.factor) # column 3-End as factor 
 	rownames(samples.all)<-samples.all$SampleName
 	samples<-selectSamples(sampleType, samples.all)
-}else if(grepl("^Plasma",myProject)){
-	samples.all <- read.csv(paste0(metaDir,"/meta.ALL.csv"), stringsAsFactors=FALSE)
+}else if(myProject=="Trophoblast.IA"){
+	samples.all = read.csv(paste0(metaDir,"/meta.ALL.csv"), stringsAsFactors=FALSE)
 	samples.all[c(3:ncol(samples.all))]=lapply(samples.all[c(3:ncol(samples.all))], as.factor) # column 3-End as factor 
 	rownames(samples.all)<-samples.all$SampleName
 	samples<-selectSamples(sampleType, samples.all)
+}else if(grepl("^Plasma",myProject)){
+	#samples.all = read.csv(paste0(metaDir,"/meta.",sampleType,".csv"),stringsAsFactors=FALSE)
+	samples.all = read.csv(paste0(metaDir,"/meta.ALL.Salmon.csv"), stringsAsFactors=FALSE)
+	samples.all[c(3:ncol(samples.all))]=lapply(samples.all[c(3:ncol(samples.all))], as.factor) # column 3-End as factor 
+	rownames(samples.all)<-samples.all$SampleName
+	#samples<-samples.all
+    samples<-selectSamples(sampleType, samples.all)
 }else if(grepl("^RoadMap",myProject)){
 	samples.all <- read.csv(paste0(metaDir,"/meta.ALL.csv"), stringsAsFactors=FALSE)
 	samples.all[c(3:ncol(samples.all))]=lapply(samples.all[c(3:ncol(samples.all))], as.factor) # column 3-End as factor 
@@ -517,7 +588,7 @@ for(i in colnames(samples[3:ncol(samples)]))(samples[i]<-droplevels(samples[i]))
 ## Design ##
 ############
 #SGA.AGA, SGA.AGA.piRNA, SGA.AGA.miRNA
-if(grepl("^SGA.AGA",myProject) | grepl("^PET",myProject) | grepl("^Retosiban",myProject) | grepl("^Cholestasis",myProject)){
+if(grepl("^SGA.AGA",myProject) | grepl("^PET",myProject) | grepl("^Retosiban",myProject) | grepl("^Cholestasis",myProject) | grepl("^Trophoblast.IA",myProject)){
 	my.contrast="Condition"
 	if(sampleType=='PAPPA.SGA'){
 		design <- model.matrix(~PAPPA, samples) # isa 'matrix'
@@ -540,16 +611,21 @@ if(grepl("^SGA.AGA",myProject) | grepl("^PET",myProject) | grepl("^Retosiban",my
 #Boy.Girl, Boy.Girl.miRNA, Boy.Girl.piRNA
 }else if(grepl("^Boy.Girl",myProject) | grepl("^GTEx",myProject)){
 	my.contrast="Sex"
-	if(sampleType!='BR'){
-	# simple design
-		design <- model.matrix(~Sex, samples) 
-		deseq.design <- formula(~ Sex) 
-		dexseq.design<- ~ sample + exon + Sex:exon 
-	}else{
+	if(sampleType=='BR'){
 	# paired-design for breech samples (BR)
 		design <- model.matrix(~ Pair + Sex, samples) # isa 'matrix' with paired design
 		deseq.design <- formula(~ Pair + Sex) 		# paired design. isa 'formula'
 		dexseq.design<- ~ sample + exon + Pair:exon + Sex:exon 
+    }else if(sampleType=='BR.Salmon'){
+	# paired-design for breech samples (BR.Salmon)
+		design <- model.matrix(~ Pair + Sex, samples) # isa 'matrix' with paired design
+		deseq.design <- formula(~ Pair + Sex) 		# paired design. isa 'formula'
+		dexseq.design<- ~ sample + exon + Pair:exon + Sex:exon 
+	}else{
+	# simple design
+		design <- model.matrix(~Sex, samples) 
+		deseq.design <- formula(~ Sex) 
+		dexseq.design<- ~ sample + exon + Sex:exon 
 	}
 }else if(myProject=="PDN"){
 	my.contrast="Condition"
@@ -557,25 +633,26 @@ if(grepl("^SGA.AGA",myProject) | grepl("^PET",myProject) | grepl("^Retosiban",my
 	deseq.design <- formula(~ SampleName) 			# individual difference (isa 'matrix')
 	dexseq.design<- ~ sample + exon + SampleName:exon 
 }else if(grepl("^Plasma",myProject)){
-	if(sampleType=="ALL"){
+	# Plasma.2016: PLS.PT, PLS12WK.PT or PLS36WK.PT
+	if(grepl(".PT$",sampleType)){ 
+		my.contrast="Source"
+		design <- model.matrix(~ Source, samples) # isa 'matrix'
+		deseq.design <- formula(~ Source) 		  # isa 'formula'
+		dexseq.design<- ~ sample + exon + Source:exon 
+	# Plasma.2016: PLS36WK.12WK
+	}else if(grepl(".WK$",sampleType)){ 
+		my.contrast="GA"
+		design <- model.matrix(~ GA, samples) # isa 'matrix'
+		deseq.design <- formula(~ GA) 		  # isa 'formula'
+		dexseq.design<- ~ sample + exon + GA:exon 
+	# ALL, ALL.Salmon, GA.12 
+    }else{
 		my.contrast="Sex"
 		# simple design
 		design <- model.matrix(~Sex, samples) 
 		deseq.design <- formula(~ Sex) 
 		dexseq.design<- ~ sample + exon + Sex:exon 
-	# PLS.PT, PLS12WK.PT or PLS36WK.PT
-	}else if(grepl(".PT",sampleType)){ 
-		my.contrast="Source"
-		design <- model.matrix(~ Source, samples) # isa 'matrix'
-		deseq.design <- formula(~ Source) 		  # isa 'formula'
-		dexseq.design<- ~ sample + exon + Source:exon 
-	# PLS36WK.12WK
-	}else{
-		my.contrast="GA"
-		design <- model.matrix(~ GA, samples) # isa 'matrix'
-		deseq.design <- formula(~ GA) 		  # isa 'formula'
-		dexseq.design<- ~ sample + exon + GA:exon 
-	}
+    }
 }else if(grepl("^RoadMap",myProject)){
 	my.contrast="Tissue"
 	design <- model.matrix(~ Tissue, samples) # isa 'matrix'
@@ -663,13 +740,13 @@ plotExp<-function(my.entry,my.metric="FPM",my.contrast="Condition",my.box=TRUE,m
 			my.filename <- file.path(deseq.dir, paste(my.gene, "exp.level",my.metric,sep="."))
             p.this<-p2
 		}
-        if(capabilities()[["tiff"]]){
-            tiff(filename=paste0(my.filename,".tiff"),width=14,height=9,units="in",res=300, compression = 'lzw')
-        }else{
-            jpeg(filename=paste0(my.filename,".jpeg"),width=14,height=9,units="in",res=300)
-        }
+        #if(capabilities()[["tiff"]]){
+        #    tiff(filename=paste0(my.filename,".tiff"),width=14,height=9,units="in",res=300, compression = 'lzw')
+        #}else{
+        #    jpeg(filename=paste0(my.filename,".jpeg"),width=14,height=9,units="in",res=300)
+        #}
         print(p.this)
-		dev.off()
+		#dev.off()
 	}else{
 		if(my.box){print(p1)}else{print(p2)}
 	}
@@ -718,7 +795,46 @@ plotExpMulti<-function(my.entry,my.metric="Count"){
 	multiplot(p1, p2, p4, cols=3) # ~/lib/multiplot.R
 }#end of plotFPM
 
-getTopDeseq <-function(my.top.deg, my.name){
+#################
+# Volcanio Plot #
+#################
+getTopDeseq<-function(my.top.deg, my.name){
+    if(my.name=="all.gene"){
+        p <- ggplot(my.top.deg, aes(log2FoldChange,-log10(padj))) + 
+            geom_point(data=my.top.deg[padj>=0.05],alpha=0.5,size=1) + 
+            geom_point(data=my.top.deg[padj<0.05 & log2FoldChange>=0],alpha=0.5,size=1,col="red") + 
+            geom_point(data=my.top.deg[padj<0.05 & log2FoldChange<0],alpha=0.5,size=1,col="blue") + 
+            geom_hline(aes(yintercept=-log10(0.05)),col="grey", linetype="dashed") +
+            ggtitle(paste("All ", nrow(my.top.deg)," genes")) +
+            theme_Publication()
+	}else if(grepl("^top",my.name)){
+        p <- ggplot(my.top.deg, aes(log2FoldChange,-log10(padj))) + 
+            geom_point(alpha=0.8,size=1.5) + 
+            geom_hline(yintercept=-log10(0.01),col="grey", linetype="dashed") +
+            geom_vline(xintercept=c(-log2(1.5),log2(1.5)),col="grey", linetype="dashed") +
+            geom_text(data=my.top.deg[log2FoldChange>=0],aes_string(label=my.id),col="red",hjust=0,nudge_x=0.05, nudge_y=0.02,size=4.5) + 
+            geom_text(data=my.top.deg[log2FoldChange<0],aes_string(label=my.id),col="blue",hjust=0,nudge_x=0.05, nudge_y=0.02,size=4.5) + 
+            ggtitle(paste("Top ", nrow(my.top.deg)," DEGs")) +
+            theme_Publication()
+    }else{
+        p <- ggplot(my.top.deg, aes(log2FoldChange,-log10(padj))) + 
+            geom_point(alpha=0.8,size=1.5) + 
+            geom_hline(yintercept=-log10(my.pval),col="grey", linetype="dashed") +
+            geom_vline(xintercept=c(-log2(1.5),log2(1.5)),col="grey", linetype="dashed") +
+            geom_text(data=my.top.deg[log2FoldChange>=0],aes_string(label=my.id),col="red",hjust=0,nudge_x=0.05, nudge_y=0.02,size=4.5) + 
+            geom_text(data=my.top.deg[log2FoldChange<0],aes_string(label=my.id),col="blue",hjust=0,nudge_x=0.05, nudge_y=0.02,size=4.5) + 
+            ggtitle(paste(nrow(my.top.deg),"DEGs of padj<",my.pval)) +
+            theme_Publication()
+    }
+    print(p)
+	
+	################################ 
+	# Write top deg into .csv file #
+	################################ 
+	write.csv(my.top.deg, file=gzfile(paste0(deseq.dir,"/filtered_toptags_deseq.",my.name,".",sampleType,".csv.gz")), row.names=F, quote=F) # isa 'Data.Frame'
+}#end of getTopDeseq 
+
+getTopDeseq_OLD_NO_USE <-function(my.top.deg, my.name){
 	my.top.deg<-as.data.frame(my.top.deg)
 	my.top.deg[[my.filter]]<-rownames(my.top.deg)
 

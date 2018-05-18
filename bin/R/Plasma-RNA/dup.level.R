@@ -2,10 +2,10 @@ library(data.table)
 source("~/Pipelines/config/graphic.R")
 
 foo<-fread("~/Pipelines/bin/R/Plasma-RNA/CSV/SLX-11368.Homo_sapiens.PE150.v1.flagstat.txt") # Ultra-deep PE150 (344M reads)
-bar<-fread("~/Pipelines/bin/R/Plasma-RNA/CSV/SLX-9342.Homo_sapiens.PE150.v1.flagstat.txt") # Shallow PE150 (4M reads)
 tar<-fread("~/Pipelines/bin/R/Plasma-RNA/CSV/SLX-9342.Homo_sapiens.PE75.v2.flagstat.txt") # Moderate PE75 (32M reads)
-var<-fread("~/Pipelines/bin/R/Plasma-RNA/CSV/SLX-9342.Homo_sapiens.SE50.v1.flagstat.txt") # Shallow SE50 (3M reads)
 yar<-fread("~/Pipelines/bin/R/Plasma-RNA/CSV/SLX-10285.Homo_sapiens.SE125.D708_D503.50pct.sampled.flagstat.txt") # Placenta sample SE125 (106M reads)
+#bar<-fread("~/Pipelines/bin/R/Plasma-RNA/CSV/SLX-9342.Homo_sapiens.PE150.v1.flagstat.txt") # Shallow PE150 (4M reads)
+#var<-fread("~/Pipelines/bin/R/Plasma-RNA/CSV/SLX-9342.Homo_sapiens.SE50.v1.flagstat.txt") # Shallow SE50 (3M reads)
 
 # Shallow PE150 (4M reads)
 #echo -e "Type Sampled Total Secondary Duplicated Paired Properly_paired Singleton" > SLX-9342.Homo_sapiens.PE150.v1.flagstat.txt
@@ -88,7 +88,7 @@ p75.s50<-ggplot(dt.dup[grepl("PE75",Type) | grepl("SE50",Type)], aes(Sampled, Du
 	scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100)) +
 	facet_wrap(~Type) +
 	theme_Publication()
-
+# x-axis: % sampled, y-axis: %
 p.all.dup1<-ggplot(dt.dup, aes(Sampled, Duplicated/(Total-Secondary)*100)) + 
 	geom_bar(stat="identity",fill="darkgrey") + 
 	geom_point(size=5) + 
@@ -99,7 +99,7 @@ p.all.dup1<-ggplot(dt.dup, aes(Sampled, Duplicated/(Total-Secondary)*100)) +
 	scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100)) +
 	facet_wrap(~Type, nrow=2) +
 	theme_Publication()
-
+# x-axis: % sampled, y-axis: %
 p.all.dup2<-ggplot(dt.dup, aes(Sampled, Duplicated/(Total-Secondary)*100,group=Type)) + 
 	geom_point(aes(color=Type),size=5,alpha=.7) + 
 	#geom_line(linetype=2,size=1.5,color='darkgrey') + 
@@ -109,7 +109,7 @@ p.all.dup2<-ggplot(dt.dup, aes(Sampled, Duplicated/(Total-Secondary)*100,group=T
 	scale_x_continuous(breaks=bar$Sampled) +
 	scale_y_continuous(breaks=seq(0,100,10),limits=c(20,100)) +
 	theme_Publication()
-
+# x-axis: % sampled, y-axis: no.
 p.all.dup3<-ggplot(dt.dup, aes(Sampled, Duplicated, group=Type)) + 
 	geom_point(aes(color=Type),size=5,alpha=.7) + 
 	#geom_line(linetype=2,size=1.5,color='darkgrey') + 
@@ -118,7 +118,15 @@ p.all.dup3<-ggplot(dt.dup, aes(Sampled, Duplicated, group=Type)) +
 	labs(x="Sampled Reads (%)", y="Number") + 
 	scale_x_continuous(breaks=bar$Sampled) +
 	theme_Publication()
-
+# x-axis: no read, y-axis: no.
+p.all.dup4<-ggplot(dt.dup, aes(No_read*(Sampled/100)/10^6, Duplicated/10^6, group=Type)) + 
+	geom_point(aes(color=Type),size=5,alpha=.7) + 
+	#geom_line(linetype=2,size=1.5,color='darkgrey') + 
+	geom_line(aes(color=Type,linetype=Tissue),size=1.5,alpha=.6) + 
+	ggtitle("Number of Duplicated Reads") + 
+	labs(x="No of Sampled Reads (million)", y="Number of Duplicated Reads (million)") + 
+	#scale_x_continuous(breaks=bar$Sampled) +
+	theme_Publication()
 
 p.all.uniq1<-ggplot(dt.dup, aes(Sampled, (Total-Secondary-Duplicated)/(Total-Secondary)*100, group=Type)) + 
 	geom_point(aes(color=Type),size=7,alpha=.7) + 
@@ -137,10 +145,20 @@ p.all.uniq2<-ggplot(dt.dup, aes(Sampled, Total-Secondary-Duplicated, group=Type)
 	labs(x="Sampled Reads (%)", y="Number of Uniq Reads") + 
 	scale_x_continuous(breaks=bar$Sampled) +
 	theme_Publication()
+# x-axis: No. of sampled read; y-axis: No. of uniq read
+p.all.uniq3<-ggplot(dt.dup, aes(No_read*(Sampled/100)/10^6, (Total-Secondary-Duplicated)/10^6, group=Type)) + 
+	geom_point(aes(color=Type),size=7,alpha=.7) + 
+	#geom_line(aes(color=Type),linetype=2,size=1.5,alpha=.5) + 
+	geom_line(aes(color=Type,linetype=Tissue),size=1.5,alpha=.6) + 
+	ggtitle("Mapped Unique Reads") + 
+	labs(x="No. of Sampled Reads (million)", y="Number of Uniq Reads (milliion") + 
+	#scale_x_continuous(breaks=bar$Sampled) +
+	theme_Publication()
 
 ##
 ## FeatureCount
 ##
+if(FALSE){
 # 1. Plasma PE150_344M: Ultra-deep PE150 (344M reads)
 sampling.levels=list("01"=1,"1"=10,"3"=30,"5"=50,"7"=70,"10"=100)
 #sampling.levels=list("01"=1,"1"=10,"2"=20,"3"=30,"4"=40,"5"=50,"7"=70,"9"=90,"10"=100)
@@ -210,7 +228,7 @@ p.cnt.gene<-ggplot(rbind(dt.count.dup,dt.count.dedup), aes(Sampled, Count, group
 	scale_x_continuous(breaks=bar$Sampled) +
 	facet_wrap(~Class) +
 	theme_Publication()
-
+} # end of if FALSE
 
 ##
 ## Save to FILE
@@ -226,17 +244,20 @@ pdf(file=paste(my.file.name,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'
 #multiplot(p1,p2,cols=2)
 #multiplot(p3,p4,cols=2)
 #print(p.all.dup1)
-print(p.all.dup3)
-print(p.all.dup2)
-print(p.all.uniq2)
-print(p.all.uniq1)
+#print(p.all.dup2)
+#print(p.all.dup3)
+
+#print(p.all.uniq1)
+#print(p.all.uniq2)
+print(p.all.uniq3)
+print(p.all.dup4)
 #multiplot(p.all.uniq1, p.all.uniq2, cols=2)
-print(p.cnt.gene)
+#print(p.cnt.gene)
 dev.off()
 
 
 ############################################################
 # 10K Down-sampling from the ultra-deep (300M) sequencing ##
 ############################################################
-dt.downsample<-fread("~/results/RNA-Seq/Plasma.2017/Meta/PE150.10K.sampling.flagstat.txt")
+#dt.downsample<-fread("~/results/RNA-Seq/Plasma.2017/Meta/PE150.10K.sampling.flagstat.txt")
 

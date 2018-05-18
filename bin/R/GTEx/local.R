@@ -21,9 +21,8 @@ my.tissue<-list(
 	`Small_Intestine`="Small Intestine - Terminal Ileum",
 	`Spleen`="Spleen",
 	`Thyroid`="Thyroid",
-#my.tissue<-list(
 	# 2nd batch (N=4)
-	#`Breast`="Breast - Mammary Tissue",
+	`Breast`="Breast - Mammary Tissue",
 	`Muscle`="Muscle - Skeletal",
 	`Nerve`="Nerve - Tibial",
 	`Skin`="Cells - Transformed fibroblasts",
@@ -105,8 +104,8 @@ makeMeta<-function(){
 } # end of makeMeta
 
 # merge DEG from POPS and GTEx
-mergeDEG<-function(flag='withChrY'){
-	my.RData=ifelse(flag=="withChrY", "~/results/RNA-Seq/GTEx/DESeq2/res.all.tissues.RData", "~/results/RNA-Seq/GTEx/DESeq2.withoutChrY/res.all.tissues.RData")
+mergeDEG.DESeq2.1.10<-function(flag='withChrY'){
+	my.RData=ifelse(flag=="withChrY", "~/results/RNA-Seq/GTEx/DESeq2.1.10/res.all.tissues.RData", "~/results/RNA-Seq/GTEx/DESeq2.1.10.withoutChrY/res.all.tissues.RData")
 	if(!file.exists(my.RData)){
 		library(DESeq2) # to load DESeq2
 
@@ -114,9 +113,9 @@ mergeDEG<-function(flag='withChrY'){
 		dl.dummy<-list()
 		for(i in c(dt.tissue$SMTS,"Placenta")){
 			if(i=="Placenta"){
-				file<- "/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2/AGA.withoutChrY/toptags_all_deseq.AGA.csv.gz"
+				file<- "/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.10/AGA.withoutChrY/toptags_all_deseq.AGA.csv.gz"
 			}else{
-				file<- file.path("/home/ssg29/results/RNA-Seq/GTEx/DESeq2.withoutChrY",paste0(i, "/toptags_all_deseq.",i,".csv.gz"))
+				file<- file.path("/home/ssg29/results/RNA-Seq/GTEx/DESeq2.1.10.withoutChrY",paste0(i, "/toptags_all_deseq.",i,".csv.gz"))
 			}
 			dt.dummy<-fread(paste("zcat ",file))
 			dt.dummy$Tissue=i
@@ -126,15 +125,15 @@ mergeDEG<-function(flag='withChrY'){
 		dl.exp.gtex<-list() # initialise 
 		for(i in dt.tissue$SMTS){
 			cat(paste(i,"...\n"))
-			# ~/results/RNA-Seq/GTEx/DESeq2.withoutChrY/Pancreas/deseq.Pancreas.RData
+			# ~/results/RNA-Seq/GTEx/DESeq2.1.10.withoutChrY/Pancreas/deseq.Pancreas.RData
 			# POPS (GRCh37)
 			if(i=="Placenta"){
-				deseq.RData=ifelse(flag=="withChrY","/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2/AGA/deseq.AGA.RData","/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2/AGA.withoutChrY/deseq.AGA.RData")
-				#deseq.RData <- "/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2/AGA.withoutChrY/deseq.AGA.RData"
-				#deseq.RData <- "/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2/AGA/deseq.AGA.RData"
+				deseq.RData=ifelse(flag=="withChrY","/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.10/AGA/deseq.AGA.RData","/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.10/AGA.withoutChrY/deseq.AGA.RData")
+				#deseq.RData <- "/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.10/AGA.withoutChrY/deseq.AGA.RData"
+				#deseq.RData <- "/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.10/AGA/deseq.AGA.RData"
 			# GTEx 
 			}else{
-				deseq.RData=ifelse(flag=="withChrY",file.path("/home/ssg29/results/RNA-Seq/GTEx/DESeq2",paste0(i, "/deseq.",i,".RData")), file.path("/home/ssg29/results/RNA-Seq/GTEx/DESeq2.withoutChrY",paste0(i, "/deseq.",i,".RData")))
+				deseq.RData=ifelse(flag=="withChrY",file.path("/home/ssg29/results/RNA-Seq/GTEx/DESeq2.1.10",paste0(i, "/deseq.",i,".RData")), file.path("/home/ssg29/results/RNA-Seq/GTEx/DESeq2.1.10.withoutChrY",paste0(i, "/deseq.",i,".RData")))
 			}
 			if(file.exists(deseq.RData)){
 				load(deseq.RData) 
@@ -150,14 +149,66 @@ mergeDEG<-function(flag='withChrY'){
 				stop(paste(deseq.RData, "not found\n"))
 			}
 		} # end of SMTS
-		#save(dl.exp.gtex, file="~/results/RNA-Seq/GTEx/DESeq2.withoutChrY/res.all.tissues.RData")
-		save(dl.exp.gtex, file="~/results/RNA-Seq/GTEx/DESeq2/res.all.tissues.RData")
+		#save(dl.exp.gtex, file="~/results/RNA-Seq/GTEx/DESeq2.1.10.withoutChrY/res.all.tissues.RData")
+		save(dl.exp.gtex, file="~/results/RNA-Seq/GTEx/DESeq2.1.10/res.all.tissues.RData")
 	}else{
 		load(my.RData)
 	}
 	cat("dl.exp.gtex loaded\n")
 	return (dl.exp.gtex)
 } # end of 'mergeDEG'
+
+# chrY included
+mergeDEG.DESeq2.1.18.1<-function(){
+    library(DESeq2)
+	my.RData="~/results/RNA-Seq/GTEx/DESeq2.1.18.1/GTEx.PT.DESeq2.RData"
+	if(!file.exists(my.RData)){
+		dl.gtex.deseq<-list()
+		dl.Fpkm<-list()
+		for(i in dt.tissue$SMTS){
+			if(i=="Placenta"){
+				file<-"/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.18.1/AGA/filtered_toptags_deseq.all.gene.AGA.csv.gz"
+				deseq.RData="/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.18.1/AGA/deseq.AGA.RData"
+			}else{
+				file<- file.path("/home/ssg29/results/RNA-Seq/GTEx/DESeq2.1.18.1",paste0(i, "/filtered_toptags_deseq.all.gene.",i,".csv.gz"))
+				deseq.RData=file.path("/home/ssg29/results/RNA-Seq/GTEx/DESeq2.1.18.1",paste0(i,"/deseq.",i,".RData" ))
+			}
+			dt.dummy<-fread(paste("zcat ",file))
+			dt.dummy$Tissue=i
+			dl.gtex.deseq[[i]]<-dt.dummy
+			if(file.exists(deseq.RData)){
+				load(deseq.RData) 
+				cat(paste("dds and res loaded for",i,"\n"))
+                ddsFpkm <-fpkm(dds) # isa 'matrix'
+	            dt.Fpkm<-data.table(`Tissue`=i, `ensembl_gene_id`=rownames(ddsFpkm), ddsFpkm)
+			    dl.Fpkm[[i]]<-dt.Fpkm
+			}else{
+				stop(paste(deseq.RData, "not found\n"))
+			}
+		}
+		save(dl.gtex.deseq, dl.Fpkm, file=my.RData)
+	    cat("dl.gtex.deseq and dl.Fpkm saved\n")
+    }else{
+		load(my.RData)
+    }    
+	cat("dl.gtex.deseq and dl.Fpkm loaded\n")
+} # end of 'mergeDEG'
+
+# it loads 'dl.Fpkm' if not
+getGTExFpkm<-function(my.target.ensg){
+    if (length(my.target.ensg)==0) stop ("target ENSG<1")
+    if(!exists("dl.Fpkm")){mergeDEG.DESeq2.1.18.1()}
+    dt.fpkm.tissue<-rbindlist(
+                        lapply(dl.Fpkm, function(i)
+                                melt.data.table(i[ensembl_gene_id %in% my.target.ensg], 
+                                                id.vars=c("Tissue","ensembl_gene_id"), 
+                                                variable.name="SampleID", 
+                                                value.name="FPKM"
+                                                ) # wide (col-based)to long (row-based)
+                    )
+            )
+    return(dt.fpkm.tissue)
+}
 
 #dl.exp.gtex=mergeDEG()
 my.RData="~/results/chrX/RData/deg.XCI.all.tissues.RData"

@@ -415,6 +415,7 @@ if(TRUE){
 	if(FALSE){
 		my.freq=10
 		my.dt.frag<-dt.frag.class[fpkm.iqr>=minFpkm & evi.ratio>=my.freq*0.01 & class %in% c("Novel","Known")]
+		my.dt.frag<-dt.frag.class[fpkm.iqr>=minFpkm & evi.ratio>=my.freq*0.01 & class %in% c("Novel")]
 		my.tcon<-my.dt.frag[,tcon]
 		# save CSV 
 		my.file=file.path(top.dir, paste0("Cuffcompare/",myCohort,"/",myCohort,".",TR_PREFIX,".known.novel.",my.freq,".tr.reconstruction.csv"))

@@ -1,11 +1,10 @@
-library(data.table)
+#library(data.table)
 
 #############
 ## Samples ##
 #############
-#source("~/Pipelines/bin/R/Placentome/samples.R") # 'dt.pops'
-outLiers=list(`IGFBP1`=c("84C","88","80C"), `SGA.PET`=c("77","71","79","19P","02P","72P"))
-dt.samples.all<-fread("/home/ssg29/results/RNA-Seq/Placentome/Meta/reconstruct.stringtie.csv", na.strings="")
+outLiers=list(`Failed`=c("91"), `IGFBP1`=c("84C","88","80C"), `SGA.PET`=c("77","71","79","19P","02P","72P"))
+dt.samples.all<-fread("/home/ssg29/results/RNA-Seq/Placentome/Meta/reconstruct.stringtie.csv", na.strings="") # n=325 for all samples
 cat("Reading input file...\n")
 dt.read.cnt<-fread(file.path("~/results/RNA-Seq/Placentome/Meta", paste0("FG.JD.SE125.",TR_PREFIX,".mapping.txt")), header=F)
 setnames(dt.read.cnt,c("Library","BarCode","Category","Read"))
@@ -242,5 +241,30 @@ do.go.cuff<-function(){
 	terms<- tm_map(terms, stripWhitespace)
 	#terms<- tm_map(terms, stemDocument) #install.packages("SnowballC")
 	wordcloud(terms, scale=c(5,0.5), max.words=100, random.order=FALSE, rot.per=0.35, use.r.layout=FALSE, colors=brewer.pal(8, "Dark2")) # brewer.pal from RColorBrewer
+}
+
+# Suppl information from: https://academic.oup.com/bib/article/18/2/205/2562739
+# Function require a vector with expression of one gene in different tissues.
+# If expression for one tissue is not known, gene specificity for this gene is NA
+# Minimum 2 tissues
+fTau <- function(x){
+    if(all(!is.na(x))){
+        if(min(x, na.rm=TRUE) >= 0){
+            if(max(x)!=0){
+                x <- (1-(x/max(x)))
+                res <- sum(x, na.rm=TRUE)
+                res <- res/(length(x)-1)
+            }else{
+                res <- 0
+            }
+ 		}else{
+            res <- NA
+            #print("Expression values have to be positive!")
+ 		} 
+ 	}else{
+        res <- NA
+        #print("No data for this gene avalable.")
+    } 
+    return(res)
 }
 

@@ -2,7 +2,7 @@
 # Sung Gong <sung@bio.cc>
 
 TR_PREFIX='GRCh38' # GRCh37|GRCh38
-source("~/Pipelines/bin/R/Placentome/local.R")
+source("~/Pipelines/bin/R/Placentome/local.R") # load 'dt.pops 'dt.read.cnt'
 source("~/Pipelines/config/graphic.R")
 mySource="Placentome" # "FG"
 top.dir=file.path("~/results/RNA-Seq",mySource) #top.dir="~/results/RNA-Seq/Placentome"

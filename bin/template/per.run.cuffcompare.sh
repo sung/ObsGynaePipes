@@ -5,8 +5,8 @@
 # Optimised and customised to run at the Darwin HPC
 
 source $HOME/Pipelines/config/rna_seq.config # export envrionment variables
-source $HOME/lib/sung.sh #defines 'mkdir_unless'
-source $HOME/config/sung.bash #defines PATH 
+source $HOME/Pipelines/lib/sung.sh #defines 'mkdir_unless'
+source $HOME/config/sung.hpc.bash #defines PATH 
 
 PROJECT=Placentome
 PROJECT_DIR=$HOME/results/RNA-Seq/$PROJECT

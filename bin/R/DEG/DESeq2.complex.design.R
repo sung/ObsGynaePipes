@@ -6,7 +6,7 @@
 
 myCaller='DESeq2'
 TR_PREFIX='GRCh38' # GRCh37 | GRCh38 
-ENS_VER=82 # 75 (for igenome), 82 (for manual downlaod) 90 (for Cholestatis project)
+ENS_VER=82 # 75 (for igenome), 82 (for manual downlaod) 90 (for Cholestatis project & IA-TB)
 source("~/Pipelines/config/DEG.R") # load config
 
 cat(paste0("Running ", myProject, ":",sampleType,"...\n"))
@@ -19,9 +19,9 @@ if(file.exists(deseq.RData)){
 	cat("dds, res, rld?, loaded\n")
 # create RData for the first time 
 }else{
-	####################
-	# Read HTSeq count #
-	####################
+	#########################################
+	# Read HTSeq/featureCounts/Salmon count #
+	#########################################
 	cat("DESeqDataSetFromHTSeqCount()...\n")
 	print(system.time(ddsHTSeq <- DESeqDataSetFromHTSeqCount(sampleTable = samples, directory="", design= deseq.design ))) # isa 'DESeqDataSet'
 
@@ -29,7 +29,6 @@ if(file.exists(deseq.RData)){
 	## Filter genes ##
 	################## 
 	cat("filter out genes with no annotation...\n")
-	#ddsKeep <- rownames(ddsHTSeq) %in% dt.ensg$ensembl_gene_id
 	ddsKeep <- rownames(ddsHTSeq) %in% names(my.target.list) # remove entries of no GRange info
     if(!all(ddsKeep)){
 	    newColData<- colData(ddsHTSeq)
@@ -38,9 +37,14 @@ if(file.exists(deseq.RData)){
     }
 	##########################
 	# Filter genes from chrY #
+    # only for GRCh37.75 DESeq2.1.10 for the paper
 	##########################
 	if(grepl("^Boy.Girl",myProject) | grepl("^GTEx",myProject)){
-		if(grepl("^Boy.Girl",myProject) & sampleType!="BR"){
+        # Boy.Girl BR samples (do not collapse)
+		if(grepl("^Boy.Girl",myProject) & grepl("^BR",sampleType)){
+            ddsCollapsed<-ddsHTSeq
+        # collapse (merge) data frome the same individuals (i.e. CRN)
+		}else{
 			cat("1. collapsing replicates...\n")
 			# Error: sum(assay(object)) == sum(assay(collapsed)) is not TRUE (R version 3.1.1 (2014-07-10), DESeq2_1.6.3)
 			# try with R 3.2.1 (DESeq2_1.10.1)
@@ -51,23 +55,24 @@ if(file.exists(deseq.RData)){
 																											# 'run' will be join by ','
             }else{
                 print(system.time(ddsCollapsed <- collapseReplicates(ddsHTSeq, groupby=colData(ddsHTSeq)$CRN, run=colData(ddsHTSeq)$Source))) # isa 'DESeqDataSet'
-
             }
-		}else{
-            ddsCollapsed<-ddsHTSeq
 		}
-		# Boy.Girl.exon.GRCh38 (or GRCh37)
-		if(grepl("exon",myProject)|grepl("iRNA",myProject)){ 
+		# Boy.Girl.exon.GRCh38 (or GRCh37) CSMD1?
+		if(grepl("exon",myProject)|grepl("iRNA",myProject)){
 			ddsKeep <- rep(TRUE, nrow(ddsCollapsed))
+        # total-RNA-Seq
 		}else{
-			cat("2. removing chrY...\n")
-			#ddsKeep <- rownames(ddsCollapsed) %in% dt.ensg[chromosome_name!="Y",ensembl_gene_id]
-			ddsKeep <- rep(TRUE, nrow(ddsCollapsed))
-		}
-
+		    if(grepl("^BR",sampleType)){
+    			ddsKeep <- rep(TRUE, nrow(ddsCollapsed))
+            }else{
+			    #cat("2. removing chrY...\n"
+    			ddsKeep <- rep(TRUE, nrow(ddsCollapsed))
+			    #ddsKeep <- rownames(ddsCollapsed) %in% dt.ensg[chromosome_name!="Y",ensembl_gene_id]
+            }
+        }
 		cat("DESeq from filtered count data...\n")
 		newColData<- colData(ddsCollapsed); rownames(newColData)<-newColData$SampleId # double-check SampleId is available?
-		newCounts <- counts(ddsCollapsed)[ddsKeep,]
+		newCounts <- counts(ddsCollapsed)[ddsKeep,]; colnames(newCounts)<-newColData$SampleId 
 		ddsMatrix <- DESeqDataSetFromMatrix(newCounts, newColData, deseq.design) # isa 'DESeqDataSet'
 
 		# every gene contains at least one zero (mainly for exon-count analysis)
@@ -83,7 +88,7 @@ if(file.exists(deseq.RData)){
     #################
     # RoadMap Exon ##
     #################
-	}else if(grepl("^RoadMap.exon",myProject)){ 
+	}else if(grepl("^RoadMap.exon",myProject)){
 		cat("1. collapsing replicates...\n")
         if(packageVersion("DESeq2")<1.10){
 		    print(system.time(ddsCollapsed <- collapseReplicatesBugFix(ddsHTSeq, groupby=colData(ddsHTSeq)$Tissue))) # isa 'DESeqDat# 'groupby' will be rownames of colData(dds)
@@ -165,24 +170,182 @@ if(file.exists(deseq.RData)){
 	#save(dds,res,rld, file=deseq.RData) #  save 'dds'
 }# end of loading RData
 
-#if(packageVersion("DESeq2")>=1.16){} # CHANGES IN VERSION 1.15.9 adding prototype function lfcShrink().
-                                        #‘>=1.16’, the default (betaPrior)is set to ‘FALSE’
-if(priorInfo(res)$type=="none"){
-    cat("Applying lfcShrink()...\n")
-    print(system.time(res <- lfcShrink(dds,contrast=c(my.contrast,levels(colData(dds)[[my.contrast]])[2],levels(colData(dds)[[my.contrast]])[1]),res=res,parallel=TRUE)))
+# Data preparation for downstream analysis
+if(TRUE){
+    if(FALSE){
+        res.unshrunken<-res
+        dt.res.unshrunken<-data.table(data.frame(res.unshrunken)); dt.res.unshrunken[[my.filter]]<-rownames(res.unshrunken); 
+    }
+
+    #if(packageVersion("DESeq2")>=1.16){} # CHANGES IN VERSION 1.15.9 adding prototype function lfcShrink().
+                                            #‘>=1.16’, the default (betaPrior)is set to ‘FALSE’
+    if(priorInfo(res)$type=="none"){
+        cat("Applying lfcShrink()...\n")
+        print(system.time(res <- lfcShrink(dds,contrast=c(my.contrast,levels(colData(dds)[[my.contrast]])[2],levels(colData(dds)[[my.contrast]])[1]),res=res,parallel=TRUE)))
+    }
+    my.res <- res
+
+    ################################################
+    ## Test of lfcShrink() with different options ##
+    ################################################
+    if(FALSE){
+        # default 'contrast'
+        res.default.contrast<-res
+        dt.res.default.contrast<-data.table(data.frame(res.default.contrast)); dt.res.default.contrast[[my.filter]]<-rownames(res.default.contrast); 
+
+        # default 'coef'
+        res.default.coef <- lfcShrink(dds,coef="Sex_F_vs_M",parallel=TRUE)
+        dt.res.default.coef<-data.table(data.frame(res.default.coef)); dt.res.default.coef[[my.filter]]<-rownames(res.default.coef); 
+
+        # type="ashr"
+        res.ashr <- lfcShrink(dds,coef="Sex_F_vs_M",type="ashr",parallel=TRUE)
+        dt.res.ashr<-data.table(data.frame(res.ashr)); dt.res.ashr[[my.filter]]<-rownames(res.ashr); 
+
+        # type="apeglm"
+        res.apeglm <- lfcShrink(dds,coef="Sex_F_vs_M",type="apeglm",parallel=TRUE)
+        dt.res.apeglm<-data.table(data.frame(res.apeglm)); dt.res.apeglm[[my.filter]]<-rownames(res.apeglm) 
+
+        merge(dt.res.unshrunken, dt.ensg[hgnc_symbol=="DDX3Y"]) # un-shrunken
+        merge(dt.res.default.contrast, dt.ensg[hgnc_symbol=="DDX3Y"]) # default via 'contrast'
+        merge(dt.res.default.coef, dt.ensg[hgnc_symbol=="DDX3Y"]) # default via 'coef'
+        merge(dt.res.ashr, dt.ensg[hgnc_symbol=="DDX3Y"]) # ashr
+        merge(dt.res.apeglm, dt.ensg[hgnc_symbol=="DDX3Y"]) # apeglm
+
+    }
+
+    dt.res<-data.table(data.frame(res)); dt.res[[my.filter]]<-rownames(res); 
+    rn=rownames(colData(dds)) #as.character(samples[["SampleName"]]) # samples$SampleName (or samples[,c("SampleName")])
+    rn.control=rownames(colData(dds)[as.numeric(colData(dds)[[my.contrast]])-1==0,]) 
+                #as.character(colData(dds)[as.numeric(colData(dds)[[my.contrast]])-1==0,c("SampleName")]) #as.character(samples[as.numeric(samples[[my.contrast]])-1==0,c("SampleName")]) # control only (AGA or Male), which is background
+    rn.case=rownames(colData(dds)[as.numeric(colData(dds)[[my.contrast]])-1!=0,])
+                #as.character(samples[as.numeric(samples[[my.contrast]])-1!=0,c("SampleName")]) # case only (SGA or female)
+    cat("fpkm(dds)...\n")
+    ddsFpkm <-fpkm(dds) # isa 'matrix'
+    cat("fpm(dds)...\n")
+    ddsFpm <-fpm(dds) # isa 'matrix'
 }
-my.res <- res
-dt.res<-data.table(data.frame(res)); dt.res[[my.filter]]<-rownames(res); 
-rn=rownames(colData(dds)) #as.character(samples[["SampleName"]]) # samples$SampleName (or samples[,c("SampleName")])
-rn.control=rownames(colData(dds)[as.numeric(colData(dds)[[my.contrast]])-1==0,]) 
-			#as.character(colData(dds)[as.numeric(colData(dds)[[my.contrast]])-1==0,c("SampleName")]) #as.character(samples[as.numeric(samples[[my.contrast]])-1==0,c("SampleName")]) # control only (AGA or Male), which is background
-rn.case=rownames(colData(dds)[as.numeric(colData(dds)[[my.contrast]])-1!=0,])
-			#as.character(samples[as.numeric(samples[[my.contrast]])-1!=0,c("SampleName")]) # case only (SGA or female)
-cat("setting FPKM...\n")
-cat("fpkm(dds)...\n")
-ddsFpkm <-fpkm(dds) # isa 'matrix'
-cat("fpm(dds)...\n")
-ddsFpm <-fpm(dds) # isa 'matrix'
+########################
+### MAIN DEG ANALYSIS ##
+########################
+if(TRUE){
+    cat("main DEG analysis...\n")
+    # prepare pdf output filename
+    my.file.name<- paste0(deseq.dir,'/deseq.',sampleType,".",TR_PREFIX,".",ENS_VER)
+    pdf(file=paste(my.file.name,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
+
+    ##############
+    ## data prep #
+    ##############
+    foo<-data.table(meanFpkm=rowMeans(ddsFpkm,na.rm=T), 
+                    meanFpkm.case=rowMeans(ddsFpkm[,rn.case],na.rm=T), 
+                    meanFpkm.control=rowMeans(ddsFpkm[,rn.control],na.rm=T))
+    foo[[my.filter]]<-rownames(ddsFpkm)
+    deseq.anno=merge(dt.res, foo, all.x=TRUE)
+    # miRNA, piRNA, exon, RPT
+    if(exists("my.target")){
+        bar<-unique(with(as.data.frame(my.target), data.frame(seqnames,Name)))
+        colnames(bar)<-c("chromosome_name",my.filter)
+        deseq.anno=merge(deseq.anno, bar, all.x=TRUE)[order(pvalue)]
+    # ensembl_gene_id based analysis
+    }else{
+        deseq.anno<-merge(deseq.anno, dt.ensg[,.(ensembl_gene_id,chromosome_name,hgnc_symbol,gene_biotype)], all.x=TRUE)[order(pvalue)]
+    }
+    ###########################
+    # plot FC over read-count #
+    ###########################
+    cat("plot FC over read-count","\n")
+    # 1. all genes
+    deseq.top.deg <- deseq.anno
+    if(nrow(deseq.top.deg)>0){getTopDeseq(deseq.top.deg,"all.gene")}
+
+    # 2. padj < 0.05 
+    cat("Top DEGs of padj<=0.05\n")
+    my.pval=0.05
+    deseq.top.deg <- deseq.anno[padj<my.pval]
+    if(nrow(deseq.top.deg)>0){getTopDeseq(deseq.top.deg,"padj.05")}
+
+    # 3. padj < 0.01
+    cat("Top DEGs of padj<=0.01\n")
+    my.pval=0.01
+    deseq.top.deg <- deseq.anno[padj<my.pval]
+    if(nrow(deseq.top.deg)>0){getTopDeseq(deseq.top.deg,"padj.01")}
+
+    # 4. top 100 
+    cat("Top 100 DEGs\n")
+    deseq.top.deg <- deseq.anno[1:100]
+    if(nrow(deseq.top.deg)>0){getTopDeseq(deseq.top.deg,"top.100")}
+
+    # Samples Info 
+    write.csv(colData(dds), file=gzfile(file.path(deseq.dir,paste0(sampleType,".samples.txt.gz"))), row.names=F, quote=F)
+    dev.off()
+
+	#####################
+	## All Counts/FPKM ##
+	#####################
+	write.csv(ddsFpkm, file=gzfile(file.path(cluster.dir, paste0(sampleType, ".fpkm.csv.gz"))),quote=F)
+	write.csv(counts(dds,normalized=T), file=gzfile(file.path(cluster.dir, paste0(sampleType, ".normalized.count.csv.gz"))),quote=F)
+	write.csv(counts(dds,normalized=F), file=gzfile(file.path(cluster.dir, paste0(sampleType, ".raw.count.csv.gz"))),quote=F)
+
+
+    cat("All is done\n")
+
+    # Old legacy codes
+    if(FALSE){
+        ################################################
+        ## Plot expression level of a gene of interest #
+        ################################################
+        my.entry<-dt.res[order(pvalue)][[my.filter]][1]
+        plotExp(my.entry,"FPM",my.contrast,my.box=FALSE,my.save=T)
+        plotExp(my.entry,"Count",my.contrast,my.box=FALSE,my.save=T)
+        #plotExp(my.entry,"FPM",my.contrast,my.box=TRUE,my.save=T)
+
+        ##########################
+        ## Top DEGs padj<=0.01  ##
+        ##########################
+        deseq.top.deg=my.res[!is.na(my.res$padj) & my.res$padj<=0.01, ]
+        if(nrow(deseq.top.deg)>0){getTopDeseq(deseq.top.deg,"padj.01")}
+
+        ###########################################
+        # conventional filtering (FDR<0.1 & FC>2) #
+        ###########################################
+    #    deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$padj) & (my.res$log2FoldChange > 1 | my.res$log2FoldChange < -1) & my.res$padj <= 0.1, ]
+        deseq.top.deg=dt.res[ !is.na(log2FoldChange) & !is.na(padj) & (log2FoldChange > 1 | log2FoldChange < -1) & padj <= 0.1]
+        if(nrow(deseq.top.deg) > 1){
+            plotMA(res, main=paste0("conventional filtering (FDR<=0.1 & |logFC|>1): ", nrow(deseq.top.deg), " genes (", nrow(dt.res[log2FoldChange<0]), "<0, ", nrow(dt.res[log2FoldChange>=0]), ">=0)"), ylim=c(-2,2)) # default q-value: alpha = 0.1
+        }
+        #################
+        # for all genes
+        #################
+        cat("no filtering","\n")
+        deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange), ]
+        plotMA(my.res, main=paste0("No filtering: ", nrow(deseq.top.deg), " genes (", table(my.res$log2FoldChange<0)["TRUE"], "<0, ", table(my.res$log2FoldChange<0)["FALSE"], ">=0)"), ylim=c(-2,2)) # default q-value: alpha = 0.1
+        abline(v=c(0.01,1,minRead), h=c(-1,1), col="blue")
+
+        hist(my.res$pvalue, breaks=100, xlab='P-value', main=paste0('P value distribution of ', nrow(my.res[ !is.na(my.res$pvalue),]), ' genes'))
+        hist(my.res[my.res$baseMean>=minRead,]$pvalue, breaks=100, xlab='P-value', main=paste0('P value distribution of ', nrow(my.res[ my.res$baseMean>=minRead,]), ' genes  of minRead>=', minRead))
+
+        #######################################
+        # filter genes by mean count & p-value
+        #######################################
+        cat("filter by mean count & p-value\n")
+        deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$pvalue) & my.res$baseMean>=minRead & my.res$pvalue<=myPValue, ]
+        if(nrow(deseq.top.deg) > 1){
+            hist(deseq.top.deg$padj, main=paste0("FDR distribution of ", nrow(deseq.top.deg) ," genes having P-value<=",myPValue))
+
+            plotMA(deseq.top.deg, main=paste0(nrow(deseq.top.deg), " genes (",table(deseq.top.deg$log2FoldChange<0)["TRUE"] , "<0, ", table(deseq.top.deg$log2FoldChange<0)["FALSE"], ">=0) having mean>=",minRead, "& P-value<",myPValue), ylim=c(-2,2), alpha=0) # default q-value: alpha = 0.1
+            abline(v=c(minRead), col="blue")
+        }
+        ##############################################
+        # filter genes by mean count & p-value & FDR
+        ##############################################
+        cat("filter by mean count & p-value & FDR\n")
+        deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$pvalue) & !is.na(my.res$padj) & my.res$baseMean>=minRead & my.res$pvalue<=myPValue & my.res$padj<=myFDR, ]
+        if(nrow(deseq.top.deg) > 1){
+            plotMA(deseq.top.deg, main=paste0(nrow(deseq.top.deg), " genes (",table(deseq.top.deg$log2FoldChange<0)["TRUE"] , "<0, ", table(deseq.top.deg$log2FoldChange<0)["FALSE"], ">=0) having mean>=",minRead, "& P-value<=",myPValue," & FDR<=",myFDR), ylim=c(-2,2), alpha=0) # default q-value: alpha = 0.1
+            abline(v=c(minRead), col="blue")
+        }
+    }# FALSE
+} # end of MAIN 
 
 ######################
 ## Data Exploration ##
@@ -197,6 +360,11 @@ if(FALSE){
 	# Sample Clustering Based on rlog           #
 	#############################################
 	rlogMat <- assay(rld) # isa 'matirx' (row: genes, col: samples); blind=TRUE by default
+    rlogMat.ori<-rlogMat
+
+    # remove chrY
+	rlogKeep <- rownames(rlogMat) %in% dt.ensg[chromosome_name!="Y",ensembl_gene_id]
+    rlogMat<-rlogMat[rlogKeep,]
 
 	hmcol <- colorRampPalette(brewer.pal(9, "GnBu"))(255)
 	cat("making sampleDists of case & control...\n")
@@ -206,8 +374,10 @@ if(FALSE){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".sample.clustering.heatmap"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=9,height=9,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=9,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	print(heatmap.2(mat, trace="none", col = hmcol, key.xlab="Distance", key.title="", main="Sample Distance"))
 	dev.off()
@@ -220,8 +390,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".sample.clustering.heatmap.case"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=9,height=9,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 	        jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=9,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(heatmap.2(mat, trace="none", col = hmcol, key.xlab="Distance", key.title="", main="Sample Distance of case"))
 		dev.off()
@@ -233,8 +405,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".sample.clustering.heatmap.control"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=9,height=9,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 	        jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=9,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(heatmap.2(mat, trace="none", col = hmcol, key.xlab="Distance", key.title="", main="Sample Distance of control"))
 		dev.off()
@@ -246,8 +420,10 @@ if(FALSE){
 			my.filename <- file.path(cluster.dir, paste0(sampleType, ".boxplot.rlog.case-control"))
             if(capabilities()[["tiff"]]){
 			    tiff(filename=paste0(my.filename,".tiff"),width=16,height=9,units="in",res=300, compression = 'lzw')
-            }else{
+            }else if(capabilities()[["jpeg"]]){
 			    jpeg(filename=paste0(my.filename,".jpeg"),width=16,height=9,units="in",res=300)
+            }else{
+                pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
             }
 			original.parameters<-par()
 			par(xaxt="n") 
@@ -278,21 +454,27 @@ if(FALSE){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".sample.pca"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=9,height=9,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=9,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	print(p)
 	dev.off()
 
 	##############################
+    # Top variable genes         #
 	# Heatmap of Gene Clustering # 
-	# Based on top variable gene #
 	##############################
 	hmcol <- colorRampPalette(rev(brewer.pal(9, "RdBu")))(255)
 	cat("making heatmap of gene clustering ...\n")
-	select<- head( order(rowVars(rlogMat), decreasing=TRUE ), n=20 ) # top 20 variable genes (requires 'genefilter' library)
+	select<- head( order(rowVars(rlogMat), decreasing=TRUE ), n=70 ) # top 20 variable genes (requires 'genefilter' library)
 	my.table<-rlogMat[select,]
 	my.table<-as.data.frame(my.table[order(rownames(my.table)),]) # order by rownames (ensembl_gene_id or mirbase_id)
+
+    dt.foo<-merge(data.table(ensembl_gene_id=rownames(my.table), my.table), dt.ensg[,.(ensembl_gene_id,hgnc_symbol)])
+    my.table<-as.matrix(dt.foo[,-c("ensembl_gene_id","hgnc_symbol")])
+    rownames(my.table)<-dt.foo$hgnc_symbol
 
 	if(is.BM){
 		fields <- c(my.filter, "hgnc_symbol","description")
@@ -311,10 +493,13 @@ if(FALSE){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".top.var.gene.clustering.heatmap"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=9,height=12,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=12,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	print(heatmap.2(as.matrix(my.table), scale="row", trace="none", dendrogram="column", col = hmcol, keysize=1, key.title="", margin=c(5,7), offsetRow=0.1, main="Top Variable Genes"))
+	print(heatmap.2(as.matrix(my.table), scale="row", trace="none", dendrogram="none", col = hmcol, keysize=1, key.title="", margin=c(5,7), offsetRow=0.1, main="Top Variable Genes"))
 	dev.off()
 
 	if(!grepl("^Retosiban",myProject)){
@@ -340,8 +525,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".top.var.gene.clustering.heatmap.case"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=9,height=12,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=12,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(heatmap.2(as.matrix(my.table), scale="row", trace="none", dendrogram="column", col = hmcol, keysize=1, key.title="", margin=c(5,7), offsetRow=0.1, main="Top Variable Genes of case"))
 		dev.off()
@@ -369,8 +556,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".top.var.gene.clustering.heatmap.control"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=9,height=12,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=12,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(heatmap.2(as.matrix(my.table), scale="row", trace="none", dendrogram="column", col = hmcol, keysize=1, key.title="", margin=c(5,7), offsetRow=0.1, main="Top Variable Genes of control"))
 		dev.off()
@@ -389,8 +578,10 @@ if(FALSE){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".fpkm.boxplot"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=9,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=9,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	print(boxplot(ddsFpkm[keep,], xlab="Samples", ylab="FPKM", main=paste0("FPKM boxplots of ",nrow(ddsFpkm[keep,]), " genes having > 1 CPM across samples")))
 	dev.off()
@@ -399,8 +590,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".fpkm.boxplot.case"))
         if(capabilities()[["tiff"]]){
 	    	tiff(filename=paste0(my.filename,".tiff"),width=10,height=9,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 	    	jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=9,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(boxplot(ddsFpkm[keep,rn.case], xlab="case Samples", ylab="FPKM", main=paste0("FPKM boxplots of ",nrow(ddsFpkm[keep,rn.case]), " genes having > 1 CPM across case samples")))
 		dev.off()
@@ -409,8 +602,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".fpkm.boxplot.control"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=10,height=9,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=9,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(boxplot(ddsFpkm[keep,rn.control], xlab="control Samples", ylab="FPKM", main=paste0("FPKM boxplots of ",nrow(ddsFpkm[keep,rn.control]), " genes having > 1 CPM across control samples")))
 		dev.off()
@@ -427,8 +622,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".top.iqr.fpkm.gene.heatmap.all"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=9,height=12,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=12,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(heatmap.2(head(as.matrix(log(myTopExp$fpkm+0.001)),n=round(nrow(ddsFpkm)*0.1*0.01)), Rowv=FALSE, scale="none", trace="none", dendrogram="column", col = hmcol, keysize=1, key.xlab="FPKM", main="Top FPKM Genes"))
 		dev.off()
@@ -451,8 +648,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".top.iqr.fpkm.gene.heatmap.case"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=9,height=12,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=12,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(heatmap.2(head(as.matrix(log(myTopExp.case$fpkm+0.001)),n=round(nrow(ddsFpkm)*0.1*0.01)), Rowv=FALSE, scale="none", trace="none", dendrogram="column", col = hmcol, keysize=1, key.xlab="FPKM", main="Top IQR(FPKM) of case"))
 		dev.off()
@@ -475,8 +674,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".top.iqr.fpkm.gene.heatmap.control"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=9,height=12,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=12,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(heatmap.2(head(as.matrix(log(myTopExp.ctl$fpkm+0.001)),n=round(nrow(ddsFpkm)*0.1*0.01)), Rowv=FALSE, scale="none", trace="none", dendrogram="column", col = hmcol, keysize=1, key.xlab="FPKM", main="Top IQR(FPKM) of control"))
 		dev.off()
@@ -511,8 +712,10 @@ if(FALSE){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".iqr.fpkm.log2.one.plus.mean.log2sd"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=9,height=10,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=10,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	plot(log2(1+apply(ddsFpkm[keep,], 1, function(i) mean(i[i>=quantile(i)[2] & i<=quantile(i)[4]]))), log2(1+apply(ddsFpkm[keep,], 1, function(i) sd(i[i>=quantile(i)[2] & i<=quantile(i)[4]]))), xlab="log2(1+mean(IQR(FPKM)))", ylab="log2(1+SD(IQR(FPKM)))", main="log2(mean)-log2(SD) plot") # SD-Mean plot
 	dev.off()
@@ -524,8 +727,10 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".iqr.fpkm.mean.sd.case"))
         if(capabilities()[["tiff"]]){
 	    	tiff(filename=paste0(my.filename,".tiff"),width=9,height=10,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 	    	jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=10,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		plot(mean.iqr.fpkm, sd.iqr.fpkm, xlab="mean(IQR(FPKM))", ylab="SD(IQR(FPKM))", main="Mean-SD plot of case") # SD-Mean plot
 		text(cbind(mean.iqr.fpkm, sd.iqr.fpkm)[myTopExp.case$select[1:5],], labels=rownames(myTopExp.case$fpkm)[1:5], pos=2) # label to the left (pos=2)
@@ -537,23 +742,19 @@ if(FALSE){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".iqr.fpkm.mean.sd.control"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=9,height=10,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=9,height=10,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		plot(mean.iqr.fpkm, sd.iqr.fpkm, xlab="mean(IQR(FPKM))", ylab="SD(IQR(FPKM))", main="Mean-SD plot of control") # SD-Mean plot
 		text(cbind(mean.iqr.fpkm, sd.iqr.fpkm)[myTopExp.ctl$select[1:5],], labels=rownames(myTopExp.ctl$fpkm)[1:5], pos=2) # label to the left (pos=2)
 		dev.off()
 	}
-} #end of sampleType=="ALL"
-
-###############################
-# prepare pdf output filename #
-###############################
-my.file.name<- paste0(deseq.dir,'/deseq.',sampleType)
-pdf(file=paste(my.file.name,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
+} #end of data exploration (i.e. clustering)
 
 # Boy.Girl chrX only (FG & JD)
-if(FALSE){ 
+if(FALSE){
 	##############
 	## Outliers ##
 	##############
@@ -641,10 +842,11 @@ if(FALSE){
 	dt.res.chrX=merge(dt.res, dt.chr, by="mirbase_id", all.x=TRUE, allow.cartesian=TRUE)[chromosome_name=="X"]
 	dt.res.chrX<-dt.res.chrX[,`new.padj` := p.adjust(pvalue, method="BH")]
 
-} #myProject=="Boy.Girl"
+} #myProject=="Boy.Girl" chrX
 
-
-# FG plasma samples 2016
+###########################
+## FG plasma samples 2016 #
+###########################
 if(myProject=="Plasma.2016"){
 	library(data.table)
 
@@ -692,8 +894,10 @@ if(myProject=="Plasma.2016"){
 	venn.list[["Placenta"]]=my.dt.meanFpkm[Placenta>minFPKM,ensembl_gene_id]
     if(capabilities()[["tiff"]]){
 	    my.filename <- file.path(cluster.dir, paste0(sampleType, ".venn.plasma.pt.fpkm.more.than.",minFPKM,".tiff"))
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    my.filename <- file.path(cluster.dir, paste0(sampleType, ".venn.plasma.pt.fpkm.more.than.",minFPKM,".jpeg"))
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	venn.diagram(
 		x=venn.list,
@@ -722,8 +926,10 @@ if(myProject=="Plasma.2016"){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.fpkm.plasma.heatmap"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=12,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=12,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	heatmap.2(as.matrix(log(myTopExp$fpkm+0.01)), Rowv=FALSE, scale="none", trace="none", dendrogram="column", col = hmcol, keysize=1, key.xlab="log(FPKM)", main="Plasma ChrY Genes of FPKM>0", margins=c(4,8))
 	dev.off()
@@ -731,8 +937,10 @@ if(myProject=="Plasma.2016"){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.fpkm.plasma.heatmap.tr"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=13,height=10,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=13,height=10,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	heatmap.2(as.matrix(log(t(myTopExp$fpkm)+0.01)), Colv=FALSE, scale="none", trace="none", dendrogram="row", col = hmcol, keysize=1, key.xlab="log(FPKM)", main="Plasma ChrY Genes of FPKM>0", margins=c(8,4), srtCol=45)
 	dev.off()
@@ -741,8 +949,10 @@ if(myProject=="Plasma.2016"){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.fpkm.plasma.row.dendro.heatmap"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=12,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=12,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	heatmap.2(as.matrix(log(myTopExp$fpkm+0.01)), Rowv=TRUE, scale="none", trace="none", dendrogram="both", col = hmcol, keysize=1, key.xlab="log(FPKM)", main="Plasma ChrY Genes of FPKM>0", margins=c(4,8))
 	dev.off()
@@ -752,8 +962,10 @@ if(myProject=="Plasma.2016"){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.fpkm.plasma.sorted.heatmap"))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=12,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=12,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	heatmap.2(as.matrix(log(foo+0.01)), Rowv=FALSE, scale="none", trace="none", dendrogram="column", col = hmcol, keysize=1, key.xlab="log(FPKM)", main="Plasma ChrY Genes of FPKM>0", margins=c(4,8))
 	dev.off()
@@ -767,8 +979,10 @@ if(myProject=="Plasma.2016"){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.fpkm.more.than.",i,".plasma.heatmap"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=10,height=12,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=12,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		heatmap.2(as.matrix(log(myTopExp$fpkm+0.01)), Colv=FALSE, Rowv=FALSE, scale="none", trace="none", dendrogram="none", col = hmcol, keysize=1, key.xlab="log(FPKM)", main=paste("ChrY Genes of Avg. Plasma FPKM>",i), margins=c(8,10),  srtCol=45, cellnote=round(myTopExp$fpkm,4), notecol="black")
 		dev.off()
@@ -807,8 +1021,10 @@ if(myProject=="Plasma.2016"){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, ".placenta.specific.genes.fpkm.more.than.",i,".by.group.heatmap"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=10,height=12,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=12,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		heatmap.2(as.matrix(log(myTopExp$fpkm+0.01)), Colv=FALSE, Rowv=FALSE, scale="none", trace="none", dendrogram="none", col = hmcol, keysize=1, key.xlab="log(FPKM)", main=paste("Placenta Specific Genes of Avg Plasma FPKM>",i), margins=c(9,9),  srtCol=45, cellnote=round(myTopExp$fpkm,2), notecol="black")
 		dev.off()
@@ -839,93 +1055,108 @@ if(myProject=="Plasma.2016"){
 	dev.off()	
 } # end of myProject=="Plasma.2016"
 
-# mapping and annotation based on GRCh38
-if(myProject=="Plasma.2017"){
-	library(data.table)
+#######################################
+## Plasma RNA-Seq                    ## 
+## from FG (JD-BR samples) GRCh38.82 ##
+## or ILM (JD-BR samples) GRCh37.82  ##
+#######################################
+if(myProject=="Plasma.2017dfjdkfjdk"){
 
-	#ddsFpkm <-fpkm(dds) # isa 'matrix'
-	#ddsFpm <-fpm(dds) # isa 'matrix'
+    if(TRUE){
+        cat("getting gene annotations...\n")
+        # All plasma samples are breech (of JD)
+        dt.samples<-data.table(as.data.frame(colData(dds)), SampleID=rownames(colData(dds)))
 
-	cat("getting gene annotations...\n")
-	#dt.ensg <- data.table(getBM(attributes = my.fields, filters = my.filter, values = rownames(dds), mart = myMart))
-	#dt.ensg from config/Annotation.R
+        # FPKM, FPM & Counts
+        dt.Fpkm<-data.table(`ensembl_gene_id`=rownames(ddsFpkm), ddsFpkm)
+        dt.Fpm<-data.table(`ensembl_gene_id`=rownames(ddsFpm), ddsFpm)
+        dt.Count<-data.table(`ensembl_gene_id`=rownames(counts(dds)), counts(dds,normalized=T))
 
-	# All plasma samples are breech (of JD)
-	dt.samples<-data.table(as.data.frame(colData(dds)), SampleID=rownames(colData(dds)))
+        ##############################################################################
+        ## Top expressed chrY genes and some placenta-specific genes including PSG7 ##
+        ##############################################################################
+        # placenta-specific genes
+        my.ensg=c(`PSG1`="ENSG00000231924", `PSG2`="ENSG00000242221", `PSG3`="ENSG00000221826", `PSG4`="ENSG00000243137",
+                `PSG5`="ENSG00000204941", `PSG6`="ENSG00000170848", `PSG7`="ENSG00000221878", `PSG8`="ENSG00000124467",
+                `PSG9`="ENSG00000183668", `PSG10P`="ENSG00000248257", `PSG11`="ENSG00000243130", 
+                `CGA`="ENSG00000135346", `CGB1`="ENSG00000267631", `CGB2`="ENSG00000104818", `CGB3`="ENSG00000104827",
+                `CGB5`="ENSG00000189052", `CGB7`="ENSG00000196337", `CGB8`="ENSG00000213030", `CSH1`="ENSG00000136488",
+                `CSH2`="ENSG00000213218", `PLAC1`="ENSG00000170965", `PLAC4`="ENSG00000280109", `PLAC8`="ENSG00000145287",
+                `PAPPA`="ENSG00000182752", `PAPPA2`="ENSG00000116183",`SMS`="ENSG00000102172"
+                )
+        my.ensg=c(`PSG7`="ENSG00000221878")
+        # chrY and target genes only
+        dt.target<-dt.ensg[chromosome_name=="Y" | hgnc_symbol %in% names(my.ensg),.(ensembl_gene_id,hgnc_symbol,chromosome_name)]
 
-	# FPKM, FPM & Counts
-	dt.Fpkm<-data.table(`ensembl_gene_id`=rownames(ddsFpkm), ddsFpkm)
-	dt.Fpm<-data.table(`ensembl_gene_id`=rownames(ddsFpm), ddsFpm)
-	dt.Count<-data.table(`ensembl_gene_id`=rownames(counts(dds)), counts(dds))
+        dt.melt.Fpkm<-melt(dt.Fpkm[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="FPKM")
+        dt.melt.Fpm<-melt(dt.Fpm[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="FPM")
+        dt.melt.Count<-melt(dt.Count[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="Count")
+        #       ensembl_gene_id SampleID              FPKM
+        #    1: ENSG00000012817      413                 0
+        #	 2: ENSG00000067048      413                 0
 
-	##############################################################################
-	## Top expressed chrY genes and some placenta-specific genes including PSG7 ##
-	##############################################################################
-	# placenta-specific genes
-	my.ensg=c(`PSG1`="ENSG00000231924", `PSG2`="ENSG00000242221", `PSG3`="ENSG00000221826", `PSG4`="ENSG00000243137",
-			`PSG5`="ENSG00000204941", `PSG6`="ENSG00000170848", `PSG7`="ENSG00000221878", `PSG8`="ENSG00000124467",
-			`PSG9`="ENSG00000183668", `PSG10P`="ENSG00000248257", `PSG11`="ENSG00000243130", 
-			`CGA`="ENSG00000135346", `CGB1`="ENSG00000267631", `CGB2`="ENSG00000104818", `CGB3`="ENSG00000104827",
-			`CGB5`="ENSG00000189052", `CGB7`="ENSG00000196337", `CGB8`="ENSG00000213030", `CSH1`="ENSG00000136488",
-			`CSH2`="ENSG00000213218", `PLAC1`="ENSG00000170965", `PLAC4`="ENSG00000280109", `PLAC8`="ENSG00000145287",
-			`PAPPA`="ENSG00000182752", `PAPPA2`="ENSG00000116183",`SMS`="ENSG00000102172"
-			)
-	#my.ensg=c(`PSG7`="ENSG00000221878")
-	# chrY and target genes only
-	dt.target<-dt.ensg[chromosome_name=="Y" | hgnc_symbol %in% names(my.ensg),.(ensembl_gene_id,hgnc_symbol,chromosome_name)]
+        # FPKM of each samples
+        dt.foo.fpkm<-merge(dt.melt.Fpkm, dt.samples) 
+        dt.ga.sex.fpkm<-merge(dt.foo.fpkm[,.(`FPKM`=mean(FPKM)),"ensembl_gene_id,GA,SeqType,Sex"], dt.ensg) # mean FPKM by GA and Sex for a gene
+        dt.sample.fpkm<-merge(dt.foo.fpkm, dt.ensg, by="ensembl_gene_id") # FPKM of each samples with gene names
 
-	dt.melt.Fpkm<-melt(dt.Fpkm[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="FPKM")
-	dt.melt.Fpm<-melt(dt.Fpm[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="FPM")
-	dt.melt.Count<-melt(dt.Count[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="Count")
-	#       ensembl_gene_id SampleID              FPKM
-	#    1: ENSG00000012817      413                 0
-	#	 2: ENSG00000067048      413                 0
+        # FPM of each samples
+        dt.foo.fpm<-merge(dt.melt.Fpm, dt.samples) 
+        dt.ga.sex.fpm<-merge(dt.foo.fpm[,.(`FPM`=mean(FPM)),"ensembl_gene_id,GA,SeqType,Sex"], dt.ensg) # mean FPM by GA and Sex for a gene
+        dt.sample.fpm<-merge(dt.foo.fpm, dt.ensg, by="ensembl_gene_id") # FPM of each samples with gene names
 
-	# FPKM of each samples
-	dt.foo.fpkm<-merge(dt.melt.Fpkm, dt.samples) 
-	dt.ga.sex.fpkm<-merge(dt.foo.fpkm[,.(`FPKM`=mean(FPKM)),"ensembl_gene_id,GA,SeqType,Sex"], dt.ensg) # mean FPKM by GA and Sex for a gene
-	dt.sample.fpkm<-merge(dt.foo.fpkm, dt.ensg, by="ensembl_gene_id") # FPKM of each samples with gene names
+        # Count of each samples
+        dt.foo.count<-merge(dt.melt.Count, dt.samples) 
+        dt.ga.sex.count<-merge(dt.foo.count[,.(`Count`=mean(Count)),"ensembl_gene_id,GA,SeqType,Sex"], dt.ensg) # mean Count by "GA, SeqType and Sex"
+        dt.sample.count<-merge(dt.foo.count, dt.ensg, by="ensembl_gene_id") # Count of each samples with gene names
+    }
 
-	# FPM of each samples
-	dt.foo.fpm<-merge(dt.melt.Fpm, dt.samples) 
-	dt.ga.sex.fpm<-merge(dt.foo.fpm[,.(`FPM`=mean(FPM)),"ensembl_gene_id,GA,SeqType,Sex"], dt.ensg) # mean FPM by GA and Sex for a gene
-	dt.sample.fpm<-merge(dt.foo.fpm, dt.ensg, by="ensembl_gene_id") # FPM of each samples with gene names
-
-	# Count of each samples
-	dt.foo.count<-merge(dt.melt.Count, dt.samples) 
-	dt.ga.sex.count<-merge(dt.foo.count[,.(`Count`=mean(Count)),"ensembl_gene_id,GA,SeqType,Sex"], dt.ensg) # mean Count by "GA, SeqType and Sex"
-	dt.sample.count<-merge(dt.foo.count, dt.ensg, by="ensembl_gene_id") # Count of each samples with gene names
-
-	##
-	## SMS
+	#########
+	## SMS ##
+	#########
 	##ggplot(merge(dt.foo.fpkm[BarCode!="NoIndex",.(ensembl_gene_id, Sex,GA,FPKM)], dt.ensg[hgnc_symbol=="SMS",.(ensembl_gene_id)], by="ensembl_gene_id"), aes(GA, FPKM)) + geom_boxplot(aes(fill=Sex),alpha=.5)
 	##ggplot(merge(dt.foo.fpm[BarCode!="NoIndex",.(ensembl_gene_id, Sex,GA,FPM)], dt.ensg[hgnc_symbol=="SMS",.(ensembl_gene_id)], by="ensembl_gene_id"), aes(GA, FPM)) + geom_boxplot(aes(fill=Sex),alpha=.5)
 	##ggplot(merge(dt.foo.count[BarCode!="NoIndex",.(ensembl_gene_id, Sex,GA,Count)], dt.ensg[hgnc_symbol=="SMS",.(ensembl_gene_id)], by="ensembl_gene_id"), aes(GA, Count)) + geom_boxplot(aes(fill=Sex),alpha=.5)
+    #write.csv(ddsFpkm["ENSG00000102172",rn.case], file="/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.10/AGA.withoutChrY/SMS.FPKM.Female.csv",col.names=F) # female
+    #write.csv(ddsFpkm["ENSG00000102172",rn.control], file="/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/DESeq2.1.10/AGA.withoutChrY/SMS.FPKM.Male.csv",col.names=F) # male
 
-	dt.plasma.fpkm<-merge(
-			# Highly expressed chrY genes by GA & Sex 
-			data.table::dcast(dt.ga.sex.fpkm[chromosome_name=="Y" | hgnc_symbol %in% c("PSG7","SMS")], ensembl_gene_id+hgnc_symbol+gene_biotype~GA+SeqType+Sex, value.var="FPKM", sep="_"), # long (row-based) to wide (column-based)
-			# Highly expressed chrY genes across all samples
-			#dt.sample.fpkm[chromosome_name=="Y" | hgnc_symbol=="PSG7", .(all=mean(FPKM)),"ensembl_gene_id"][all>0][order(-all)],
-			dt.sample.fpkm[chromosome_name=="Y" | hgnc_symbol %in% c("PSG7","SMS"), .(all=mean(FPKM)),"ensembl_gene_id"],
-			by="ensembl_gene_id")[order(-all)]
+    if(TRUE){
+        # Highly expressed chrY genes by GA & Sex 
+        dt.plasma.fpkm<-data.table::dcast(dt.ga.sex.fpkm[chromosome_name=="Y" | hgnc_symbol %in% c("PSG7","SMS")], ensembl_gene_id+hgnc_symbol+gene_biotype~Sex+GA+SeqType, value.var="FPKM", sep="_") # long (row-based) to wide (column-based)
+        dt.plasma.fpm<-data.table::dcast(dt.ga.sex.fpm[chromosome_name=="Y" | hgnc_symbol %in% c("PSG7","SMS")], ensembl_gene_id+hgnc_symbol+gene_biotype~Sex+GA+SeqType, value.var="FPM", sep="_") # long (row-based) to wide (column-based)
+        dt.plasma.count<-data.table::dcast(dt.ga.sex.count[chromosome_name=="Y" | hgnc_symbol=="PSG7"], ensembl_gene_id+hgnc_symbol+gene_biotype~Sex+GA+SeqType, value.var="Count", sep="_") # long (row-based) to wide (column-based)
+    }else{
+        dt.plasma.fpkm<-merge(
+                # Highly expressed chrY genes by GA & Sex 
+                data.table::dcast(dt.ga.sex.fpkm[chromosome_name=="Y" | hgnc_symbol %in% c("PSG7","SMS")], ensembl_gene_id+hgnc_symbol+gene_biotype~Sex+GA+SeqType, value.var="FPKM", sep="_"), # long (row-based) to wide (column-based)
+                # Highly expressed chrY genes across all samples
+                #dt.sample.fpkm[chromosome_name=="Y" | hgnc_symbol=="PSG7", .(all=mean(FPKM)),"ensembl_gene_id"][all>0][order(-all)],
+                dt.sample.fpkm[chromosome_name=="Y" | hgnc_symbol %in% c("PSG7","SMS"), .(all=mean(FPKM)),"ensembl_gene_id"],
+                by="ensembl_gene_id")[order(-all)]
+        dt.plasma.fpm<-merge(
+                data.table::dcast(dt.ga.sex.fpm[chromosome_name=="Y" | hgnc_symbol %in% c("PSG7","SMS")], ensembl_gene_id+hgnc_symbol+gene_biotype~Sex+GA+SeqType, value.var="FPM", sep="_"), # long (row-based) to wide (column-based)
+                dt.sample.fpm[chromosome_name=="Y" | hgnc_symbol %in% c("PSG7","SMS"), .(all=mean(FPM)),"ensembl_gene_id"],
+                by="ensembl_gene_id")[order(-all)]
+        dt.plasma.count<-merge(
+                # Highly expressed chrY genes by GA & Sex 
+                data.table::dcast(dt.ga.sex.count[chromosome_name=="Y" | hgnc_symbol=="PSG7"], ensembl_gene_id+hgnc_symbol+gene_biotype~Sex+GA+SeqType, value.var="Count", sep="_"), # long (row-based) to wide (column-based)
+                # Highly expressed chrY genes across all samples
+                #dt.sample.count[chromosome_name=="Y" | hgnc_symbol=="PSG7", .(all=mean(Count)),"ensembl_gene_id"][all>0][order(-all)],
+                dt.sample.count[chromosome_name=="Y" | hgnc_symbol=="PSG7", .(all=mean(Count)),"ensembl_gene_id"][order(-all)],
+                by="ensembl_gene_id")[order(-all)]
+    }
 
 	write.csv(dt.plasma.fpkm, file=file.path(cluster.dir, paste0(myProject, ".top.chrY.PSG7.fpkm.per.group.csv")))
+	write.csv(dt.plasma.fpm, file=file.path(cluster.dir, paste0(myProject, ".top.chrY.PSG7.fpm.per.group.csv")))
+	write.csv(dt.plasma.count, file=file.path(cluster.dir, paste0(myProject, ".top.chrY.PSG7.count.per.group.csv")))
+
 	write.csv(dt.Fpkm[ensembl_gene_id %in% dt.plasma.fpkm$ensembl_gene_id], file=gzfile(file.path(cluster.dir, paste0(myProject, ".top.chrY.PSG7.fpkm.per.sample.csv.gz"))))
-
-	write.csv(merge(dt.Count, dt.ensg[,.(ensembl_gene_id,chromosome_name)])[chromosome_name=="Y"], file=gzfile(file.path(cluster.dir, paste0(myProject, ".all.chrY.PSG7.count.per.sample.csv.gz"))))
-	write.csv(merge(dt.Fpm, dt.ensg[,.(ensembl_gene_id,chromosome_name)])[chromosome_name=="Y"], file=gzfile(file.path(cluster.dir, paste0(myProject, ".all.chrY.PSG7.fpm.per.sample.csv.gz"))))
-
-	dt.plasma.count<-merge(
-			# Highly expressed chrY genes by GA & Sex 
-			data.table::dcast(dt.ga.sex.count[chromosome_name=="Y" | hgnc_symbol=="PSG7"], ensembl_gene_id+hgnc_symbol+gene_biotype~GA+SeqType+Sex, value.var="Count", sep="_"), # long (row-based) to wide (column-based)
-			# Highly expressed chrY genes across all samples
-			#dt.sample.count[chromosome_name=="Y" | hgnc_symbol=="PSG7", .(all=mean(Count)),"ensembl_gene_id"][all>0][order(-all)],
-			dt.sample.count[chromosome_name=="Y" | hgnc_symbol=="PSG7", .(all=mean(Count)),"ensembl_gene_id"][order(-all)],
-			by="ensembl_gene_id")[order(-all)]
-
-	write.csv(dt.plasma.count, file=file.path(cluster.dir, paste0(myProject, ".top.chrY.PSG7.per.group.count.csv")))
+	write.csv(dt.Fpm[ensembl_gene_id %in% dt.plasma.fpm$ensembl_gene_id], file=gzfile(file.path(cluster.dir, paste0(myProject, ".top.chrY.PSG7.fpm.per.sample.csv.gz"))))
 	write.csv(dt.Count[ensembl_gene_id %in% dt.plasma.count$ensembl_gene_id], file=gzfile(file.path(cluster.dir, paste0(myProject, ".top.chrY.PSG7.count.per.sample.csv.gz"))))
+
+	write.csv(merge(dt.Fpkm, dt.ensg[,.(ensembl_gene_id,chromosome_name)])[chromosome_name=="Y"], file=gzfile(file.path(cluster.dir, paste0(myProject, ".all.chrY.PSG7.fpkm.per.sample.csv.gz"))))
+	write.csv(merge(dt.Fpm, dt.ensg[,.(ensembl_gene_id,chromosome_name)])[chromosome_name=="Y"], file=gzfile(file.path(cluster.dir, paste0(myProject, ".all.chrY.PSG7.fpm.per.sample.csv.gz"))))
+	write.csv(merge(dt.Count, dt.ensg[,.(ensembl_gene_id,chromosome_name)])[chromosome_name=="Y"], file=gzfile(file.path(cluster.dir, paste0(myProject, ".all.chrY.PSG7.count.per.sample.csv.gz"))))
 
 	# merge FPKM & Count for this gene
 	#merge(dt.sample.count[hgnc_symbol=="TMSB4Y",.(SampleID,Count)], dt.sample.fpkm[hgnc_symbol=="TMSB4Y",.(SampleID,FPKM)])[order(FPKM)]
@@ -933,149 +1164,210 @@ if(myProject=="Plasma.2017"){
 	#############
 	## Figures ##
 	#############
-	my.file.name<- paste0(cluster.dir,'/top.expressed.chrY.',sampleType)
-	pdf(file=paste(my.file.name,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
-	# genes of interests
-	my.genes=c("PSG7", "RNA5-8SP6", "TMSB4Y")
-	for(my.gene in my.genes){
-		# Histogram of log2(FPKM)
-		if(my.gene=="PSG7"){
-			p0<-ggplot(dt.sample.fpkm[hgnc_symbol==my.gene,.(SampleID,Sex,GA,FPKM)], aes(x=log2(FPKM))) +  
-				geom_histogram(colour="black", fill="white") + 
-				ggtitle(my.gene) +
-				theme_Publication()
-			print(p0)
+    if(FALSE){
+        my.file.name<- paste0(cluster.dir,'/top.expressed.chrY.',sampleType)
+        pdf(file=paste(my.file.name,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
+        # genes of interests
+        my.genes=c("PSG7", "RNA5-8SP6", "TMSB4Y")
+        for(my.gene in my.genes){
+            # Histogram of log2(FPKM)
+            if(my.gene=="PSG7"){
+                p0<-ggplot(dt.sample.fpkm[hgnc_symbol==my.gene,.(SampleID,Sex,GA,FPKM)], aes(x=log2(FPKM))) +  
+                    geom_histogram(colour="black", fill="white") + 
+                    ggtitle(my.gene) +
+                    theme_Publication()
+                print(p0)
 
-			p0.1<-ggplot(dt.sample.fpkm[hgnc_symbol==my.gene,.(SampleID,Sex,GA,FPKM)], aes(x=FPKM)) +  
-				geom_histogram(colour="black", fill="white") + 
-				ggtitle(my.gene) +
-				theme_Publication()
-			print(p0.1)
+                p0.1<-ggplot(dt.sample.fpkm[hgnc_symbol==my.gene,.(SampleID,Sex,GA,FPKM)], aes(x=FPKM)) +  
+                    geom_histogram(colour="black", fill="white") + 
+                    ggtitle(my.gene) +
+                    theme_Publication()
+                print(p0.1)
 
-			p0.2<-ggplot(dt.sample.count[hgnc_symbol==my.gene,.(SampleID,Sex,GA,Count)], aes(x=Count)) +  
-				geom_histogram(colour="black", fill="white") + 
-				ggtitle(my.gene) +
-				theme_Publication()
-			print(p0.2)
+                p0.2<-ggplot(dt.sample.count[hgnc_symbol==my.gene,.(SampleID,Sex,GA,Count)], aes(x=Count)) +  
+                    geom_histogram(colour="black", fill="white") + 
+                    ggtitle(my.gene) +
+                    theme_Publication()
+                print(p0.2)
 
-			# boxplot of FPKM vs GA
-			p2<-ggplot(dt.sample.fpkm[hgnc_symbol==my.gene], aes(GA, FPKM)) + 
-				geom_boxplot(outlier.shape=1, outlier.size=5, size=1, width=.5) +
-				ggtitle(my.gene) + 
-				scale_colour_manual(values=my.col[["Sex"]]) +
-				theme_Publication()
-			print(p2)
-		}else{
-			# mean FPKM vs GA
-			p1<-ggplot(dt.ga.sex.fpkm[hgnc_symbol==my.gene], aes(GA, FPKM, group=Sex)) + 
-				geom_point(aes(col=Sex), size=6) + 
-				geom_line(lty=2) + 
-				ggtitle(my.gene) + 
-				scale_colour_manual(values=my.col[["Sex"]]) +
-				theme_Publication()
-			print(p1)
+                # boxplot of FPKM vs GA
+                p2<-ggplot(dt.sample.fpkm[hgnc_symbol==my.gene], aes(GA, FPKM)) + 
+                    geom_boxplot(outlier.shape=1, outlier.size=5, size=1, width=.5) +
+                    ggtitle(my.gene) + 
+                    scale_colour_manual(values=my.col[["Sex"]]) +
+                    theme_Publication()
+                print(p2)
+            }else{
+                # mean FPKM vs GA
+                p1<-ggplot(dt.ga.sex.fpkm[hgnc_symbol==my.gene], aes(GA, FPKM, group=Sex)) + 
+                    geom_point(aes(col=Sex), size=6) + 
+                    geom_line(lty=2) + 
+                    ggtitle(my.gene) + 
+                    scale_colour_manual(values=my.col[["Sex"]]) +
+                    theme_Publication()
+                print(p1)
 
-			# mean FPKM vs GA
-			p1.1<-ggplot(dt.ga.sex.fpkm[hgnc_symbol==my.gene], aes(GA, FPKM, group=Sex)) + 
-				geom_point(aes(shape=Sex), size=8) + 
-				geom_line() + 
-				ggtitle(my.gene) + 
-				scale_shape_discrete(solid=F) +
-				theme_Publication()
-			print(p1.1)
+                # mean FPKM vs GA
+                p1.1<-ggplot(dt.ga.sex.fpkm[hgnc_symbol==my.gene], aes(GA, FPKM, group=Sex)) + 
+                    geom_point(aes(shape=Sex), size=8) + 
+                    geom_line() + 
+                    ggtitle(my.gene) + 
+                    scale_shape_discrete(solid=F) +
+                    theme_Publication()
+                print(p1.1)
 
-			# boxplot of FPKM vs GA
-			p2<-ggplot(dt.sample.fpkm[hgnc_symbol==my.gene], aes(GA, FPKM)) + 
-				geom_boxplot(aes(col=Sex), outlier.shape=1, outlier.size=5, size=1, width=.5) +
-				ggtitle(my.gene) + 
-				scale_colour_manual(values=my.col[["Sex"]]) +
-				theme_Publication()
-			print(p2)
-		}
-	}
-	dev.off()
-
-	#############################
-	## Placenta breech samples ##
-	## based on HT-Seq         ##
-	## N=24 (n(F)=12, n(M)=12) ##
-	## Plasma samples are BR   ##
-	#############################
-	load("~/results/RNA-Seq/Boy.Girl.FG.JD.GRCh38/DESeq2/BR/deseq.BR.RData")
-	# samples
-	dt.pt.samples<-data.table(as.data.frame(colData(dds)), SampleID=rownames(colData(dds)))
-	pt.ddsFpkm <-fpkm(dds) # isa 'matrix'
-	pt.ddsFpm <-fpm(dds) # isa 'matrix'
-
-	# FPKM, FPM & Counts
-	dt.pt.Fpkm<-data.table(`ensembl_gene_id`=rownames(pt.ddsFpkm), pt.ddsFpkm)
-	dt.pt.Fpm<-data.table(`ensembl_gene_id`=rownames(pt.ddsFpm), pt.ddsFpm)
-	dt.pt.Count<-data.table(`ensembl_gene_id`=rownames(counts(dds)), counts(dds))
-	# target genes only (see dt.target above)
-	dt.melt.pt.Fpkm<-melt(dt.pt.Fpkm[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="FPKM")
-	dt.melt.pt.Fpm<-melt(dt.pt.Fpm[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="FPM")
-	dt.melt.pt.Count<-melt(dt.pt.Count[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="Count")
-	
-	#    1: ENSG00000012817      413                 0
-	#	 2: ENSG00000067048      413                 0
-	dt.foo.pt.fpkm<-merge(dt.melt.pt.Fpkm, dt.pt.samples) # FPKM of each samples
-	dt.sample.pt.fpkm<-merge(dt.foo.pt.fpkm, dt.ensg, by="ensembl_gene_id") # FPKM of each samples with gene names
-
-	dt.foo.pt.fpm<-merge(dt.melt.pt.Fpm, dt.pt.samples) # FPM of each samples
-	dt.sample.pt.fpm<-merge(dt.foo.pt.fpm, dt.ensg, by="ensembl_gene_id") # FPM of each samples with gene names
-
-	dt.foo.pt.count<-merge(dt.melt.pt.Count, dt.pt.samples) # Count of each samples
-	dt.sample.pt.count<-merge(dt.foo.pt.count, dt.ensg, by="ensembl_gene_id") # Count of each samples with gene names
-
-	################################################################################
-	## Top expressed plasma chrY genes and the expression level from the placenta ##
-	################################################################################
-	dt.pt.avg.fpkm<-data.table::dcast(dt.sample.pt.fpkm[CRN %in% dt.pt.samples[dt.pt.samples$CRN %in% dt.samples$CRN]$CRN # placenta samples available with plasma only (n=22)
-						& ensembl_gene_id %in% dt.plasma.fpkm[hgnc_symbol!='PSG7']$ensembl_gene_id,list(.N,FPKM=mean(FPKM)),"Sex,ensembl_gene_id"] # chrY and some targets only
-						, ensembl_gene_id ~ Sex, value.var="FPKM")
-	dt.pt.avg.count<-data.table::dcast(dt.sample.pt.count[CRN %in% dt.pt.samples[dt.pt.samples$CRN %in% dt.samples$CRN]$CRN # placenta samples available with plasma only
-						& ensembl_gene_id %in% dt.plasma.fpkm[hgnc_symbol!='PSG7']$ensembl_gene_id,list(.N,Count=mean(Count)),"Sex,ensembl_gene_id"] # chrY and some targets only
-						, ensembl_gene_id ~ Sex, value.var="Count")
-	dt.pl.pt.fpkm<-merge(dt.plasma.fpkm, dt.pt.avg.fpkm, by="ensembl_gene_id")[order(-all)]
-	dt.pl.pt.count<-merge(dt.plasma.count, dt.pt.avg.count, by="ensembl_gene_id")[order(-all)]
-
-	# select genes of interest
-	my.target.ensg<-dt.pt.avg.count[M>=10 & M/(F+1)>=10,ensembl_gene_id]
-
-
-	my.mat<-list()
-	my.mat[["fpkm"]]<-as.matrix(dt.pl.pt.fpkm[ensembl_gene_id %in% my.target.ensg,list(`12_PE75_M`, `20_PE75_M`, `28_PE75_M`, `36_PE75_M`, `36_PE150_M`, `12_PE75_F`, `20_PE75_F`, `28_PE75_F`, `36_PE75_F`, M, F)][order(-M)])	
-	colnames(my.mat[["fpkm"]])<-c("12_PE75_M", "20_PE75_M", "28_PE75_M", "36_PE75_M", "36_PE150_M", "12_PE75_F", "20_PE75_F", "28_PE75_F", "36_PE75_F", "Placenta_M", "Placenta_F")
-	rownames(my.mat[["fpkm"]])<-as.character(dt.pl.pt.fpkm[ensembl_gene_id %in% my.target.ensg][order(-M)]$hgnc_symbol)
-
-	my.mat[["count"]]<-as.matrix(dt.pl.pt.count[ensembl_gene_id %in% my.target.ensg,list(`12_PE75_M`, `20_PE75_M`, `28_PE75_M`, `36_PE75_M`, `36_PE150_M`, `12_PE75_F`, `20_PE75_F`, `28_PE75_F`, `36_PE75_F`, M, F)][order(-M)])	
-	colnames(my.mat[["count"]])<-c("12_PE75_M", "20_PE75_M", "28_PE75_M", "36_PE75_M", "36_PE150_M", "12_PE75_F", "20_PE75_F", "28_PE75_F", "36_PE75_F", "Placenta_M", "Placenta_F")
-	rownames(my.mat[["count"]])<-as.character(dt.pl.pt.count[ensembl_gene_id %in% my.target.ensg][order(-M)]$hgnc_symbol)
-
-	my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.fpkm.plasma.heatmap.pt.10"))
-    if(capabilities()[["tiff"]]){
-	    tiff(filename=paste0(my.filename,".tiff"),width=8.27,height=11.7,units="in",res=300, compression = 'lzw') # A4 size
-    }else{
-	    jpeg(filename=paste0(my.filename,".jpeg"),width=8.27,height=11.7,units="in",res=300) # A4 size
+                # boxplot of FPKM vs GA
+                p2<-ggplot(dt.sample.fpkm[hgnc_symbol==my.gene], aes(GA, FPKM)) + 
+                    geom_boxplot(aes(col=Sex), outlier.shape=1, outlier.size=5, size=1, width=.5) +
+                    ggtitle(my.gene) + 
+                    scale_colour_manual(values=my.col[["Sex"]]) +
+                    theme_Publication()
+                print(p2)
+            }
+        }
+        dev.off()
     }
-	heatmap.2(log(my.mat[["fpkm"]]+0.001), Rowv=FALSE, Colv=FALSE, scale="none", trace="none", dendrogram="none", col = hmcol, keysize=.7, key.xlab="log(FPKM)", density.info="none", main="Plasma ChrY Genes of FPKM>0", cellnote=round(my.mat[["fpkm"]],3), notecol="black", notecex=.7,  margins=c(6,7), srtCol=45, colCol=c(rep(my.col$Sex[["M"]], 5), rep(my.col$Sex[["F"]], 4), my.col$Sex))
-	dev.off()
-
-	my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.read.count.plasma.heatmap.pt.10"))
-    if(capabilities()[["tiff"]]){
-	    tiff(filename=paste0(my.filename,".tiff"),width=8.27,height=11.7,units="in",res=300, compression = 'lzw') # A4 size
+	#####################################
+	## Loading Placenta breech samples ##
+	#####################################
+    if(grepl("ILM",myProject)){
+        ## 2. Illumina Placenta Tissue RNA-Seq N=19 (F=9, M=10)
+        load("/home/ssg29/results/RNA-Seq/Boy.Girl.ILM.GRCh38/DESeq2.1.18.1/BR.Salmon/deseq.BR.Salmon.RData")
     }else{
-	    jpeg(filename=paste0(my.filename,".jpeg"),width=8.27,height=11.7,units="in",res=300) # A4 size
+        ## 1. Boy.Girl.FG.JD (JD-BR) N=24 (n(F)=12, n(M)=12) ##
+        #load("/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh38/DESeq2.1.10/BR/deseq.BR.RData")
+        ## 2. Boy.Girl.FG.JD (JD-BR) N=19 (F=9, M=10) ## sample saples from ILM placneta tissues (n=19)
+        load("/home/ssg29/results/RNA-Seq/Boy.Girl.FG.JD.GRCh38/DESeq2.1.18.1/BR.Salmon/deseq.BR.Salmon.RData")
     }
-	heatmap.2(log(my.mat[["count"]]+0.001), Rowv=FALSE, Colv=FALSE, scale="none", trace="none", dendrogram="none", col = hmcol, keysize=.7, key.xlab="log(Count)", density.info="none", main="Plasma ChrY Genes of Read-Count>0", cellnote=round(my.mat[["count"]],1), notecol="black",  notecex=.7, margins=c(6,7), srtCol=45, colCol=c(rep(my.col$Sex[["M"]], 5), rep(my.col$Sex[["F"]], 4), my.col$Sex))
-	dev.off()
 
+    if(TRUE){
+        # samples
+        dt.pt.samples<-data.table(as.data.frame(colData(dds)), SampleID=rownames(colData(dds)))
+        pt.ddsFpkm <-fpkm(dds) # isa 'matrix'
+        pt.ddsFpm <-fpm(dds) # isa 'matrix'
+
+        # FPKM, FPM & Counts
+        dt.pt.Fpkm<-data.table(`ensembl_gene_id`=rownames(pt.ddsFpkm), pt.ddsFpkm)
+        dt.pt.Fpm<-data.table(`ensembl_gene_id`=rownames(pt.ddsFpm), pt.ddsFpm)
+        dt.pt.Count<-data.table(`ensembl_gene_id`=rownames(counts(dds)), counts(dds,normalized=T))
+        # target genes only (see dt.target above)
+        dt.melt.pt.Fpkm<-melt(dt.pt.Fpkm[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="FPKM")
+        dt.melt.pt.Fpm<-melt(dt.pt.Fpm[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="FPM")
+        dt.melt.pt.Count<-melt(dt.pt.Count[ensembl_gene_id %in% dt.target[,ensembl_gene_id]], id="ensembl_gene_id", variable.name="SampleID", value.name="Count")
+        
+        #    1: ENSG00000012817      413                 0
+        #	 2: ENSG00000067048      413                 0
+        dt.foo.pt.fpkm<-merge(dt.melt.pt.Fpkm, dt.pt.samples) # FPKM of each samples
+        dt.sample.pt.fpkm<-merge(dt.foo.pt.fpkm, dt.ensg, by="ensembl_gene_id") # FPKM of each samples with gene names
+
+        dt.foo.pt.fpm<-merge(dt.melt.pt.Fpm, dt.pt.samples) # FPM of each samples
+        dt.sample.pt.fpm<-merge(dt.foo.pt.fpm, dt.ensg, by="ensembl_gene_id") # FPM of each samples with gene names
+
+        dt.foo.pt.count<-merge(dt.melt.pt.Count, dt.pt.samples) # Count of each samples
+        dt.sample.pt.count<-merge(dt.foo.pt.count, dt.ensg, by="ensembl_gene_id") # Count of each samples with gene names
+
+        ################################################################################
+        ## Top expressed plasma chrY genes and the expression level from the placenta ##
+        ################################################################################
+        dt.pt.avg.fpm<-data.table::dcast(dt.sample.pt.fpm[CRN %in% dt.pt.samples[dt.pt.samples$CRN %in% dt.samples$CRN]$CRN # placenta samples available with plasma only (n=22)
+                            & ensembl_gene_id %in% dt.plasma.fpm[hgnc_symbol!='PSG7']$ensembl_gene_id,list(.N,FPM=mean(FPM)),"Sex,ensembl_gene_id,hgnc_symbol"] # chrY and some targets only
+                            , ensembl_gene_id+hgnc_symbol ~ Sex, value.var="FPM")
+        dt.pt.avg.fpkm<-data.table::dcast(dt.sample.pt.fpkm[CRN %in% dt.pt.samples[dt.pt.samples$CRN %in% dt.samples$CRN]$CRN # placenta samples available with plasma only (n=22)
+                            & ensembl_gene_id %in% dt.plasma.fpkm[hgnc_symbol!='PSG7']$ensembl_gene_id,list(.N,FPKM=mean(FPKM)),"Sex,ensembl_gene_id,hgnc_symbol"] # chrY and some targets only
+                            , ensembl_gene_id+hgnc_symbol ~ Sex, value.var="FPKM")
+        dt.pt.avg.count<-data.table::dcast(dt.sample.pt.count[CRN %in% dt.pt.samples[dt.pt.samples$CRN %in% dt.samples$CRN]$CRN # placenta samples available with plasma only
+                            & ensembl_gene_id %in% dt.plasma.count[hgnc_symbol!='PSG7']$ensembl_gene_id,list(.N,Count=mean(Count)),"Sex,ensembl_gene_id,hgnc_symbol"] # chrY and some targets only
+                            , ensembl_gene_id+hgnc_symbol ~ Sex, value.var="Count")
+
+        setnames(dt.pt.avg.fpm, c("ensembl_gene_id","hgnc_symbol","Placenta_M","Placenta_F"))
+        setnames(dt.pt.avg.fpkm, c("ensembl_gene_id","hgnc_symbol","Placenta_M","Placenta_F"))
+        setnames(dt.pt.avg.count, c("ensembl_gene_id","hgnc_symbol","Placenta_M","Placenta_F"))
+
+        dt.pl.pt.fpm<-merge(dt.plasma.fpm, dt.pt.avg.fpm, by=c("ensembl_gene_id","hgnc_symbol"))
+        dt.pl.pt.fpkm<-merge(dt.plasma.fpkm, dt.pt.avg.fpkm, by=c("ensembl_gene_id","hgnc_symbol"))
+        dt.pl.pt.count<-merge(dt.plasma.count, dt.pt.avg.count, by=c("ensembl_gene_id","hgnc_symbol"))
+
+        # select genes of interest
+        # use top 11 chrY genes chosen from the original illumina report 
+        my.target.hgnc=c("DDX3Y","RPS4Y1","USP9Y","UTY","ZFY","KDM5D","PCDH11Y","EIF1AY","TXLNGY","NLGN4Y","PRKY")
+        # top chrY genes based on this threshold (FPM>1 & FC>10)
+        #my.target.hgnc<-dt.pt.avg.fpm[Placenta_M>=1 & Placenta_M/(Placenta_F+0.0001)>=10][order(-Placenta_M),as.character(hgnc_symbol)]
+        
+        my.mat<-list()
+        # use top chrY genes 
+        dt.foo<-dt.pl.pt.fpm[hgnc_symbol %in% my.target.hgnc]; dt.foo$hgnc_symbol<-factor(dt.foo$hgnc_symbol,my.target.hgnc)
+        my.mat[["fpm"]]<-as.matrix(dt.foo[order(hgnc_symbol)][,-(1:3)])
+
+        dt.foo<-dt.pl.pt.fpkm[hgnc_symbol %in% my.target.hgnc]; dt.foo$hgnc_symbol<-factor(dt.foo$hgnc_symbol,my.target.hgnc)
+        my.mat[["fpkm"]]<-as.matrix(dt.foo[order(hgnc_symbol)][,-(1:3)])
+
+        dt.foo<-dt.pl.pt.count[hgnc_symbol %in% my.target.hgnc]; dt.foo$hgnc_symbol<-factor(dt.foo$hgnc_symbol,my.target.hgnc)
+        my.mat[["count"]]<-as.matrix(dt.foo[order(hgnc_symbol)][,-(1:3)])
+
+        rownames(my.mat[["fpm"]])<-my.target.hgnc
+        rownames(my.mat[["fpkm"]])<-my.target.hgnc
+        rownames(my.mat[["count"]])<-my.target.hgnc
+    }
+
+    if(TRUE){
+        ######################################
+        ## heatmap of FPM from the top chrY ## 
+        ######################################
+        my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.fpm.plasma.heatmap.pt.10"))
+        if(capabilities()[["tiff"]]){
+            tiff(filename=paste0(my.filename,".tiff"),width=8.27,height=11.7,units="in",res=300, compression = 'lzw') # A4 size
+        }else if(capabilities()[["jpeg"]]){
+            jpeg(filename=paste0(my.filename,".jpeg"),width=8.27,height=11.7,units="in",res=300) # A4 size
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
+        }
+
+        heatmap.2(log(my.mat[["fpm"]]+0.001), Rowv=FALSE, Colv=FALSE, scale="none", trace="none", dendrogram="none", col = hmcol, keysize=.7, key.xlab="log(FPM)", density.info="none", main="FPMs of Plasma ChrY Genes (FPM>0)", cellnote=round(my.mat[["fpm"]],3), notecol="black", notecex=.7,  margins=c(6,7), srtCol=45, colCol=ifelse(grepl("M",colnames(my.mat[["fpm"]])),my.col$Sex[["M"]],my.col$Sex[["F"]]))
+        dev.off()
+
+        #######################################
+        ## heatmap of FPKM from the top chrY ## 
+        #######################################
+        my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.fpkm.plasma.heatmap.pt.10"))
+        if(capabilities()[["tiff"]]){
+            tiff(filename=paste0(my.filename,".tiff"),width=8.27,height=11.7,units="in",res=300, compression = 'lzw') # A4 size
+        }else if(capabilities()[["jpeg"]]){
+            jpeg(filename=paste0(my.filename,".jpeg"),width=8.27,height=11.7,units="in",res=300) # A4 size
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
+        }
+        heatmap.2(log(my.mat[["fpkm"]]+0.001), Rowv=FALSE, Colv=FALSE, scale="none", trace="none", dendrogram="none", col = hmcol, keysize=.7, key.xlab="log(FPKM)", density.info="none", main="FPKMs of Plasma ChrY Genes (FPKM>0)", cellnote=round(my.mat[["fpkm"]],3), notecol="black", notecex=.7,  margins=c(6,7), srtCol=45, colCol=ifelse(grepl("M",colnames(my.mat[["fpkm"]])),my.col$Sex[["M"]],my.col$Sex[["F"]]))
+        dev.off()
+
+        ########################################
+        ## heatmap of Count from the top chrY ## 
+        ########################################
+        my.filename <- file.path(cluster.dir, paste0(sampleType, ".chrY.read.count.plasma.heatmap.pt.10"))
+        if(capabilities()[["tiff"]]){
+            tiff(filename=paste0(my.filename,".tiff"),width=8.27,height=11.7,units="in",res=300, compression = 'lzw') # A4 size
+        }else if(capabilities()[["jpeg"]]){
+            jpeg(filename=paste0(my.filename,".jpeg"),width=8.27,height=11.7,units="in",res=300) # A4 size
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
+        }
+        heatmap.2(log(my.mat[["count"]]+0.001), Rowv=FALSE, Colv=FALSE, scale="none", trace="none", dendrogram="none", col = hmcol, keysize=.7, key.xlab="log(Count)", density.info="none", main="Plasma ChrY Genes of Read-Count>0", cellnote=round(my.mat[["count"]],1), notecol="black",  notecex=.7, margins=c(6,7), srtCol=45, colCol=ifelse(grepl("M",colnames(my.mat[["count"]])),my.col$Sex[["M"]],my.col$Sex[["F"]]))
+        dev.off()
+
+    }
+
+
+	write.csv(my.mat[["fpm"]], file=file.path(cluster.dir, paste0(sampleType, ".chrY.fpm.plasma.pt.10.csv")))
 	write.csv(my.mat[["fpkm"]], file=file.path(cluster.dir, paste0(sampleType, ".chrY.fpkm.plasma.pt.10.csv")))
 	write.csv(my.mat[["count"]], file=file.path(cluster.dir, paste0(sampleType, ".chrY.read.count.plasma.pt.10.csv")))
 
-
 	####################
 	## Per-individual ##
+	####################
+	dt.all.fpm<-merge(
+					dt.sample.pt.fpm[,.(CRN,Sex,ensembl_gene_id,hgnc_symbol,FPM)], # placenta
+					dcast(dt.sample.fpm[,.(CRN,GA,SeqType,ensembl_gene_id,FPM)], CRN+ensembl_gene_id~GA+SeqType, value.var="FPM"), # plasma
+					by=c("ensembl_gene_id","CRN")
+					)
 	dt.all.fpkm<-merge(
 					dt.sample.pt.fpkm[,.(CRN,Sex,ensembl_gene_id,hgnc_symbol,FPKM)], # placenta
 					dcast(dt.sample.fpkm[,.(CRN,GA,SeqType,ensembl_gene_id,FPKM)], CRN+ensembl_gene_id~GA+SeqType, value.var="FPKM"), # plasma
@@ -1087,55 +1379,57 @@ if(myProject=="Plasma.2017"){
 					by=c("ensembl_gene_id","CRN")
 					)
 
-
-
 	#########################################################################
-	## Sample-wise Comparsion between Plasma (GA=12,20,28,36) and Placenta ##
-	########################################################################
+	## Sample-wide Comparsion between Plasma (GA=12,20,28,36) and Placenta ##
+	#########################################################################
 	my.target=dt.target[hgnc_symbol=="PSG7",as.character(ensembl_gene_id)]
 	dl.target<-list()
-	for(my.target in dt.target[chromosome_name!="Y",ensembl_gene_id]){
+	for(my.target in my.target){
 		dt.pt.pl<-rbind(
-			dt.sample.fpkm[ensembl_gene_id==my.target & SeqType=="PE75",.(CRN,Sex,Source,SampleID,SeqType,GA,FPKM)],
-			dt.sample.fpkm[ensembl_gene_id==my.target & SeqType=="PE150",.(CRN,Sex,Source,SampleID,SeqType,GA,FPKM)],
-			#dt.sample.pt.fpkm[ensembl_gene_id==my.target,.(CRN,Sex,Source='Placenta',SampleID,SeqType="SE125",GA='Placenta',FPKM)]
-			dt.sample.pt.fpkm[ensembl_gene_id==my.target & CRN %in% dt.samples$CRN,.(CRN,Sex,Source='Placenta',SampleID,SeqType="SE125",GA=36,FPKM)]
+			dt.sample.fpkm[ensembl_gene_id==my.target,.(CRN,Sex,Source,SampleID,GA,FPKM)],
+			dt.sample.pt.fpkm[ensembl_gene_id==my.target & CRN %in% dt.samples$CRN,.(CRN,Sex,Source='Placenta',SampleID,GA=36,FPKM)]
 			)
-		dl.target[[my.target]]<-data.table::dcast(dt.pt.pl, CRN+Sex~Source+GA+SeqType,value.var="FPKM")[order(-Placenta_36_SE125)] # long (row-based) to wide (column-based)
+		dl.target[[my.target]]<-data.table::dcast(dt.pt.pl, CRN+Sex~Source+GA,value.var="FPKM")[order(-Placenta_36)] # long (row-based) to wide (column-based)
 	}
-		#dt.target[[my.target]][,CRN:=NULL] # remove CRN
-		#this.col=c("12","20","28","36","Placenta")
-		#dt.dummy[[my.target]][, (this.col) := lapply(.SD,as.character), .SDcols=this.col] # numeric to character for the sake of NA to ""
-		## http://stackoverflow.com/questions/20535505/replacing-all-missing-values-in-r-data-table-with-a-value
-		#for (i in seq_along(dt.dummy[[my.target]])) set(dt.dummy[[my.target]], i=which(is.na(dt.dummy[[my.target]][[i]])), j=i, value="")
-		#dt.dummy[[my.target]][,Sex:=ifelse(Sex=="F",1,0)] # 1 for F; 0 for M
-		#write.csv(dt.dummy[[my.target]], file=file.path(cluster.dir,'Ulla', paste(myProject,my.target, "plasma.breech.csv",sep=".")), row.names=F)
+    #dt.target[[my.target]][,CRN:=NULL] # remove CRN
+    #this.col=c("12","20","28","36","Placenta")
+    #dt.dummy[[my.target]][, (this.col) := lapply(.SD,as.character), .SDcols=this.col] # numeric to character for the sake of NA to ""
+    ## http://stackoverflow.com/questions/20535505/replacing-all-missing-values-in-r-data-table-with-a-value
+    #for (i in seq_along(dt.dummy[[my.target]])) set(dt.dummy[[my.target]], i=which(is.na(dt.dummy[[my.target]][[i]])), j=i, value="")
+    #dt.dummy[[my.target]][,Sex:=ifelse(Sex=="F",1,0)] # 1 for F; 0 for M
+    #write.csv(dt.dummy[[my.target]], file=file.path(cluster.dir,'Ulla', paste(myProject,my.target, "plasma.breech.csv",sep=".")), row.names=F)
 
-	# PSG7
+    ##############
+	## PSG7 ROC ##
+    ##############
+    library(pROC)
 	my.file.name<- paste0(cluster.dir,'/PSG7.ROC.by.GA.',sampleType)
 	pdf(file=paste(my.file.name,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=8.3, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
 
-	dt.test<-dl.target[["ENSG00000221878"]][,.(`outcome`=factor(ifelse(Placenta_36_SE125>100,"High","Low")), `Placenta`=Placenta_36_SE125, `12WK`=Plasma_12_PE75, `20WK`=Plasma_20_PE75, `28WK`=Plasma_28_PE75, `36WK`=Plasma_36_PE75, `36KW.Deep`=Plasma_36_PE150)]
-	my.roc.12<-plot.roc(dt.test$outcome, dt.test$`12WK`, main="12WK", legacy.axes=TRUE, print.auc=TRUE, ci=T)
-	my.roc.20<-plot.roc(dt.test$outcome, dt.test$`20WK`, main="20WK",legacy.axes=TRUE, print.auc=TRUE, ci=T)
-	my.roc.28<-plot.roc(dt.test$outcome, dt.test$`28WK`, main="28WK",legacy.axes=TRUE, print.auc=TRUE, ci=T)
-	my.roc.36<-plot.roc(dt.test$outcome, dt.test$`36WK`, main="36WK",legacy.axes=TRUE, print.auc=TRUE, ci=T)
+	dt.test<-dl.target[["ENSG00000221878"]][,.(`outcome`=factor(ifelse(Placenta_36>100,"1","0")), CRN,Sex,`Placenta`=Placenta_36, `12WK`=Plasma_12, `20WK`=Plasma_20, `28WK`=Plasma_28, `36WK`=Plasma_36)]
+	#my.roc.12<-plot.roc(dt.test$outcome, dt.test$`12WK`, main="12WK", legacy.axes=TRUE, print.auc=TRUE, ci=T)
+	#my.roc.20<-plot.roc(dt.test$outcome, dt.test$`20WK`, main="20WK",legacy.axes=TRUE, print.auc=TRUE, ci=T)
+	#my.roc.28<-plot.roc(dt.test$outcome, dt.test$`28WK`, main="28WK",print.auc=TRUE, legacy.axes=T,ci=T)
+	#my.roc.36<-plot.roc(dt.test$outcome, dt.test$`36WK`, main="36WK",legacy.axes=TRUE, print.auc=TRUE, ci=T)
 
-	my.roc.12<-plot.roc(dt.test$outcome, dt.test$`12WK`, main="AUC of PSG7 by GA ", legacy.axes=TRUE, ci=T)
+	my.roc.12<-plot.roc(dt.test$outcome, dt.test$`12WK`, main="AUC of PSG7 by GA (Swift)", legacy.axes=TRUE, ci=T)
 	my.line.20<-lines.roc(dt.test$outcome, dt.test$`20WK`, col=cbPalette[2])
 	my.line.28<-lines.roc(dt.test$outcome, dt.test$`28WK`, col=cbPalette[3])
 	my.line.36<-lines.roc(dt.test$outcome, dt.test$`36WK`, col=cbPalette[4])
-	text(.7, .85, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.roc.12$auc)), 2)))
-	text(.7, .95, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.20$auc)), 2)), col=cbPalette[2])
-	text(.65, .1, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.28$auc)), 2)), col=cbPalette[3])
-	text(.65, .2, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.36$auc)), 2)), col=cbPalette[4])
+    if(grepl("ILM",myProject)){
+        text(.9, .5, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.roc.12$auc)), 2)))
+        text(.8, .85, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.20$auc)), 2)), col=cbPalette[2])
+        text(.6, .6, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.28$auc)), 2)), col=cbPalette[3])
+        text(.6, .99, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.36$auc)), 2)), col=cbPalette[4])
+    }else{
+        text(.7, .9, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.roc.12$auc)), 2)))
+        text(.7, .65, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.20$auc)), 2)), col=cbPalette[2])
+        text(.5, .7, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.28$auc)), 2)), col=cbPalette[3])
+        text(.6, .3, labels=paste("AUC =", round(as.numeric(gsub("Area under the curve:","", my.line.36$auc)), 2)), col=cbPalette[4])
+    }
 	legend("bottomright", legend=c("12Wk","20Wk","28Wk","36Wk"), col=cbPalette2, lwd=2)
-
 	dev.off()
-
 	write.csv(dt.test, file=paste(my.file.name,format(Sys.time(), '%Y-%m-%d_%I%p'), 'FPKM','csv', sep ='.'), row.names=F) 
-
-
 	if(FALSE){
 		dt.foo<-rbind(dt.Fpkm[,list(ensembl_gene_id, SampleID="420","PE75"=`420`,"PE150"=`420a`)],dt.Fpkm[,list(ensembl_gene_id, SampleID="710","PE75"=`710`,"PE150"=`710a`)])
 		dt.foo<-merge(dt.foo, dt.ensg)
@@ -1149,8 +1443,10 @@ if(myProject=="Plasma.2017"){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, "PE75.PE150.fpkm"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=16,height=8,units="in",res=300, compression = 'lzw') # A4 size
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=16,height=8,units="in",res=300) # A4 size
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(p.fpkm2)
 		dev.off()
@@ -1174,8 +1470,10 @@ if(myProject=="Plasma.2017"){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, "PE75.PE150.fpkm.chrY"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=16,height=8,units="in",res=300, compression = 'lzw') # A4 size
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=16,height=8,units="in",res=300) # A4 size
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(p.fpkm4)
 		dev.off()
@@ -1192,8 +1490,10 @@ if(myProject=="Plasma.2017"){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, "PE75.PE150.fpkm.chrY.fpkm.1"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=16,height=8,units="in",res=300, compression = 'lzw') # A4 size
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=16,height=8,units="in",res=300) # A4 size
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		print(p.fpkm5)
 		dev.off()
@@ -1201,67 +1501,36 @@ if(myProject=="Plasma.2017"){
 		my.filename <- file.path(cluster.dir, paste0(sampleType, "PE75.PE150.fpkm.chrY.both"))
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=16,height=16,units="in",res=300, compression = 'lzw') # A4 size
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=16,height=16,units="in",res=300) # A4 size
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		multiplot(p.fpkm4, p.fpkm5)
 		dev.off()
 	}
 } # end of Plasma.2017"
 
-if(grepl("RPT",myProject)){ # re-constructed trascriptome based on our own RNA-Seq
+if(grepl("RPTdjfkdjfkdjfd",myProject)){ # re-constructed trascriptome based on our own RNA-Seq
 	library(VennDiagram)
 	dt.target<-as.data.table(as.data.frame(my.target))
 	# re-constructed transcriptome
+	dt.res
 	dt.res.rpt<-merge(dt.res, unique(dt.target[type=="exon",.(gene_name,gene_id)]))
 
-	# ref-based (based on featureCount)
-    if(FALSE){
-        load("~/results/RNA-Seq/PET.GRCh38.featureCount/DESeq2/ALL/deseq.ALL.RData")
-        dt.res.fc<-data.table(ensembl_gene_id=rownames(res),data.frame(res))
-        dt.res.fc<-merge(dt.res.fc, dt.ensg[,.(ensembl_gene_id,hgnc_symbol,gene_biotype)])
-    }
 	# ref-based (based on salmon)
-	#load("~/results/RNA-Seq/PET.GRCh38.salmon/DESeq2/ALL/deseq.ALL.RData")
-	load("~/results/RNA-Seq/SGA.AGA.SE125.GRCh38.salmon/DESeq2/ALL/deseq.ALL.RData")
-	dt.res.salmon<-data.table(ensembl_gene_id=rownames(res),data.frame(res))
-	dt.res.salmon<-merge(dt.res.salmon, dt.ensg[,.(ensembl_gene_id,hgnc_symbol,gene_biotype)])[order(pvalue)]
-
-	# 1. RPT (novel via salmon) vs Ref (exon-union by featureCount)
-	# merge placentome and the legacy (ref-based)
-	# legacy either P>0.01 or NA
-    if(FALSE){
-        dt.foo<-merge(dt.res.fc, dt.res.rpt, by.x="hgnc_symbol", by.y="gene_name", all.y=T)
-        dt.foo<-rbind(dt.foo[padj.x>0.01 & padj.y<0.01], dt.foo[padj.y<0.01 & is.na(padj.x)] )
-        fields <- c("ensembl_gene_id","description")
-        dt.foo<-merge(dt.foo, as.data.table(getBM(attributes = fields, filters = "ensembl_gene_id", values = dt.foo$ensembl_gene_id, mart = myMart)))
-        write.csv(dt.foo, file=file.path(deseq.dir, paste0(sampleType, ".novel10.not.in.reference.csv")))
-
-        venn.list=list()
-        venn.list[["Novel.10"]]=dt.res.rpt[padj<0.01,unique(gene_name)]
-        venn.list[["Reference"]]=dt.res.fc[padj<0.01,unique(hgnc_symbol)]
-        if(capabilities()[["tiff"]]){
-            my.filename <- file.path(cluster.dir, paste0(sampleType, ".venn.novel10.vs.legacy.tiff"))
-        }else{
-            my.filename <- file.path(cluster.dir, paste0(sampleType, ".venn.novel10.vs.legacy.jpeg"))
-        }
-        venn.diagram(
-            x=venn.list,
-            filename = my.filename,
-            col = "black",
-            fill = c(cbPalette[1],cbPalette[2]),
-            alpha = 0.5,
-            cex = 1.4,
-            fontfamily = "sans",
-            cat.cex = 1.1,
-            cat.fontface = "bold",
-            margin = 0.05
-        )
+	load("~/results/RNA-Seq/PET.GRCh38.salmon/DESeq2.1.18.1/ALL/deseq.ALL.RData")
+	#load("~/results/RNA-Seq/SGA.AGA.SE125.GRCh38.salmon/DESeq2.1.18.1/ALL/deseq.ALL.RData")
+    if(priorInfo(res)$type=="none"){
+        cat("Applying lfcShrink()...\n")
+        print(system.time(res <- lfcShrink(dds,contrast=c("Condition",levels(colData(dds)[["Condition"]])[2],levels(colData(dds)[["Condition"]])[1]),res=res,parallel=TRUE)))
     }
+	dt.res.ref<-data.table(ensembl_gene_id=rownames(res),data.frame(res))
+	dt.res.ref<-merge(dt.res.ref, dt.ensg[,.(ensembl_gene_id,hgnc_symbol,gene_biotype)])[order(pvalue)]
 
-	# 2. RPT (novel via salmon) vs Ref (transcript-aware by salmon))
-    my.pval=0.05
-	dt.foo<-merge(dt.res.salmon, dt.res.rpt, by.x="hgnc_symbol", by.y="gene_name", all.y=T)
+	# RPT (novel via salmon) vs Ref (transcript-aware by salmon))
+    my.pval=0.01
+	dt.foo<-merge(dt.res.ref, dt.res.rpt, by.x="hgnc_symbol", by.y="gene_name", all.y=T)
 	dt.foo<-rbind(dt.foo[padj.x>my.pval & padj.y<my.pval], dt.foo[padj.y<my.pval & is.na(padj.x)] )
 	fields <- c("ensembl_gene_id","description")
 	#dt.foo<-merge(dt.foo, as.data.table(getBM(attributes = fields, filters = "ensembl_gene_id", values = dt.foo$ensembl_gene_id, mart = myMart)))
@@ -1269,13 +1538,16 @@ if(grepl("RPT",myProject)){ # re-constructed trascriptome based on our own RNA-S
 
 	venn.list=list()
 	venn.list[["Novel.10"]]=dt.res.rpt[padj<my.pval,unique(gene_name)]
-	venn.list[["Reference\n(salmon)"]]=dt.res.salmon[padj<my.pval,unique(hgnc_symbol)]
+	venn.list[["Reference\n(salmon)"]]=dt.res.ref[padj<my.pval,unique(hgnc_symbol)]
     if(capabilities()[["tiff"]]){
 	    my.filename <- file.path(cluster.dir, paste0(sampleType, ".venn.novel10.vs.legacy.salmon.tiff"))
         my.imagetype="tiff"
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    my.filename <- file.path(cluster.dir, paste0(sampleType, ".venn.novel10.vs.legacy.salmon.png"))
         my.imagetype="png"
+    }else{
+	    my.filename <- file.path(cluster.dir, paste0(sampleType, ".venn.novel10.vs.legacy.salmon.pdf"))
+        my.imagetype="pdf"
     }
 	venn.diagram(
 		x=venn.list,
@@ -1292,178 +1564,7 @@ if(grepl("RPT",myProject)){ # re-constructed trascriptome based on our own RNA-S
         main.cex= 1.2,
 		margin = 0.05
 	)
-
-    if(FALSE){
-        venn.list=list()
-        venn.list[["Novel.10"]]=dt.res.rpt[padj<0.01,unique(gene_name)]
-        venn.list[["Reference"]]=dt.res.fc[padj<0.01,unique(hgnc_symbol)]
-        venn.list[["Reference\n(salmon)"]]=dt.res.salmon[padj<0.01,unique(hgnc_symbol)]
-        my.filename <- file.path(cluster.dir, paste0(sampleType, ".venn.novel10.vs.legacy.fc.vs.salmon.tiff"))
-        venn.diagram(
-            x=venn.list,
-            filename = my.filename,
-            col = "black",
-            fill = c(cbPalette[1],cbPalette[2],cbPalette[3]),
-            alpha = 0.5,
-            cex = 1.4,
-            fontfamily = "sans",
-            cat.cex = 1.1,
-            cat.fontface = "bold",
-            margin = 0.05
-        )
-    }
 }# end of RPT
-
-# plot FC over read-count
-cat("plot FC over read-count","\n")
-
-#################
-# Volcanio Plot #
-#################
-foo<-data.table(meanFpkm=rowMeans(ddsFpkm,na.rm=T), 
-                meanFpkm.case=rowMeans(ddsFpkm[,rn.case],na.rm=T), 
-                meanFpkm.control=rowMeans(ddsFpkm[,rn.control],na.rm=T))
-foo[[my.filter]]<-rownames(ddsFpkm)
-deseq.anno=merge(dt.res, foo, all.x=TRUE)
-# miRNA, piRNA, exon, RPT
-if(exists("my.target")){
-    bar<-unique(with(as.data.frame(my.target), data.frame(seqnames,Name)))
-    colnames(bar)<-c("chromosome_name",my.filter)
-    deseq.anno=merge(deseq.anno, bar, all.x=TRUE)[order(pvalue)]
-# ensembl_gene_id based analysis
-}else{
-    deseq.anno<-merge(deseq.anno, dt.ensg[,.(ensembl_gene_id,chromosome_name,hgnc_symbol,gene_biotype)], all.x=TRUE)[order(pvalue)]
-}
-# 1. all genes
-p1 <- ggplot(deseq.anno, aes(log2FoldChange,-log10(padj))) + 
-    geom_point(data=deseq.anno[padj>=0.05],alpha=0.5,size=1) + 
-    geom_point(data=deseq.anno[padj<0.05 & log2FoldChange>=0],alpha=0.5,size=1,col="red") + 
-    geom_point(data=deseq.anno[padj<0.05 & log2FoldChange<0],alpha=0.5,size=1,col="blue") + 
-    geom_hline(aes(yintercept=-log10(0.05)),col="grey", linetype="dashed") +
-    theme_Publication()
-print(p1)
-# 2. padj selected
-my.pval=0.05
-p2 <- ggplot(deseq.anno[padj<my.pval], aes(log2FoldChange,-log10(padj))) + 
-    geom_point(alpha=0.8,size=1.5) + 
-    geom_hline(yintercept=-log10(my.pval),col="grey", linetype="dashed") +
-    geom_vline(xintercept=c(-log2(1.5),log2(1.5)),col="grey", linetype="dashed") +
-	geom_text(data=deseq.anno[padj<my.pval & log2FoldChange>=0],aes_string(label=my.id),col="red",hjust=0,nudge_x=0.05, nudge_y=0.02,size=4.5) + 
-	geom_text(data=deseq.anno[padj<my.pval & log2FoldChange<0],aes_string(label=my.id),col="blue",hjust=0,nudge_x=0.05, nudge_y=0.02,size=4.5) + 
-    ggtitle(paste(nrow(deseq.anno[padj<my.pval]),"DEGs of padj<",my.pval)) +
-    theme_Publication()
-print(p2)
-# 3. top 100 
-p3 <- ggplot(deseq.anno[1:100], aes(log2FoldChange,-log10(padj))) + 
-    geom_point(alpha=0.5,size=1.5) + 
-    geom_hline(yintercept=-log10(0.05),col="grey", linetype="dashed") +
-    geom_vline(xintercept=c(-log2(1.5),log2(1.5)),col="grey", linetype="dashed") +
-	geom_text(data=deseq.anno[padj<0.05 & log2FoldChange>=0],aes_string(label=my.id),col="red",hjust=0,nudge_x=0.05, nudge_y=0.02,size=4.5) + 
-	geom_text(data=deseq.anno[padj<0.05 & log2FoldChange<0],aes_string(label=my.id),col="blue",hjust=0,nudge_x=0.05, nudge_y=0.02,size=4.5) + 
-    ggtitle("Top 100 DEGs") +
-    theme_Publication()
-print(p3)
-
-#########################################
-# save the result & FPKM into .csv file #
-#########################################
-cat("writing res and fpkm to file\n")
-write.csv(deseq.anno, file=gzfile(paste0(deseq.dir,"/toptags_all_deseq.",sampleType,".csv.gz")), row.names=F, quote=F)
-
-###########################################
-# conventional filtering (FDR<0.1 & FC>2) #
-###########################################
-if(FALSE){
-#    deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$padj) & (my.res$log2FoldChange > 1 | my.res$log2FoldChange < -1) & my.res$padj <= 0.1, ]
-    deseq.top.deg=dt.res[ !is.na(log2FoldChange) & !is.na(padj) & (log2FoldChange > 1 | log2FoldChange < -1) & padj <= 0.1]
-    if(nrow(deseq.top.deg) > 1){
-        plotMA(res, main=paste0("conventional filtering (FDR<=0.1 & |logFC|>1): ", nrow(deseq.top.deg), " genes (", nrow(dt.res[log2FoldChange<0]), "<0, ", nrow(dt.res[log2FoldChange>=0]), ">=0)"), ylim=c(-2,2)) # default q-value: alpha = 0.1
-    }
-}
-
-#################
-# for all genes
-#################
-if(FALSE){
-    cat("no filtering","\n")
-    deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange), ]
-    plotMA(my.res, main=paste0("No filtering: ", nrow(deseq.top.deg), " genes (", table(my.res$log2FoldChange<0)["TRUE"], "<0, ", table(my.res$log2FoldChange<0)["FALSE"], ">=0)"), ylim=c(-2,2)) # default q-value: alpha = 0.1
-    abline(v=c(0.01,1,minRead), h=c(-1,1), col="blue")
-
-    hist(my.res$pvalue, breaks=100, xlab='P-value', main=paste0('P value distribution of ', nrow(my.res[ !is.na(my.res$pvalue),]), ' genes'))
-    hist(my.res[my.res$baseMean>=minRead,]$pvalue, breaks=100, xlab='P-value', main=paste0('P value distribution of ', nrow(my.res[ my.res$baseMean>=minRead,]), ' genes  of minRead>=', minRead))
-}
-
-#######################################
-# filter genes by mean count & p-value
-#######################################
-if(FALSE){
-    cat("filter by mean count & p-value\n")
-    deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$pvalue) & my.res$baseMean>=minRead & my.res$pvalue<=myPValue, ]
-    if(nrow(deseq.top.deg) > 1){
-        hist(deseq.top.deg$padj, main=paste0("FDR distribution of ", nrow(deseq.top.deg) ," genes having P-value<=",myPValue))
-
-        plotMA(deseq.top.deg, main=paste0(nrow(deseq.top.deg), " genes (",table(deseq.top.deg$log2FoldChange<0)["TRUE"] , "<0, ", table(deseq.top.deg$log2FoldChange<0)["FALSE"], ">=0) having mean>=",minRead, "& P-value<",myPValue), ylim=c(-2,2), alpha=0) # default q-value: alpha = 0.1
-        abline(v=c(minRead), col="blue")
-    }
-}
-##############################################
-# filter genes by mean count & p-value & FDR
-##############################################
-if(FALSE){
-    cat("filter by mean count & p-value & FDR\n")
-    deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$pvalue) & !is.na(my.res$padj) & my.res$baseMean>=minRead & my.res$pvalue<=myPValue & my.res$padj<=myFDR, ]
-    if(nrow(deseq.top.deg) > 1){
-        plotMA(deseq.top.deg, main=paste0(nrow(deseq.top.deg), " genes (",table(deseq.top.deg$log2FoldChange<0)["TRUE"] , "<0, ", table(deseq.top.deg$log2FoldChange<0)["FALSE"], ">=0) having mean>=",minRead, "& P-value<=",myPValue," & FDR<=",myFDR), ylim=c(-2,2), alpha=0) # default q-value: alpha = 0.1
-        abline(v=c(minRead), col="blue")
-    }
-}
-
-################################################
-## Plot expression level of a gene of interest #
-################################################
-my.entry<-dt.res[order(pvalue)][[my.filter]][1]
-plotExp(my.entry,"FPM",my.contrast,my.box=FALSE,my.save=T)
-plotExp(my.entry,"Count",my.contrast,my.box=FALSE,my.save=T)
-#plotExp(my.entry,"FPM",my.contrast,my.box=TRUE,my.save=T)
-
-##########################
-## Top DEGs padj<=0.01  ##
-##########################
-cat("Top DEGs of padj<=0.01\n")
-deseq.top.deg=my.res[!is.na(my.res$padj) & my.res$padj<=0.01, ]
-if(nrow(deseq.top.deg)>0){getTopDeseq(deseq.top.deg,"padj.01")}
-##########################
-## Top DEGs padj<=0.05  ##
-##########################
-cat("Top DEGs of padj<=0.05\n")
-deseq.top.deg=my.res[!is.na(my.res$padj) & my.res$padj<=0.05, ]
-if(nrow(deseq.top.deg)>0){getTopDeseq(deseq.top.deg,"padj.05")}
-
-########################
-## Top DEGs padj<=0.2 ##
-########################
-if(FALSE){
-    cat("Top DEGs of padj<=0.2\n")
-    #deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$padj) & my.res$baseMean>=minRead & my.res$padj<=0.2, ] # at least 20 read
-    deseq.top.deg=my.res[!is.na(my.res$padj) & my.res$padj<=0.2, ]
-    if (nrow(deseq.top.deg)>0) getTopDeseq(deseq.top.deg,"padj.2")
-}
-###################
-## Top 100 genes ##
-###################
-cat("Top100 genes by p-value\n")
-#deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$padj) & my.res$baseMean>=minRead, ] # at least 20 read
-deseq.top.deg=my.res[ !is.na(my.res$log2FoldChange) & !is.na(my.res$padj), ]
-deseq.top.deg<-head(deseq.top.deg[order(deseq.top.deg$pvalue),],n=100)
-if (nrow(deseq.top.deg)>0) getTopDeseq(deseq.top.deg,"top100")
-
-#################
-# Samples Info ##
-#################
-write.csv(colData(dds), file=gzfile(file.path(deseq.dir,paste0(sampleType,".samples.txt.gz"))), row.names=F, quote=F)
-dev.off()
-cat("All is done\n")
 
 ################
 ## Annotation ##
@@ -1815,8 +1916,10 @@ if(grepl("exon",myProject)){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.diff.exp.exon.pval.by.sex.dual.",TR_PREFIX))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=8,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=8,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	ggplot_dual_axis(p.cnt,p.cnt.pval,"y")
 	dev.off()
@@ -1825,8 +1928,10 @@ if(grepl("exon",myProject)){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.log.cnt.pval.per.exon.by.sex.dual3.",TR_PREFIX))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=8,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=8,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	ggplot_dual_axis(p.cnt3,p.cnt.meth.pval,"y") # p-val (exp) & p-val (meth)
 	#ggplot_dual_axis(p.cnt3,p.cnt.pval,"y")
@@ -1837,8 +1942,10 @@ if(grepl("exon",myProject)){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.diff.meth.exon.pval.by.sex.dual.",TR_PREFIX))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=8,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=8,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	ggplot_dual_axis(p.meth,p.cnt.pval,"y")
 	dev.off()
@@ -1847,8 +1954,10 @@ if(grepl("exon",myProject)){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.diff.meth.exon.pval2.by.sex.dual.",TR_PREFIX,))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=8,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=8,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	ggplot_dual_axis(p.meth,p.meth.pval,"y")
 	dev.off()
@@ -1857,8 +1966,10 @@ if(grepl("exon",myProject)){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.diff.meth.exp.exon.by.sex.dual.",TR_PREFIX))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=7,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=7,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	ggplot_dual_axis(p.cnt2,p.meth2,"y")
 	dev.off()
@@ -1867,8 +1978,10 @@ if(grepl("exon",myProject)){
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.diff.meth.exp2.exon.by.sex.dual.",TR_PREFIX))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=7,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=7,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
 q   }
 	ggplot_dual_axis(p.meth2,p.cnt2,"y")
 	dev.off()
@@ -1887,8 +2000,10 @@ q   }
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.diff.meth.diff.exp.by.exon.by.sex.",TR_PREFIX))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=8.5,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=8.5,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	print(p.diff)
 	dev.off()
@@ -1914,8 +2029,10 @@ q   }
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.diff.exp.exon.pval.by.sex.",TR_PREFIX))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=4,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=4,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	print(p1)
 	dev.off()
@@ -1934,8 +2051,10 @@ q   }
 	my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.diff.exp.cnt.exon.pval.by.sex.",TR_PREFIX))
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=10,height=4,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=4,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	print(p2)
 	dev.off()
@@ -1952,8 +2071,10 @@ q   }
 
     if(capabilities()[["tiff"]]){
 	    my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.domain.fpkm.pheatmap.by.sex.",TR_PREFIX,".tiff"))
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    my.filename <- file.path(cluster.dir, paste0(sampleType, ".CSMD1.domain.fpkm.pheatmap.by.sex.",TR_PREFIX,".jpeg"))
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	pheatmap(t(merged.fpkm), cluster_rows=F, cluster_cols=F, annotation_col=pval, annotation_colors=ann_colors, main=paste("FPKMs of CSMD1 Exons by Sex (", TR_PREFIX,")"), filename=my.filename, width=10, height=2.5, fontsize=7, cellheight=10)
 	pheatmap(t(merged.fpkm), cluster_rows=F, cluster_cols=F, annotation_col=pval, annotation_colors=ann_colors, main=paste("FPKMs of CSMD1 Exons by Sex (", TR_PREFIX,")"), width=10, height=2.5, fontsize=7, cellheight=10)
@@ -1968,8 +2089,10 @@ q   }
 
     if(capabilities()[["tiff"]]){
 	    my.filename<-"~/results/RNA-Seq/RoadMap.exon.GRCh37/Cluster/Consortium/RoadMap.POPS.CSMD1.domain.fpkm.pheatmap.by.tissue.GRCh37.tiff"
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    my.filename<-"~/results/RNA-Seq/RoadMap.exon.GRCh37/Cluster/Consortium/RoadMap.POPS.CSMD1.domain.fpkm.pheatmap.by.tissue.GRCh37.jpeg"
+    }else{
+	    my.filename<-"~/results/RNA-Seq/RoadMap.exon.GRCh37/Cluster/Consortium/RoadMap.POPS.CSMD1.domain.fpkm.pheatmap.by.tissue.GRCh37.pdf"
     }
 	pheatmap(t(log(merged.fpkm/10^3+1)), cluster_rows=T, cluster_cols=F, width=10, height=5, fontsize_col=7, fontsize_row=10, cellheight=9, main="Log(FPKM/10^3+1)", filename=my.filename)
 	pheatmap(t(log(merged.fpkm/10^3+1)), cluster_rows=T, cluster_cols=F, width=10, height=5, fontsize_col=7, fontsize_row=10, cellheight=9, main="Log(FPKM/10^3+1)")
@@ -2004,8 +2127,10 @@ q   }
 f
         if(capabilities()[["tiff"]]){
 		    tiff(filename=paste0(my.filename,".tiff"),width=10,height=3,units="in",res=300, compression = 'lzw')
-        }else{
+        }else if(capabilities()[["jpeg"]]){
 		    jpeg(filename=paste0(my.filename,".jpeg"),width=10,height=3,units="in",res=300)
+        }else{
+            pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
         }
 		heatmap.2(t(merged.fpkm), Rowv=FALSE, Colv=FALSE, scale="none", trace="none", dendrogram="none", col=hmcol, keysize=1,  key.xlab="FPKM", main="Mean FPKMs of CSMD1 Domains", srtCol=45, colRow=sample.col, colCol=exon.col, offsetCol=0.1)
 		dev.off()
@@ -2027,8 +2152,10 @@ f
 	my.filename <- file.path("~/results/RNA-Seq/Boy.Girl.FG.JD.GRCh37/Cluster/AGA/CSMD1.PT.RoadMap.by.sex")
     if(capabilities()[["tiff"]]){
 	    tiff(filename=paste0(my.filename,".tiff"),width=12,height=10,units="in",res=300, compression = 'lzw')
-    }else{
+    }else if(capabilities()[["jpeg"]]){
 	    jpeg(filename=paste0(my.filename,".jpeg"),width=12,height=10,units="in",res=300)
+    }else{
+        pdf(file=paste(my.filename,format(Sys.time(), '%Y-%m-%d_%I%p'), 'pdf', sep ='.'), width=11.7, height=8.3, title=paste0(myProject,":",sampleType)) # A4 size
     }
 	ggplot(dt.csmd.fpkm, aes(tissue, FPKM, fill=Gender)) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(name="Sex",values=my.col[["Gender"]]) + theme_Publication()
 	dev.off()

@@ -942,9 +942,54 @@ TCONS_00168491  1760    1636.38 32.9919 4321.75
 ## hetSNP within SMS ##
 #######################
 echo "SLX BarCode Chr Pos Ref Alt RefCount AltCount" > ~/Pipelines/data/ASE/SMS.HC.ASE.GRCh38.txt
-for i in `ls /scratch/obsgynae/POPS/results/SLX*/GATK/D*/SLX*tophat.HC.ASE.txt`; do a=`echo $i | cut -d/ -f9`; SLX=`echo $a| cut -d. -f1`; Barcode=`echo $a| cut -d. -f2`; awk -v S=$SLX -v B=$Barcode '$1=="X" && $2>=21940573 && $2<=21994835{print S,B,$1,$2,$4,$5,$6,$7}' $i; done >> ~/Pipelines/data/ASE/SMS.HC.ASE.GRCh38.txt
+for i in `ls $HOME/rcs/rcs-ssg29-obsgynae/POPS/results/SLX*/GATK/D*/SLX*tophat.HC.ASE.txt`; do a=`echo $i | cut -d/ -f9`; SLX=`echo $a| cut -d. -f1`; Barcode=`echo $a| cut -d. -f2`; awk -v S=$SLX -v B=$Barcode '$1=="X" && $2>=21940573 && $2<=21994835{print S,B,$1,$2,$4,$5,$6,$7}' $i; done >> ~/Pipelines/data/ASE/SMS.HC.ASE.GRCh38.txt
 
 ###################################
 ## hetSNP within a selected gene ##
 ###################################
 look at 'bin/R/chrX/hetSNP.HC.ASE.R'
+
+
+######################################################
+## Count Reads Overlapped with Regions of Interests ##
+######################################################
+# 1-a. rRNA (via bedtools)
+samtools view -F 0x100 -b ~/rcs/rcs-ssg29-obsgynae/POPS/results/SLX-9342.Homo_sapiens.SE50.v1/TopHat/D701_D501/accepted_hits.bam | bedtools intersect -split -a stdin -b ~/data/genome/Homo_sapiens/Ensembl/GRCh38/Annotation/Genes/Homo_sapiens.GRCh38.82.rRNA.gtf2bed.bed -bed -u -s | wc -l
+622202
+
+# 1-b. rRNA (via RSeQC)
+ssg29@login-e-10 Pipelines]$ read_distribution.py -i  ~/rcs/rcs-ssg29-obsgynae/POPS/results/SLX-9342.Homo_sapiens.SE50.v1/TopHat/D701_D501/accepted_hits.bam -r ~/data/genome/Homo_sapiens/Ensembl/GRCh38/Annotation/Genes/Homo_sapiens.GRCh38.82.rRNA.gtf2bed.bed
+processing /home/ssg29/data/genome/Homo_sapiens/Ensembl/GRCh38/Annotation/Genes/Homo_sapiens.GRCh38.82.rRNA.gtf2bed.bed ... Done
+processing /home/ssg29/rcs/rcs-ssg29-obsgynae/POPS/results/SLX-9342.Homo_sapiens.SE50.v1/TopHat/D701_D501/accepted_hits.bam ... Finished
+
+Total Reads                   1890451
+Total Tags                    2040701
+Total Assigned Tags           942716
+=====================================================================
+Group               Total_bases         Tag_count           Tags/Kb
+CDS_Exons           65077               632050              9712.19
+5'UTR_Exons         0                   0                   0.00
+3'UTR_Exons         0                   0                   0.00
+Introns             0                   0                   0.00
+TSS_up_1kb          540229              1075                1.99
+TSS_up_5kb          2605231             47780               18.34
+TSS_up_10kb         5153117             48181               9.35
+TES_down_1kb        540582              52523               97.16
+TES_down_5kb        2607037             148536              56.98
+TES_down_10kb       5158272             262485              50.89
+=====================================================================
+
+# 1-c. including secondary alingments
+[ssg29@login-e-10 Pipelines]$ time bedtools intersect -split -a ~/rcs/rcs-ssg29-obsgynae/POPS/results/SLX-9342.Homo_sapiens.SE50.v1/TopHat/D701_D501/accepted_hits.bam -b ~/data/genome/Homo_sapiens/Ensembl/GRCh38/Annotation/Genes/Homo_sapiens.GRCh38.82.rRNA.gtf2bed.bed -bed  -s -wa | wc -l
+696255
+
+real    0m9.159s
+user    0m9.103s
+sys     0m0.068s
+[ssg29@login-e-10 Pipelines]$ time bedtools multicov -split -bams ~/rcs/rcs-ssg29-obsgynae/POPS/results/SLX-9342.Homo_sapiens.SE50.v1/TopHat/D701_D501/accepted_hits.bam -bed ~/data/genome/Homo_sapiens/Ensembl/GRCh38/Annotation/Genes/Homo_sapiens.GRCh38.82.rRNA.gtf2bed.bed -s  | awk '{sum+=$13}END{print sum}'
+696255
+
+real    0m2.683s
+user    0m2.655s
+sys     0m0.022s
+

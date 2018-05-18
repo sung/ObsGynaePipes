@@ -15,3 +15,53 @@ User           Usage |        Account     Usage | Account Limit Available (hours
 ssg29              0 | CHARNOCK-JONES-SL2-CPU         0 |       267,877   267,877
 ssg29              0 | CHARNOCK-JONES-SL3-CPU         0 |       200,000   200,000
 Sun 18 Feb 00:00:11 GMT 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29              0 | CHARNOCK-JONES-SL2-CPU         0 |       267,877   267,877
+ssg29              0 | CHARNOCK-JONES-SL3-CPU         0 |       200,000   200,000
+Sun  4 Mar 00:00:10 GMT 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29              2 | CHARNOCK-JONES-SL2-CPU         2 |       267,877   267,875
+ssg29              1 | CHARNOCK-JONES-SL3-CPU         1 |       200,000   199,999
+Sun 11 Mar 00:00:12 GMT 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29              2 | CHARNOCK-JONES-SL2-CPU         2 |       267,877   267,875
+ssg29              1 | CHARNOCK-JONES-SL3-CPU         1 |       200,000   199,999
+Sun 18 Mar 00:00:13 GMT 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29         27,180 | CHARNOCK-JONES-SL2-CPU    27,180 |       267,877   240,698
+ssg29             92 | CHARNOCK-JONES-SL3-CPU        92 |       200,000   199,908
+Sun  1 Apr 00:00:11 BST 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29         46,587 | CHARNOCK-JONES-SL2-CPU    46,587 |       267,877   221,290
+ssg29             92 | CHARNOCK-JONES-SL3-CPU        92 |       200,000   199,908
+Sun  8 Apr 00:00:11 BST 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29        110,983 | CHARNOCK-JONES-SL2-CPU   110,983 |       267,877   156,894
+ssg29             99 | CHARNOCK-JONES-SL3-CPU        99 |       200,000   199,901
+Sun 15 Apr 00:00:09 BST 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29        110,983 | CHARNOCK-JONES-SL2-CPU   110,983 |       267,877   156,894
+ssg29             99 | CHARNOCK-JONES-SL3-CPU        99 |       200,000   199,901
+Sun 22 Apr 00:00:10 BST 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29        110,983 | CHARNOCK-JONES-SL2-CPU   110,983 |       267,877   156,894
+ssg29             99 | CHARNOCK-JONES-SL3-CPU        99 |       200,000   199,901
+Sun 29 Apr 00:00:08 BST 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29        110,983 | CHARNOCK-JONES-SL2-CPU   110,983 |       267,877   156,894
+ssg29            160 | CHARNOCK-JONES-SL3-CPU       160 |       200,099   199,939
+Sun  6 May 00:00:14 BST 2018
+User           Usage |        Account     Usage | Account Limit Available (hours)
+---------- --------- + -------------- --------- + ------------- ---------
+ssg29        110,983 | CHARNOCK-JONES-SL2-CPU   110,983 |       267,877   156,894
+ssg29            167 | CHARNOCK-JONES-SL3-CPU       167 |       200,099   199,932
+Sun 13 May 00:00:13 BST 2018

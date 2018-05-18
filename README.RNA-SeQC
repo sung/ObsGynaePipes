@@ -1,6 +1,9 @@
 # Add Read Group (RG) tag
 bam polishbam --in /home/ssg29/results/SLX-11368.Homo_sapiens.v1/TopHat/NoIndex/accepted_hits.01.dedup.bam --out /home/ssg29/results/SLX-11368.Homo_sapiens.v1/TopHat/NoIndex/accepted_hits.01.dedup.RG.bam --RG "@RG\tID:SLX-11368\tPL:illumina\tPU:run\tLB:SLX-11368\tSM:NoIndex\tCN:CamObsGynae" --PG "@PG\tID:polish\tVN:0.0.1"
 
+# pre-process gtf
+awk '$3!="gene"{print $0}' ~/data/genome/Homo_sapiens/Ensembl/GRCh38/Annotation/Genes/Homo_sapiens.GRCh38.82.gtf > ~/data/genome/Homo_sapiens/Ensembl/GRCh38/Annotation/Genes/Homo_sapiens.GRCh38.82.transcript_id.gtf
+
 # run RNA-SeQC
 java -jar  ~/Install/RNA-SeQC/RNA-SeQC_v1.1.8.jar -s "SLX-11368.PE150.01|/home/ssg29/results/SLX-11368.Homo_sapiens.v1/TopHat/NoIndex/accepted_hits.01.dedup.RG.bam|1% down-sampling" -r ~/data/genome/Homo_sapiens/Ensembl/GRCh38/Sequence/WholeGenomeFasta/genome.fa -t ~/data/genome/Homo_sapiens/Ensembl/GRCh38/Annotation/Genes/Homo_sapiens.GRCh38.82.transcript_id.gtf -o ~/results/SLX-11368.Homo_sapiens.v1/RNA-SeQC/NoIndex/
 

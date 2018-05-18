@@ -1,8 +1,10 @@
 library(RColorBrewer) # for brewer.pal
 library(ggplot2)
-library(reshape2) # for 'melt'
+#library(reshape2) # for 'melt'
 source("~/lib/theme_publish.R") # defines theme_Publication()
-source("~/lib/multiplot.R") 
+source("~/lib/multiplot.R") # 'multiplot' is called within 'plotExp' below
+							# called by 'bin/R/MJ.RNA/get.expression.profile.R'
+							# ddsFpm should have been defined
 ############
 ## colour ##
 ############

@@ -6,6 +6,7 @@
 
 myCaller='DESeq2'
 TR_PREFIX='GRCh37' # GRCh37 | GRCh38 
+ENS_VER=75 
 
 myProject="GTEx"
 #sampleType='Adipose_Tissue'      # Boy vs. Girl 

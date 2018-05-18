@@ -1,6 +1,8 @@
 TR_PREFIX="GRCh38"
 library(data.table)
-source("~/Pipelines/config/Annotation.R")
+TR_PREFIX="GRCh38"
+ENS_VER=82 # 82 (for manual downlaod) 90 (for Cholestatis project)
+load(paste0("~/data/Annotation/Ensembl/",TR_PREFIX,".",ENS_VER,"/dt.ensg.RData")) # load 'gr.ensg, dt.ensg'
 dt.samples.all<-fread("/home/ssg29/results/RNA-Seq/Placentome/Meta/reconstruct.stringtie.csv", na.strings="")
 
 dt.sms.ase<-fread("~/Pipelines/data/ASE/SMS.HC.ASE.GRCh38.txt")

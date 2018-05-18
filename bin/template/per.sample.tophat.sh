@@ -4,9 +4,9 @@
 # Last modified: 28/Mar/2017
 # Optimised and customised to run at the Darwin HPC
 
-source $HOME/RNA-Seq/config/rna_seq.config # export envrionment variables
-source $HOME/lib/sung.sh #defines 'mkdir_unless'
-source $HOME/config/sung.bash #defines PATH 
+source $HOME/Pipelines/config/rna_seq.config # export envrionment variables
+source $HOME/Pipelines/lib/sung.sh # defines user defined functions (e.g. make_run_script)
+source $HOME/config/sung.hpc.bash #defines PATH 
 
 SLX="MY_SLX" # e.g. SLX-8080 
 PROJECT="MY_SLX"."MY_VERSION" # e.g. SLX-8080.v1
@@ -16,9 +16,7 @@ Cell="MY_CELL" # e.g. C48CWACXX
 Lane="MY_LANE" # e.g. s_1 
 Chunk="MY_CHUNK" # e.g. 1 
 
-mkdir_unless $PROJECT_DIR	
-mkdir_unless $PROJECT_DIR/scratch
-mkdir_unless $PROJECT_DIR/scratch/$Barcode
+mkdir -p $PROJECT_DIR/scratch/$Barcode
 
 echo -e `hostname`
 echo -e "NO. of thread=$NT"
@@ -33,8 +31,6 @@ SLX-9169.D704_D501.C6GW5ANXX.s_2.r_1.fq.gz
 SLX-9169.D704_D501.C6GW5ANXX.s_3.r_1.fq.gz
 fastq
 
-# assuming single-end
-# [todo] what if paired end?
 if [ $IS_SE -eq 1 ]; then
 # per each barcode (sample) 
 # do 1)FastQC 2)trim 3)tophat 4)bedtool, 5)htseq 
@@ -46,8 +42,7 @@ if [ $IS_SE -eq 1 ]; then
 		# 0. Run the inital fastqc 
 		##################################################
 		if [ $RUN_FASTQC -eq 1 ]; then
-			mkdir_unless $PROJECT_DIR/FastQC
-			mkdir_unless $PROJECT_DIR/FastQC/$Barcode
+			mkdir -p $PROJECT_DIR/FastQC/$Barcode
 			echo "fastqc $FastQ_file -o $PROJECT_DIR/FastQC/$Barcode"
 			time fastqc $FastQ_file -o $PROJECT_DIR/FastQC/$Barcode 
 		fi
@@ -60,8 +55,7 @@ if [ $IS_SE -eq 1 ]; then
 		Trimmed_FastQ=${FastQ_file/data\/fastq\/$SLX/results\/$PROJECT\/Trim\/$Barcode}
 		Trimmed_FastQ=${Trimmed_FastQ%.fq.gz}_trimmed.fq.gz #SLX-8546.D709_D501.C4FN0ANXX.s_6.r_1_trimmed.fq.gz 
 		if [ $RUN_TRIM -eq 1 ]; then
-			mkdir_unless $PROJECT_DIR/Trim
-			mkdir_unless $PROJECT_DIR/Trim/$Barcode
+			mkdir -p $PROJECT_DIR/Trim/$Barcode
 			echo -e "\ntrim_galore -a $TR_ADAPTOR1 -o $PROJECT_DIR/Trim/$Barcode --fastqc --quality $TR_QUAL --stringency $TR_STRNCY $FastQ_file"
 			time trim_galore \
 			--output_dir $PROJECT_DIR/Trim/$Barcode \
@@ -74,8 +68,7 @@ if [ $IS_SE -eq 1 ]; then
 
 		# Plasma samples prepared by SMARTer kit of clonetech
 		if [ $RUN_TRIM_SMARTER -eq 1 ]; then
-			mkdir_unless $PROJECT_DIR/Trim
-			mkdir_unless $PROJECT_DIR/Trim/$Barcode
+			mkdir -p $PROJECT_DIR/Trim/$Barcode
 			echo -e "\ncutadapt $FastQ_file"
 			time cutadapt \
 				-q $TR_QUAL \
@@ -111,8 +104,7 @@ if [ $IS_SE -eq 1 ]; then
 	###################################################################
 	TOPHAT_OUT=$PROJECT_DIR/TopHat/$Barcode
 	if [ $RUN_TOPHAT -eq 1 ]; then
-		mkdir_unless $PROJECT_DIR/TopHat
-		mkdir_unless $TOPHAT_OUT
+		mkdir -p $TOPHAT_OUT
 		Merged_FastQ=$(printf ",%s" "${Trimmed_FastQ_array[@]}")
 		Merged_FastQ=${Merged_FastQ:1} # remove first comma 
 		echo -e "\ntophat2 -p $NT --library-type $LIB_TYPE --output-dir $TOPHAT_OUT --max-multihits $TH_MH $TH_PREFILTER -transcriptome-index=$TR_INDEX_DIR/$TR_PREFIX $BOWTIE2_INDEX_BASE $Merged_FastQ"
@@ -152,8 +144,7 @@ if [ $IS_SE -eq 1 ]; then
 	# Output: $sample.genomecov.txt
 	######################
 	if [ $RUN_GENOMECOV -eq 1 ]; then
-		mkdir_unless $PROJECT_DIR/Coverage
-		mkdir_unless $PROJECT_DIR/Coverage/$Barcode
+		mkdir -p $PROJECT_DIR/Coverage/$Barcode
 		echo -e "bedtools genomecov $TOPHAT_OUT/accepted_hits.bam";
 		time bedtools genomecov -split -ibam $TOPHAT_OUT/accepted_hits.bam > $PROJECT_DIR/Coverage/$Barcode/$SLX.$Barcode.genomecov.split.txt
 		time bedtools genomecov -bg -split -ibam $TOPHAT_OUT/accepted_hits.bam > $PROJECT_DIR/Coverage/$Barcode/$SLX.$Barcode.genomecov.split.bedgraph
@@ -168,8 +159,7 @@ if [ $IS_SE -eq 1 ]; then
 	######################
 	HTSEQ_OUT=$PROJECT_DIR/HTSeq/$Barcode
 	if [ $RUN_HTSEQ -eq 1 ]; then
-		mkdir_unless $PROJECT_DIR/HTSeq
-		mkdir_unless $HTSEQ_OUT
+		mkdir -p $HTSEQ_OUT
 
 		# count based on illumina iGenome GTF
 		echo -e "\nsamtools view $TOPHAT_OUT/accepted_hits.bam | htseq-count --stranded=$HTSEQ_STRAND --type=$HTSEQ_TYPE --quiet --idattr=$HTSEQ_IDATTR - $GTF > $HTSEQ_OUT/$SLX.$Barcode.igenome.HTSeq.count.txt"
@@ -186,8 +176,7 @@ else
 	# 0. Run the inital fastqc 
 	##################################################
 	if [ $RUN_FASTQC -eq 1 ]; then
-		mkdir_unless $PROJECT_DIR/FastQC
-		mkdir_unless $PROJECT_DIR/FastQC/$Barcode
+		mkdir -p $PROJECT_DIR/FastQC/$Barcode
 		FASTQ_FILES=`ls $HOME/data/fastq/$SLX/$SLX.$Barcode*.fq.gz | grep -v lost`
 		for FastQ_file in $FASTQ_FILES	# per fastq file (per lane, both forward and reverse)
 		do
@@ -202,10 +191,10 @@ else
 	FASTQ_FILES=`ls $HOME/data/fastq/$SLX/$SLX.$Barcode*r_1.fq.gz | grep -v lost`
 	Cell_lane_array=`for i in $FASTQ_FILES; do echo $i | cut -d/ -f7 | cut -d. -f3,4 ; done`
 	## For each lane 
-	for MY_CELL_LANE in ${Cell_lane_array[*]} 
+	for CELL_LANE in ${Cell_lane_array[*]} 
 	do
-		Cell=`echo $MY_CELL_LANE | cut -d. -f1`
-		Lane=`echo $MY_CELL_LANE | cut -d. -f2`
+		Cell=`echo $CELL_LANE | cut -d. -f1`
+		Lane=`echo $CELL_LANE | cut -d. -f2`
 		if [ $IS_SMARTER1 -eq 1 ];then
 			Fw_FastQ=$HOME/data/fastq/$SLX/$SLX.$Barcode.$Cell.$Lane.r_1.fq.gz # SLX-8074.A001.C2N01ACXX.s_1.r_1.fq.gz
 			Rv_FastQ=$HOME/data/fastq/$SLX/$SLX.$Barcode.$Cell.$Lane.r_2.fq.gz # SLX-8074.A001.C2N01ACXX.s_1.r_2.fq.gz
@@ -233,8 +222,7 @@ else
 			Trimmed_Rv_FastQ=$PROJECT_DIR/Trim/$Barcode/$SLX.$Barcode.$Cell.$Lane.r_1_val_1.fq.gz 
 		fi
 		if [ $RUN_TRIM -eq 1 ]; then
-			mkdir_unless $PROJECT_DIR/Trim
-			mkdir_unless $PROJECT_DIR/Trim/$Barcode
+			mkdir -p $PROJECT_DIR/Trim/$Barcode
 			echo -e "\ntrim_galore $Fw_FastQ $Rv_FastQ"
 			time trim_galore \
 				--paired \
@@ -248,8 +236,7 @@ else
 		# 1-b. Triming Plasma samples prepared by SMARTer kit of clonetech #
 		####################################################################
 		if [ $RUN_TRIM_SMARTER -eq 1 ]; then
-			mkdir_unless $PROJECT_DIR/Trim
-			mkdir_unless $PROJECT_DIR/Trim/$Barcode
+			mkdir -p $PROJECT_DIR/Trim/$Barcode
 			if [ ! -s $Trimmed_Fw_FastQ ];then
 				echo -e "\ncutadapt $Fw_FastQ $Rv_FastQ"
 				time cutadapt \
@@ -281,7 +268,7 @@ else
 			echo -e "\e[031m$Trimmed_Rv_FastQ not found\e[0m\n"
 			exit
 		fi
-	done # endof MY_CELL_LANE
+	done # endof CELL_LANE
 	###################################################################
 	# 2. TOPHAT 
 	# Map the reads for each sample to the reference genome           #
@@ -290,8 +277,7 @@ else
 	###################################################################
 	TOPHAT_OUT=$PROJECT_DIR/TopHat/$Barcode
 	if [ $RUN_TOPHAT -eq 1 ]; then
-		mkdir_unless $PROJECT_DIR/TopHat
-		mkdir_unless $TOPHAT_OUT
+		mkdir -p $TOPHAT_OUT
 		Merged_Fw_FastQ=$(printf ",%s" "${Trimmed_Fw_FastQ_array[@]}")
 		Merged_Fw_FastQ=${Merged_Fw_FastQ:1} # remove first comma 
 
@@ -351,8 +337,7 @@ else
 	######################	
 	if [ $RUN_FTCNT -eq 1 ]; then
 		FTCNT_OUT=$PROJECT_DIR/featureCount/$Barcode
-		mkdir_unless $PROJECT_DIR/featureCount
-		mkdir_unless $FTCNT_OUT
+		mkdir -p $FTCNT_OUT
 		FTCNT_FILE=$FTCNT_OUT/$SLX.$Barcode.featureCount.$TR_PREFIX.$ENS_VER.txt
 		echo -e "featureCounts -T $NT -a $GTF -Q $FTCNT_MQ -s $FTCNT_STRAND -p -C -o $FTCNT_FILE $TOPHAT_OUT/accepted_hits.bam\n"
 		time featureCounts \

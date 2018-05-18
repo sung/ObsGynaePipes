@@ -30,7 +30,7 @@
 ##SBATCH --partition=long
 
 #! For 6GB per CPU, set "-p skylake"; for 12GB per CPU, set "-p skylake-himem":      
-#SBATCH -p skylake 
+#SBATCH -p MY_SLURM_SKYLAKE
 
 #SBATCH --error=MY_SLX.MY_VERSION.MY_COHORT.MY_BARCODE.MY_CELL.MY_LANE.MY_CHUNK.MY_STEP.log
 #SBATCH --output=MY_SLX.MY_VERSION.MY_COHORT.MY_BARCODE.MY_CELL.MY_LANE.MY_CHUNK.MY_STEP.log
@@ -58,7 +58,7 @@ module purge                               # Removes all modules still loaded
 module load rhel7/default-peta4            # REQUIRED - loads the basic environment            
 
 #! Insert additional module load commands after this line if needed:
-source $HOME/lib/modules.sh # defines necessary software to load 
+source $HOME/lib/modules.peta4-skylake.sh # defines necessary software to load 
 
 #! Full path to application executable: 
 application="$BIN_TOP/script/MY_APP"
@@ -91,7 +91,6 @@ export I_MPI_PIN_ORDER=scatter # Adjacent domains have minimal sharing of caches
 #! 3. I_MPI_PIN_PROCESSOR_LIST is ignored if I_MPI_PIN_DOMAIN is set.
 #! 4. If MPI tasks perform better when sharing caches/sockets, try I_MPI_PIN_ORDER=compact.
 
-
 #! Uncomment one choice for CMD below (add mpirun/mpiexec options if necessary):
 
 #! Choose this for a MPI code (possibly using OpenMP) using Intel MPI.
@@ -103,7 +102,6 @@ CMD="bash $application"
 
 #! Choose this for a MPI code (possibly using OpenMP) using OpenMPI:
 #CMD="mpirun -npernode $mpi_tasks_per_node -np $np $application $options"
-
 
 ###############################################################
 ### You should not have to change anything below this line ####

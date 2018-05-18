@@ -136,7 +136,7 @@ time.stamp <- format(Sys.time(), '%Y-%m-%d_%I_%M_%p')
 		print(
 			gridExtra::grid.arrange(p0.3+labs(x="", y="")+theme(axis.text.x = element_blank(),legend.position=""),  
 									p0.1+theme(legend.position=c(.9,.9), legend.background = element_rect(colour = 'black', linetype='dashed')), 
-									blankPlot, 
+									blankPlot, # defined within graphic.R
 									p0.2+coord_flip()+labs(x="", y="")+theme(axis.text.y = element_blank(),legend.position=""), 
 									ncol=2, nrow=2, widths=c(1, 4), heights=c(4,1))
 			)
